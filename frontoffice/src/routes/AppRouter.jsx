@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Home from '../pages/Home';
 import About from '../pages/About';
 import Footer from '../components/Footer';
+import Footer2 from '../components/Footer2';
 
 function AppRouter() {
     return (
@@ -23,6 +24,7 @@ function AppRouter() {
 
                 {/* Footer toujours en bas */}
                 <Footer />
+                <Footer2></Footer2>
             </div>
         </Router>
     );

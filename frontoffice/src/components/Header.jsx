@@ -34,10 +34,10 @@ function Header() {
                 {/* Logo à gauche */}
                 <Link className="navbar-brand" to="/" onClick={closeMobileMenu}>
                     <img
-                        src="/src/assets/logo.png" // Remplacez par le chemin de votre logo
+                        src="/src/assets/logo-uadb.png" // Remplacez par le chemin de votre logo
                         alt="Logo"
                         className="img-fluid"
-                        height="40"
+                        height="60"
                     />
                 </Link>
 
