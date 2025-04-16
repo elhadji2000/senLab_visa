@@ -1,45 +1,103 @@
 import React from 'react';
-import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-function Login() {
+const theme = createTheme();
+
+function Copyright() {
   return (
-    <Container fluid className="vh-100 d-flex align-items-center justify-content-center bg-light">
-      <Row className="w-100 justify-content-center">
-        <Col md={4}>
-          <Card className="shadow">
-            <Card.Body>
-              <div className="text-center mb-4">
-                {/* Ton logo au milieu */}
-                <img
-                  src="/src/logo-uadb.png" // Remplace par le chemin réel vers ton logo
-                  alt="Logo"
-                  style={{ maxWidth: '150px' }}
-                  className="mb-3"
-                />
-                <h5>Connexion à l'espace admin</h5>
-              </div>
-
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control type="email" placeholder="Entrez votre email" />
-                </Form.Group>
-
-                <Form.Group className="mb-4">
-                  <Form.Label>Mot de passe</Form.Label>
-                  <Form.Control type="password" placeholder="Mot de passe" />
-                </Form.Group>
-
-                <Button variant="primary" type="submit" className="w-100">
-                  Se connecter
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+    <Typography variant="body2" color="text.secondary" align="center">
+      {'Copyright © '}
+      <Link color="inherit" href="https://mui.com/">
+        Your Website
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
   );
 }
 
-export default Login;
+export default function SignIn() {
+  return (
+    <ThemeProvider theme={theme}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Connexion
+          </Typography>
+          <Box component="form" noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Adresse email"
+              name="email"
+              autoComplete="email"
+              autoFocus
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Mot de passe"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+            />
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" />}
+              label="Se souvenir de moi"
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Se connecter
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link href="#" variant="body2">
+                  Mot de passe oublié ?
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link href="#" variant="body2">
+                  {"Vous n'avez pas de compte ? S'inscrire"}
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+        <Box mt={8}>
+          <Copyright />
+        </Box>
+      </Container>
+    </ThemeProvider>
+  );
+}
