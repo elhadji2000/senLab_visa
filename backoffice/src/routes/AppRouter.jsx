@@ -1,24 +1,37 @@
-import React from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React from 'react';
+import { Route, Routes } from 'react-router-dom'; 
 import Login from '../pages/Login';
 import Footer2 from '../components/Footer2';
+import Dashboard from '../pages/Dashboard';
+import Layout from '../components/Layout';
+import AddUsers from '../pages/users/AddUsers';
+import ListUsers from '../pages/users/ListUsers';
+import ListQuizz from '../pages/quizz/ListQuizz';
+import AddQuizz from '../pages/quizz/AddQuizz';
+import '../App.css';
 
 function AppRouter() {
-    return (
-        <Router>
-            <div className="page-container">
+  return (
+    <div className="page-container">
+      <main className="container-fluid">
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/log" element={<Login />} />
 
-                {/* Contenu principal */}
-                <main className="container-fluid">
-                    <Routes>
-                        <Route path="/log" element={<Login></Login>} />
-                        {/* Ajoutez vos autres routes ici */}
-                    </Routes>
-                </main>
-                <Footer2></Footer2>
-            </div>
-        </Router>
-    );
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/utilisateur/ajouter" element={<AddUsers />} />
+            <Route path="/utilisateur/lister" element={<ListUsers />} />
+            <Route path="/quizz/lister" element={<ListQuizz />} />
+            <Route path="/quizz/ajouter" element={<AddQuizz />} />
+            {/* Ajoute d'autres routes ici */}
+          </Route>
+        </Routes>
+      </main>
+
+      <Footer2 />
+    </div>
+  );
 }
 
-export default AppRouter
+export default AppRouter;

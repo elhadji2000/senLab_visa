@@ -1,0 +1,33 @@
+.sidebar-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .menu-toggle-btn {
+    background-color: #21d43f;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    text-align: left;
+  }
+  
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #21d43f;
+    color: white;
+  }
+  
+  .sidebar-logo {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+  }
+  
+  .sidebar-title {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  
