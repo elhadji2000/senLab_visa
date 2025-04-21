@@ -14,3 +14,11 @@
 .page{
   margin-top: 30px;
 }
+.cursor-pointer {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.cursor-pointer:hover {
+  transform: scale(1.1);
+}

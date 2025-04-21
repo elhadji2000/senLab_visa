@@ -25,10 +25,10 @@ function Header() {
         <Navbar.Toggle aria-controls="main-navbar" />
         <Navbar.Collapse id="main-navbar">
           <Nav className="ms-auto align-items-center">
-            <Nav.Link as={Link} to="/home" active={location.pathname === "/home"}>Accueil</Nav.Link>
-            <Nav.Link as={Link} to="/about" active={location.pathname === "/about"}>À propos</Nav.Link>
+            <Nav.Link as={Link} to="/home" active={location.pathname === "/home"}>ACCUEIL</Nav.Link>
+            <Nav.Link as={Link} to="/about" active={location.pathname === "/about"}>À PROPOS</Nav.Link>
 
-            <NavDropdown title="Simulations" id="simulations-dropdown">
+            <NavDropdown title="SIMULATIONS" id="simulations-dropdown">
               <NavDropdown.Item as={Link} to="/products">Toutes les simulations</NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item as={Link} to="/product1">Physique</NavDropdown.Item>
@@ -38,8 +38,8 @@ function Header() {
               <NavDropdown.Item as={Link} to="/product2">Science de la Terre</NavDropdown.Item>
             </NavDropdown>
 
-            <Nav.Link as={Link} to="/about">Enseignements</Nav.Link>
-            <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
+            <Nav.Link as={Link} to="/about">ENSEIGNEMENTS</Nav.Link>
+            <Nav.Link as={Link} to="/contact">CONTACT</Nav.Link>
 
             <Button
               as={Link}
@@ -47,7 +47,7 @@ function Header() {
               variant="outline-success"
               className="ms-lg-2 me-2"
             >
-              <i className="fas fa-sign-in-alt me-1"></i> Connexion
+              <i className="fas fa-sign-in-alt me-1"></i> CONNEXION
             </Button>
             <Button
               as={Link}
