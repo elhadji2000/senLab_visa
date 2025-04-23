@@ -128,6 +128,7 @@ function AddQuizz() {
                                     label={`Option ${oIndex + 1}`}
                                     value={option.text}
                                     onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
+                                    required
                                 />
                                 <IconButton
                                     className="ms-2"

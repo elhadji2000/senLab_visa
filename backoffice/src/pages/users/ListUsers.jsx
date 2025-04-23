@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Typography,
   TableContainer,
@@ -16,26 +17,17 @@ import {
 import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 
 const ListUsers = () => {
-  const users = [
-    {
-      id: 1,
-      prenom: 'Ali',
-      nom: 'Sow',
-      email: 'ali@mail.com',
-      telephone: '77889900',
-      status: true,
-      dateSys: '2024-04-01',
-    },
-    {
-      id: 2,
-      prenom: 'Fatou',
-      nom: 'Diouf',
-      email: 'fatou@mail.com',
-      telephone: '77445522',
-      status: false,
-      dateSys: '2024-04-15',
-    },
-  ];
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/users') // remplace l’URL par celle de ton backend
+      .then(response => {
+        setUsers(response.data);
+      })
+      .catch(error => {
+        console.error("Erreur lors du chargement des utilisateurs :", error);
+      });
+  }, []);
 
   return (
     <Box sx={{ p: 4 }}>
@@ -52,6 +44,7 @@ const ListUsers = () => {
               <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>Prénom</TableCell>
               <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>Nom</TableCell>
               <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>Email</TableCell>
+              <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>Rôle</TableCell>
               <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>Téléphone</TableCell>
               <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>Status</TableCell>
               <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>Créé le</TableCell>
@@ -64,22 +57,24 @@ const ListUsers = () => {
                 <TableCell align="center">{index + 1}</TableCell>
                 <TableCell align="center">
                   <Avatar sx={{ bgcolor: '#2196f3', margin: 'auto' }}>
-                    {user.prenom.charAt(0).toUpperCase()}
+                    {user.prenom?.charAt(0).toUpperCase()}
                   </Avatar>
                 </TableCell>
                 <TableCell align="center">{user.prenom}</TableCell>
                 <TableCell align="center">{user.nom}</TableCell>
                 <TableCell align="center">{user.email}</TableCell>
+                <TableCell align="center">{user.role}</TableCell>
                 <TableCell align="center">{user.telephone}</TableCell>
                 <TableCell align="center">
                   <Chip
-                    label={user.status ? 'Actif' : 'Inactif'}
-                    color={user.status ? 'success' : 'default'}
+                    label={user.status === 'true' ? 'Actif' : 'Inactif'}
+                    color={user.status === 'true' ? 'success' : 'default'}
                     size="small"
                   />
+
                 </TableCell>
                 <TableCell align="center">
-                  {new Date(user.dateSys).toLocaleDateString()}
+                  {new Date(user.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell align="center">
                   <IconButton color="info" title="Voir">
