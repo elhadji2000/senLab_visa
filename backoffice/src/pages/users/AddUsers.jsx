@@ -1,33 +1,22 @@
 import React, { useState } from 'react';
-import { Form, Button, Container, Row, Col } from 'react-bootstrap';
-import { FaAsterisk, FaPen, FaUserCircle } from 'react-icons/fa';
+import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
+import { FaAsterisk, FaUserPlus, FaCheck } from 'react-icons/fa';
 import axios from 'axios';
 import './AddUsers.css';
-// import { useNavigate } from 'react-router-dom'; // Décommente si tu veux rediriger
 
 function AddUsers() {
-  // const navigate = useNavigate(); // Décommente si tu veux rediriger
-
   const [formData, setFormData] = useState({
     prenom: '',
     nom: '',
     email: '',
     telephone: '',
-    password: '123456', // mot de passe par défaut
+    password: 'Default@123', // Mot de passe plus sécurisé par défaut
     status: 'true',
     role: '',
   });
 
-  const [photo, setPhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
-
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPhoto(file);
-      setPhotoPreview(URL.createObjectURL(file));
-    }
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState({ success: null, message: '' });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,195 +28,192 @@ function AddUsers() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus({ success: null, message: '' });
 
     const { prenom, nom, email, telephone, role } = formData;
     if (!prenom || !nom || !email || !telephone || !role) {
-      alert('Veuillez remplir tous les champs obligatoires.');
+      setSubmitStatus({ success: false, message: 'Veuillez remplir tous les champs obligatoires.' });
+      setIsSubmitting(false);
       return;
     }
 
     try {
-      const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        data.append(key, value);
+      const response = await axios.post('http://localhost:5000/api/users', formData);
+
+      setSubmitStatus({ 
+        success: true, 
+        message: 'Utilisateur créé avec succès !' 
       });
-      if (photo) {
-        data.append('image', photo); // 'image' correspond au champ multer
-      }
+      
+      // Réinitialisation du formulaire après 2 secondes
+      setTimeout(() => {
+        setFormData({
+          prenom: '',
+          nom: '',
+          email: '',
+          telephone: '',
+          password: 'Default@123',
+          status: 'true',
+          role: '',
+        });
+        setIsSubmitting(false);
+      }, 2000);
 
-      const response = await axios.post('http://localhost:5000/api/users', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      alert('✅ Utilisateur enregistré avec succès !');
-
-      // Option : réinitialisation du formulaire
-      setFormData({
-        prenom: '',
-        nom: '',
-        email: '',
-        telephone: '',
-        password: '123456',
-        status: 'true',
-        role: '',
-      });
-      setPhoto(null);
-      setPhotoPreview(null);
-
-      // Option : redirection
-      // navigate('/liste-utilisateurs');
     } catch (err) {
       console.error(err);
-      alert("❌ Erreur lors de l'enregistrement de l'utilisateur.");
+      const errorMessage = err.response?.data?.message || "Erreur lors de la création de l'utilisateur";
+      setSubmitStatus({ success: false, message: errorMessage });
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Container className="my-5 p-4 shadow rounded bg-white">
-      <h3 className="text-center mb-4">Créer un nouvel utilisateur</h3>
-      <Form onSubmit={handleSubmit}>
+    <Container className="add-user-container">
+      <div className="form-header">
+        <h2 className="form-title">
+          <FaUserPlus className="me-2" />
+          Nouvel Utilisateur
+        </h2>
+        <p className="form-subtitle">Remplissez les informations pour créer un nouveau compte</p>
+      </div>
+
+      {submitStatus.message && (
+        <Alert variant={submitStatus.success ? 'success' : 'danger'} className="mb-4">
+          {submitStatus.message}
+        </Alert>
+      )}
+
+      <Form onSubmit={handleSubmit} className="user-form">
         <Row>
-          <Col md={3} className="text-center mb-3">
-            <div className="profile-photo-container">
-              <div className="photo-wrapper">
-                {photoPreview ? (
-                  <img src={photoPreview} alt="Profil" className="profile-photo-circle" />
-                ) : (
-                  <FaUserCircle className="default-avatar" />
-                )}
-                <label htmlFor="fileUpload" className="edit-icon">
-                  <FaPen />
-                </label>
-                <input
-                  id="fileUpload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  style={{ display: 'none' }}
-                />
-              </div>
-            </div>
+          <Col md={6}>
+            <Form.Group className="mb-4 form-group-custom">
+              <Form.Label className="form-label">
+                Prénom <FaAsterisk className="text-danger" size={8} />
+              </Form.Label>
+              <Form.Control
+                name="prenom"
+                value={formData.prenom}
+                onChange={handleChange}
+                type="text"
+                placeholder="Jean"
+                className="form-input"
+                required
+              />
+            </Form.Group>
           </Col>
 
-          <Col md={9}>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-4">
-                  <Form.Label>
-                    Prénom <FaAsterisk className="text-danger" size={8} />
-                  </Form.Label>
-                  <Form.Control
-                    name="prenom"
-                    value={formData.prenom}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Entrez le prénom"
-                    className="custom-input"
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-4">
-                  <Form.Label>
-                    Nom <FaAsterisk className="text-danger" size={8} />
-                  </Form.Label>
-                  <Form.Control
-                    name="nom"
-                    value={formData.nom}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Entrez le nom"
-                    className="custom-input"
-                    required
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-4">
-                  <Form.Label>
-                    Email <FaAsterisk className="text-danger" size={8} />
-                  </Form.Label>
-                  <Form.Control
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    type="email"
-                    placeholder="exemple@mail.com"
-                    className="custom-input"
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-4">
-                  <Form.Label>
-                    Téléphone <FaAsterisk className="text-danger" size={8} />
-                  </Form.Label>
-                  <Form.Control
-                    name="telephone"
-                    value={formData.telephone}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Numéro de téléphone"
-                    className="custom-input"
-                    required
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-4">
-                  <Form.Label>
-                    Rôle <FaAsterisk className="text-danger" size={8} />
-                  </Form.Label>
-                  <Form.Select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="custom-input"
-                    required
-                  >
-                    <option value="">-- Sélectionner --</option>
-                    <option value="admin">Admin</option>
-                    <option value="professeur">Professeur</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-4">
-                  <Form.Label>
-                    Statut <FaAsterisk className="text-danger" size={8} />
-                  </Form.Label>
-                  <Form.Select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className="custom-input"
-                    required
-                  >
-                    <option value="">-- Sélectionner --</option>
-                    <option value="true">Actif</option>
-                    <option value="false">Inactif</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <div className="text-end">
-              <Button variant="primary" size="lg" type="submit">
-                Enregistrer l'utilisateur
-              </Button>
-            </div>
+          <Col md={6}>
+            <Form.Group className="mb-4 form-group-custom">
+              <Form.Label className="form-label">
+                Nom <FaAsterisk className="text-danger" size={8} />
+              </Form.Label>
+              <Form.Control
+                name="nom"
+                value={formData.nom}
+                onChange={handleChange}
+                type="text"
+                placeholder="Dupont"
+                className="form-input"
+                required
+              />
+            </Form.Group>
           </Col>
         </Row>
+
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-4 form-group-custom">
+              <Form.Label className="form-label">
+                Email <FaAsterisk className="text-danger" size={8} />
+              </Form.Label>
+              <Form.Control
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                type="email"
+                placeholder="jean.dupont@exemple.com"
+                className="form-input"
+                required
+              />
+            </Form.Group>
+          </Col>
+
+          <Col md={6}>
+            <Form.Group className="mb-4 form-group-custom">
+              <Form.Label className="form-label">
+                Téléphone <FaAsterisk className="text-danger" size={8} />
+              </Form.Label>
+              <Form.Control
+                name="telephone"
+                value={formData.telephone}
+                onChange={handleChange}
+                type="tel"
+                placeholder="0612345678"
+                className="form-input"
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-4 form-group-custom">
+              <Form.Label className="form-label">
+                Rôle <FaAsterisk className="text-danger" size={8} />
+              </Form.Label>
+              <Form.Select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="form-input"
+                required
+              >
+                <option value="">Sélectionnez un rôle</option>
+                <option value="admin">Administrateur</option>
+                <option value="professeur">Professeur</option>
+                <option value="editeur">Éditeur</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+
+          <Col md={6}>
+            <Form.Group className="mb-4 form-group-custom">
+              <Form.Label className="form-label">
+                Statut <FaAsterisk className="text-danger" size={8} />
+              </Form.Label>
+              <Form.Select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="form-input"
+                required
+              >
+                <option value="true">Actif</option>
+                <option value="false">Inactif</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <div className="form-footer">
+          <Button 
+            variant="primary" 
+            type="submit" 
+            className="submit-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              'En cours...'
+            ) : (
+              <>
+                <FaCheck className="me-2" />
+                Créer l'utilisateur
+              </>
+            )}
+          </Button>
+        </div>
       </Form>
     </Container>
   );

@@ -16,8 +16,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/users', require('./routes/user.route'));
+app.use('/api/quizzes', require('./routes/quiz.route'));
+app.use('/api/questions', require('./routes/question.route'));
+app.use('/api/options', require('./routes/option.route'));
 
+// Lancement du serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`));
-
-

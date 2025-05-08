@@ -1,18 +1,16 @@
 import React from 'react';
-import SidebarMenu from './SidebarMenu';
-import Navbar from './Navbar'; // si tu as une barre en haut
+import Navbar from './Navbar';
+import SecondaryNavbar from './SecondaryNavbar';
 import { Outlet } from 'react-router-dom';
 
-const Layout = () => {
+const Layout = ({ children }) => {
   return (
-    <div className="layout">
-      <SidebarMenu />
-      <div className="main-content">
-        <Navbar />
-        <div className="page">
-          <Outlet /> {/* Affiche ici les pages internes */}
-        </div>
-      </div>
+    <div className="d-flex flex-column min-vh-100">
+      <Navbar />
+      <SecondaryNavbar />
+      <main className="flex-grow-1 p-3">
+      <Outlet /> {/* Affiche ici les pages internes */}
+      </main>
     </div>
   );
 };
