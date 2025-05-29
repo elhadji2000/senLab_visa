@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exploration des Fonctions du Second Degré</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --dark-color: #2b2d42;
+            --light-color: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .formula-container {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .formula {
+            font-size: 2rem;
+            font-family: 'Times New Roman', serif;
+            text-align: center;
+            color: var(--dark-color);
+            margin: 0;
+        }
+        
+        .param-container {
+            margin-bottom: 20px;
+        }
+        
+        .param-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+        
+        .param-value {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+        
+        .solution-card {
+            background-color: rgba(72, 149, 239, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid var(--accent-color);
+        }
+        
+        .complex-solution {
+            color: #e63946;
+            font-style: italic;
+        }
+        
+        .course-card {
+            background-color: white;
+            height: 100%;
+        }
+        
+        .course-title {
+            color: var(--dark-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 500px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .input-group-custom {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .input-group-text-custom {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .form-control-custom {
+            border: none;
+            border-left: 1px solid #eee;
+            padding: 12px 15px;
+        }
+        
+        .vertical-sliders {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .vertical-slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .vertical-slider {
+            -webkit-appearance: slider-vertical;
+            width: 10px;
+            height: 150px;
+            padding: 0 15px;
+        }
+        
+        @media (max-width: 992px) {
+            .vertical-sliders {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header py-4">
+        <div class="container">
+            <h1 class="text-center"><i class="fas fa-chart-line me-2"></i> Exploration des Fonctions du Second Degré</h1>
+            <p class="text-center mb-0">Une simulation interactive pour comprendre les paraboles</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Colonne de gauche - Paramètres -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-sliders-h me-2"></i> Paramètres de la Fonction
+                    </div>
+                    <div class="card-body">
+                        <div class="formula-container">
+                            <p class="formula">f(x) = <span id="a-value">1</span>x² + <span id="b-value">0</span>x + <span id="c-value">0</span></p>
+                        </div>
+                        
+                        <!-- Inputs numériques -->
+                        <div class="param-container">
+                            <label class="param-label">Coefficient a :</label>
+                            <div class="input-group input-group-custom mb-3">
+                                <span class="input-group-text input-group-text-custom">a =</span>
+                                <input type="number" class="form-control form-control-custom" id="a-input" value="1" step="0.1" min="-5" max="5">
+                            </div>
+                            <span class="param-value">Valeur : <span id="a-display">1.0</span></span>
+                        </div>
+                        
+                        <div class="param-container">
+                            <label class="param-label">Coefficient b :</label>
+                            <div class="input-group input-group-custom mb-3">
+                                <span class="input-group-text input-group-text-custom">b =</span>
+                                <input type="number" class="form-control form-control-custom" id="b-input" value="0" step="0.1" min="-10" max="10">
+                            </div>
+                            <span class="param-value">Valeur : <span id="b-display">0.0</span></span>
+                        </div>
+                        
+                        <div class="param-container">
+                            <label class="param-label">Coefficient c :</label>
+                            <div class="input-group input-group-custom mb-3">
+                                <span class="input-group-text input-group-text-custom">c =</span>
+                                <input type="number" class="form-control form-control-custom" id="c-input" value="0" step="0.1" min="-10" max="10">
+                            </div>
+                            <span class="param-value">Valeur : <span id="c-display">0.0</span></span>
+                        </div>
+                        
+                        <!-- Sliders verticaux (visible seulement sur grand écran) -->
+                        <div class="vertical-sliders">
+                            <div class="vertical-slider-container">
+                                <label class="param-label">a</label>
+                                <input type="range" class="vertical-slider" min="-5" max="5" step="0.1" id="a-slider" value="1" orient="vertical">
+                            </div>
+                            <div class="vertical-slider-container">
+                                <label class="param-label">b</label>
+                                <input type="range" class="vertical-slider" min="-10" max="10" step="0.1" id="b-slider" value="0" orient="vertical">
+                            </div>
+                            <div class="vertical-slider-container">
+                                <label class="param-label">c</label>
+                                <input type="range" class="vertical-slider" min="-10" max="10" step="0.1" id="c-slider" value="0" orient="vertical">
+                            </div>
+                        </div>
+                        
+                        <div class="solution-card mt-4">
+                            <h4><i class="fas fa-calculator me-2"></i> Solutions de l'Équation</h4>
+                            <div id="solution-text" class="mt-3">
+                                Ajustez les coefficients pour voir les solutions.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle me-2"></i> Propriétés de la Fonction
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>Forme générale :</strong> f(x) = ax² + bx + c
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Sommet :</strong> <span id="vertex">(0.00, 0.00)</span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Variation :</strong> <span id="variation">Décroissante puis croissante</span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Intersection avec l'axe y :</strong> <span id="y-intercept">(0, 0.00)</span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Discriminant Δ :</strong> <span id="discriminant">0.00</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Colonne centrale - Graphique -->
+            <div class="col-lg-5">
+                <div class="chart-container">
+                    <canvas id="quadraticChart"></canvas>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-lightbulb me-2"></i> Observations
+                    </div>
+                    <div class="card-body">
+                        <div id="observations-text">
+                            <p><i class="fas fa-arrow-up text-success me-2"></i> <strong>Coefficient a</strong> : Contrôle l'ouverture et le sens de la parabole</p>
+                            <p><i class="fas fa-arrows-alt-h text-primary me-2"></i> <strong>Coefficient b</strong> : Influence la position horizontale du sommet</p>
+                            <p><i class="fas fa-arrow-up text-info me-2"></i> <strong>Coefficient c</strong> : Détermine l'intersection avec l'axe des ordonnées</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Colonne de droite - Cours -->
+            <div class="col-lg-3">
+                <div class="card course-card">
+                    <div class="card-header">
+                        <i class="fas fa-book me-2"></i> Cours - Second Degré
+                    </div>
+                    <div class="card-body">
+                        <h5 class="course-title">Définition</h5>
+                        <p>Une fonction polynôme du second degré s'écrit :</p>
+                        <p class="text-center"><strong>f(x) = ax² + bx + c</strong></p>
+                        <p>avec a ≠ 0.</p>
+                        
+                        <h5 class="course-title mt-4">Représentation Graphique</h5>
+                        <p>La courbe est une <strong>parabole</strong> :</p>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i> Tournée vers le haut si a > 0</li>
+                            <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i> Tournée vers le bas si a < 0</li>
+                        </ul>
+                        
+                        <h5 class="course-title mt-4">Racines de l'Équation</h5>
+                        <p>Solutions de ax² + bx + c = 0 :</p>
+                        <p>Δ = b² - 4ac</p>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i> Δ > 0 : 2 solutions réelles</li>
+                            <li class="list-group-item"><i class="fas fa-check-circle text-warning me-2"></i> Δ = 0 : 1 solution double</li>
+                            <li class="list-group-item"><i class="fas fa-check-circle text-danger me-2"></i> Δ < 0 : 2 solutions complexes</li>
+                        </ul>
+                        
+                        <div class="alert alert-primary mt-4">
+                            <i class="fas fa-tip me-2"></i> <strong>Astuce</strong> : Essayez ces combinaisons :
+                            <ul class="mt-2 mb-0">
+                                <li>a=1, b=0, c=0 (parabole centrée)</li>
+                                <li>a=2, b=4, c=2 (solution double)</li>
+                                <li>a=1, b=0, c=1 (pas de solution réelle)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialisation du graphique avec un repère amélioré
+        const ctx = document.getElementById('quadraticChart').getContext('2d');
+        let quadraticChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'f(x) = ax² + bx + c',
+                    borderColor: '#e63946',
+                    backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                    tension: 0.1,
+                    pointRadius: 0,
+                    borderWidth: 3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'center',
+                        title: {
+                            display: true,
+                            text: 'Axe des abscisses (x)',
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            color: '#2b2d42'
+                        },
+                        min: -10,
+                        max: 10,
+                        grid: {
+                            color: function(context) {
+                                return context.tick.value === 0 ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.15)';
+                            },
+                            lineWidth: function(context) {
+                                return context.tick.value === 0 ? 2 : 1;
+                            }
+                        },
+                        ticks: {
+                            stepSize: 1,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        position: 'center',
+                        title: {
+                            display: true,
+                            text: 'Axe des ordonnées (y)',
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            color: '#2b2d42'
+                        },
+                        min: -10,
+                        max: 10,
+                        grid: {
+                            color: function(context) {
+                                return context.tick.value === 0 ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.15)';
+                            },
+                            lineWidth: function(context) {
+                                return context.tick.value === 0 ? 2 : 1;
+                            }
+                        },
+                        ticks: {
+                            stepSize: 1,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: '#2b2d42'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'nearest',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `f(${context.parsed.x.toFixed(2)}) = ${context.parsed.y.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        hitRadius: 10,
+                        hoverRadius: 5
+                    }
+                }
+            }
+        });
+
+        // Fonctions de calcul
+        function calculateQuadraticPoints(a, b, c) {
+            const points = [];
+            for (let x = -10; x <= 10; x += 0.1) {
+                points.push({
+                    x: x,
+                    y: a * x * x + b * x + c
+                });
+            }
+            return points;
+        }
+
+        function calculateSolutions(a, b, c) {
+            const discriminant = b * b - 4 * a * c;
+            const vertexX = -b / (2 * a);
+            const vertexY = a * vertexX * vertexX + b * vertexX + c;
+            
+            // Mise à jour du discriminant dans l'interface
+            document.getElementById('discriminant').textContent = discriminant.toFixed(2);
+            
+            if (a === 0) {
+                return {
+                    type: 'linear',
+                    solution: `La fonction est linéaire (a=0). Solution réelle : x = ${(-c/b).toFixed(2)}`,
+                    vertex: [vertexX, vertexY]
+                };
+            }
+            
+            if (discriminant > 0) {
+                const x1 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                const x2 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                return {
+                    type: 'two-roots',
+                    solution: `Δ = ${discriminant.toFixed(2)} > 0 ⇒ Deux solutions réelles :<br>
+                              <strong>x₁ = ${x1.toFixed(2)}</strong><br>
+                              <strong>x₂ = ${x2.toFixed(2)}</strong>`,
+                    roots: [x1, x2],
+                    vertex: [vertexX, vertexY]
+                };
+            } else if (discriminant === 0) {
+                const x0 = -b / (2 * a);
+                return {
+                    type: 'one-root',
+                    solution: `Δ = 0 ⇒ Une solution double :<br>
+                              <strong>x₀ = ${x0.toFixed(2)}</strong>`,
+                    roots: [x0],
+                    vertex: [vertexX, vertexY]
+                };
+            } else {
+                const realPart = (-b / (2 * a)).toFixed(2);
+                const imagPart = (Math.sqrt(-discriminant) / (2 * a)).toFixed(2);
+                return {
+                    type: 'no-real-roots',
+                    solution: `Δ = ${discriminant.toFixed(2)} < 0 ⇒ Pas de solution réelle<br>
+                              <span class="complex-solution">Solutions complexes :<br>
+                              z₁ = ${realPart} - ${imagPart}i<br>
+                              z₂ = ${realPart} + ${imagPart}i</span>`,
+                    vertex: [vertexX, vertexY]
+                };
+            }
+        }
+
+        function updateProperties(a, b, c, solution) {
+            // Sommet
+            const vertexText = `(${solution.vertex[0].toFixed(2)}, ${solution.vertex[1].toFixed(2)})`;
+            document.getElementById('vertex').textContent = vertexText;
+            
+            // Variation
+            const variationText = a > 0 ? 
+                "Décroissante puis croissante (minimum)" : 
+                "Croissante puis décroissante (maximum)";
+            document.getElementById('variation').textContent = variationText;
+            
+            // Intersection avec l'axe y
+            const yInterceptText = `(0, ${c.toFixed(2)})`;
+            document.getElementById('y-intercept').textContent = yInterceptText;
+        }
+
+        // Fonction principale de mise à jour
+        function updateChartAndSolution() {
+            // Récupération des valeurs depuis les inputs numériques
+            const a = parseFloat(document.getElementById('a-input').value);
+            const b = parseFloat(document.getElementById('b-input').value);
+            const c = parseFloat(document.getElementById('c-input').value);
+            
+            // Mise à jour des sliders verticaux
+            document.getElementById('a-slider').value = a;
+            document.getElementById('b-slider').value = b;
+            document.getElementById('c-slider').value = c;
+            
+            // Mise à jour des valeurs affichées
+            document.getElementById('a-value').textContent = a;
+            document.getElementById('b-value').textContent = b;
+            document.getElementById('c-value').textContent = c;
+            document.getElementById('a-display').textContent = a.toFixed(1);
+            document.getElementById('b-display').textContent = b.toFixed(1);
+            document.getElementById('c-display').textContent = c.toFixed(1);
+            
+            // Calcul des points de la courbe
+            const points = calculateQuadraticPoints(a, b, c);
+            quadraticChart.data.datasets[0].data = points;
+            
+            // Calcul des solutions
+            const solution = calculateSolutions(a, b, c);
+            document.getElementById('solution-text').innerHTML = solution.solution;
+            
+            // Mise à jour des propriétés
+            updateProperties(a, b, c, solution);
+            
+            // Mise à jour du graphique
+            quadraticChart.update();
+        }
+
+        // Synchronisation entre les sliders verticaux et les inputs numériques
+        function syncInputs() {
+            // Si on change un slider vertical, on met à jour l'input numérique correspondant
+            document.getElementById('a-slider').addEventListener('input', function() {
+                document.getElementById('a-input').value = this.value;
+                updateChartAndSolution();
+            });
+            
+            document.getElementById('b-slider').addEventListener('input', function() {
+                document.getElementById('b-input').value = this.value;
+                updateChartAndSolution();
+            });
+            
+            document.getElementById('c-slider').addEventListener('input', function() {
+                document.getElementById('c-input').value = this.value;
+                updateChartAndSolution();
+            });
+            
+            // Si on change un input numérique, on met à jour le slider correspondant
+            document.getElementById('a-input').addEventListener('input', updateChartAndSolution);
+            document.getElementById('b-input').addEventListener('input', updateChartAndSolution);
+            document.getElementById('c-input').addEventListener('input', updateChartAndSolution);
+        }
+
+        // Initialisation
+        syncInputs();
+        updateChartAndSolution();
+    </script>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

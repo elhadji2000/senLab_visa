@@ -84,42 +84,27 @@ const SecondaryNavbar = () => {
             >
               <NavDropdown.Item 
                 as={Link} 
-                to="/simulations/physique" 
-                active={isActive('/simulations/physique')}
+                to="/simulations/ajouter" 
+                active={isActive('/simulations/ajouter')}
+              >
+                <FaPlus className="me-2" />
+                Ajouter
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item 
+                as={Link} 
+                to="/simulations/explorer" 
+                active={isActive('/simulations/explorer')}
               >
                 <FaAtom className="me-2" />
-                Physique
-              </NavDropdown.Item>
-              <NavDropdown.Item 
-                as={Link} 
-                to="/simulations/chimie" 
-                active={isActive('/simulations/chimie')}
-              >
-                <FaVial className="me-2" />
-                Chimie
-              </NavDropdown.Item>
-              <NavDropdown.Item 
-                as={Link} 
-                to="/simulations/mathematique" 
-                active={isActive('/simulations/mathematique')}
-              >
-                <FaCalculator className="me-2" />
-                Mathématique
-              </NavDropdown.Item>
-              <NavDropdown.Item 
-                as={Link} 
-                to="/simulations/biologie" 
-                active={isActive('/simulations/biologie')}
-              >
-                <FaMicroscope className="me-2" />
-                Biologie
+                Explorer les Simulations
               </NavDropdown.Item>
               
               <NavDropdown.Divider />
               
               <NavDropdown.Item 
                 as={Link} 
-                to="/simulations/toutes" 
+                to="/simulations/all1" 
                 active={isActive('/simulations/toutes')}
               >
                 <FaThList className="me-2" />

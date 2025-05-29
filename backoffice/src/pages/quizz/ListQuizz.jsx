@@ -45,15 +45,26 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   }
 }));
 
-const DifficultyChip = styled(Chip)(({ difficulty, theme }) => ({
-  backgroundColor: 
-    difficulty === 'Facile' ? theme.palette.success.main : 
-    difficulty === 'Moyen' ? theme.palette.warning.main : theme.palette.error.main,
-  color: 'white',
-  fontWeight: 'bold',
-  minWidth: 80,
-  borderRadius: 4,
-}));
+const DifficultyChip = styled(Chip)(({ difficulty, theme }) => {
+  const colors = {
+    '6e': theme.palette.info.light,
+    '5e': theme.palette.info.main,
+    '4e': theme.palette.primary.light,
+    '3e': theme.palette.primary.main,
+    '2nde': theme.palette.warning.light,
+    '1ère': theme.palette.warning.main,
+    'Terminale': theme.palette.error.main,
+  };
+
+  return {
+    backgroundColor: colors[difficulty] || theme.palette.grey[500],
+    color: 'white',
+    fontWeight: 'bold',
+    minWidth: 80,
+    borderRadius: 4,
+  };
+});
+
 
 const ListQuizz = () => {
   const [quizzes, setQuizzes] = useState([]);

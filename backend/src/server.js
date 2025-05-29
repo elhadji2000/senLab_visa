@@ -19,6 +19,9 @@ app.use('/api/users', require('./routes/user.route'));
 app.use('/api/quizzes', require('./routes/quiz.route'));
 app.use('/api/questions', require('./routes/question.route'));
 app.use('/api/options', require('./routes/option.route'));
+app.use('/api/simulations', require('./routes/simulation.route'));
+app.use('/api/auth', require('./routes/auth.route'));
+app.use('/api/dashboard', require('./routes/dasboard.route'));
 
 // Lancement du serveur
 const PORT = process.env.PORT || 5000;

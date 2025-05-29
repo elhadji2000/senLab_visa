@@ -8,6 +8,9 @@ import AddUsers from '../pages/users/AddUsers';
 import ListUsers from '../pages/users/ListUsers';
 import ListQuizz from '../pages/quizz/ListQuizz';
 import AddQuizz from '../pages/quizz/AddQuizz';
+import Toutes from '../pages/simulations/Toutes';
+import Ajouter from '../pages/simulations/Ajouter';
+import Explorer from '../pages/simulations/explorer';
 import '../App.css';
 
 function AppRouter() {
@@ -24,6 +27,9 @@ function AppRouter() {
             <Route path="/utilisateur/lister" element={<ListUsers />} />
             <Route path="/quizz/lister" element={<ListQuizz />} />
             <Route path="/quizz/ajouter" element={<AddQuizz />} />
+            <Route path="/simulations/all1" element={<Toutes />} />
+            <Route path="/simulations/ajouter" element={<Ajouter />} />
+            <Route path="/simulations/explorer" element={<Explorer />} />
             {/* Ajoute d'autres routes ici */}
           </Route>
         </Routes>
