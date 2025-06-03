@@ -111,7 +111,7 @@ const ListUsers = () => {
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar
-            sx={{ 
+            sx={{
               bgcolor: 'primary.main',
               width: 48,
               height: 48,
@@ -165,7 +165,7 @@ const ListUsers = () => {
           <Grid item xs={6}>
             <StatusChip
               status={user.status}
-              label={user.status === 'true' ? 'Actif' : 'Inactif'}
+              label={user.status === true ? 'Actif' : 'Inactif'}
               size="small"
             />
           </Grid>

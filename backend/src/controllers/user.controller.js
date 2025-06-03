@@ -1,57 +1,64 @@
-const User = require('../models/UserModel');
+const dotenv = require('dotenv');
+dotenv.config({ path: require('path').resolve(__dirname, '../.env') });
+
+// Debug
+console.log('[Auth] ACCESS_TOKEN_SECRET:', process.env.ACCESS_TOKEN_SECRET ? 'OK' : 'NON DÉFINI');
+
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { validationResult } = require('express-validator');
 
-// ✅ Ajouter un utilisateur avec image et mot de passe crypté
+const User = require('../models/UserModel');
+
+// Version adaptée de register avec gestion d'image
 exports.addUser = async (req, res) => {
-    // Validation des données
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+  try {
+    const { prenom, nom, email, password, telephone, role } = req.body;
+
+    // Validation simple
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email et mot de passe requis'
+      });
     }
 
-    try {
-        const { prenom, nom, email, telephone, password, role, status } = req.body;
+    // Création de l'utilisateur
+    const user = new User({
+      prenom,
+      nom,
+      email,
+      password, // Le middleware pre('save') va le hasher automatiquement
+      telephone,
+      role
+    });
 
-        // Vérifier si l'utilisateur existe déjà
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Un utilisateur avec cet email existe déjà' });
-        }
+    await user.save();
 
-        // Cryptage du mot de passe
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+    // Retourne l'utilisateur sans le mot de passe
+    const userWithoutPassword = user.toObject();
+    delete userWithoutPassword.password;
 
-        const user = new User({
-            prenom,
-            nom,
-            email,
-            telephone,
-            password: hashedPassword, // Stockage du mot de passe crypté
-            role,
-            status,
-            image: req.file ? req.file.path : null,
-        });
+    res.status(201).json({
+      success: true,
+      user: userWithoutPassword
+    });
 
-        const savedUser = await user.save();
-        
-        // Ne pas renvoyer le mot de passe dans la réponse
-        const userResponse = savedUser.toObject();
-        delete userResponse.password;
-
-        res.status(201).json({
-            message: 'Utilisateur créé avec succès',
-            user: userResponse
-        });
-
-    } catch (error) {
-        console.error("Erreur lors de l'ajout de l'utilisateur :", error);
-        res.status(500).json({ 
-            message: 'Erreur serveur',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
+  } catch (error) {
+    console.error('Erreur d\'inscription:', error);
+    
+    // Gestion des erreurs MongoDB
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cet email ou téléphone est déjà utilisé'
+      });
     }
+
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur lors de l\'inscription'
+    });
+  }
 };
 
 // ✅ Liste des utilisateurs (sans mots de passe)

@@ -1,8 +1,16 @@
+// DOIT ÊTRE LA PREMIÈRE LIGNE du fichier principal
+require('dotenv').config({ path: __dirname + '/.env' }); // Chemin absolu
+
+// Debug immédiat
+console.log('=== Variables chargées ===');
+console.log('PORT:', process.env.PORT);
+console.log('MONGO_URI:', process.env.MONGO_URI ? '***masqué***' : 'non défini');
+console.log('ACCESS_TOKEN_SECRET:', process.env.ACCESS_TOKEN_SECRET ? '***masqué***' : 'NON DÉFINI - ERREUR');
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const path = require('path');
-require('dotenv').config();
 
 const app = express();
 

@@ -39,7 +39,7 @@ function AddUsers() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users', formData);
+      const response = await axios.post('http://localhost:5000/api/auth/register', formData);
 
       setSubmitStatus({ 
         success: true, 
@@ -172,8 +172,9 @@ function AddUsers() {
               >
                 <option value="">Sélectionnez un rôle</option>
                 <option value="admin">Administrateur</option>
-                <option value="professeur">Professeur</option>
-                <option value="editeur">Éditeur</option>
+                <option value="enseignant">enseignant</option>
+                <option value="etudiant">etudiant</option>
+                <option value="responsable">responsable</option>
               </Form.Select>
             </Form.Group>
           </Col>

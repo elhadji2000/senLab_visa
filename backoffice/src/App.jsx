@@ -9,7 +9,7 @@ function App() {
   return (
     <>
       <AppRouter />
-      <Assistant /> {/* Affiche l'icône Siri-like partout */}
+      {/* <Assistant />  */}{/* Affiche l'icône Siri-like partout */}
     </>
   );
 }

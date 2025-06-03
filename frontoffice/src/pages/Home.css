@@ -1,0 +1,253 @@
+/* Variables */
+:root {
+  --primary-color: #3a7bd5;
+  --secondary-color: #00d2ff;
+  --dark-color: #2c3e50;
+  --light-color: #f8f9fa;
+  --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+.home-page {
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(58, 123, 213, 0.9), rgba(0, 210, 255, 0.8)), 
+              url('../assets/senLab2.jpg') center/cover no-repeat;
+  color: white;
+  position: relative;
+  padding: 0 1rem;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.hero-title span {
+  background: linear-gradient(90deg, #fff, #c9d6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto 2.5rem;
+}
+
+.hero-button {
+  padding: 0.8rem 2.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: var(--transition);
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Sections communes */
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.section-subtitle {
+  font-size: 1.2rem;
+  text-align: center;
+  color: #6c757d;
+  margin-bottom: 3rem;
+}
+
+/* Disciplines Section */
+.disciplines-section {
+  padding: 6rem 0;
+  background-color: var(--light-color);
+}
+
+.discipline-card {
+  height: 180px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.discipline-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(100%);
+  transition: var(--transition);
+}
+
+.discipline-card:hover::before {
+  transform: translateY(0);
+}
+
+.discipline-icon {
+  margin-bottom: 1rem;
+  color: var(--dark-color);
+}
+
+.discipline-name {
+  font-weight: 600;
+  color: var(--dark-color);
+  margin: 0;
+}
+
+.discipline-link {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  width: 100%;
+  height: 100%;
+}
+
+/* Features Section */
+.features-section {
+  padding: 6rem 0;
+  background-color: white;
+}
+
+.feature-card {
+  background: white;
+  border-radius: 15px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.feature-icon {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.feature-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--dark-color);
+}
+
+.feature-description {
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+/* CTA Section */
+.cta-section {
+  padding: 6rem 0;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+}
+
+.cta-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.cta-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.cta-text {
+  font-size: 1.2rem;
+  max-width: 700px;
+  margin: 0 auto 2.5rem;
+  opacity: 0.9;
+}
+
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cta-button {
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .hero-title {
+    font-size: 2.8rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .cta-button {
+    width: 100%;
+    max-width: 300px;
+  }
+}

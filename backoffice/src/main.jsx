@@ -6,14 +6,17 @@ import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme'; // Assurez-vous d'avoir créé ce fichier
 import App from './App';
 import './index.css';
+import { AuthProvider } from './contexts/AuthContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <CssBaseline /> {/* Normalise le CSS et rend le thème cohérent */}
-        <App />
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline /> {/* Normalise le CSS et rend le thème cohérent */}
+          <App />
+        </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

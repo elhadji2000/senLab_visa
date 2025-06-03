@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from './Navbar';
 import SecondaryNavbar from './SecondaryNavbar';
 import { Outlet } from 'react-router-dom';
+import Assistant from './Assistant';
 
 const Layout = ({ children }) => {
   return (
@@ -10,6 +11,7 @@ const Layout = ({ children }) => {
       {/* <SecondaryNavbar /> */}
       <main className="flex-grow-1 p-3">
       <Outlet /> {/* Affiche ici les pages internes */}
+      <Assistant /> 
       </main>
     </div>
   );

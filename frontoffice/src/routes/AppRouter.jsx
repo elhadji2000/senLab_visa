@@ -16,6 +16,7 @@ function AppRouter() {
                 {/* Contenu principal */}
                 <main className="content-wrap">
                     <Routes>
+                        <Route path="" element={<Home />} />
                         <Route path="/home" element={<Home />} />
                         <Route path="/about" element={<About />} />
                         {/* Ajoutez vos autres routes ici */}
