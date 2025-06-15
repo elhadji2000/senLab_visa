@@ -1,27 +1,20 @@
-// src/controllers/auth.controller.js
-// En tout premier ligne du fichier
 const dotenv = require('dotenv');
 dotenv.config({ path: require('path').resolve(__dirname, '../.env') });
 
-// Debug
-console.log('[Auth] ACCESS_TOKEN_SECRET:', process.env.ACCESS_TOKEN_SECRET ? 'OK' : 'NON DÉFINI');
-
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const User = require('../models/UserModel');
-const fsPromise = require('fs').promises;
+const User = require('../models/User.model');
 
+// =====================
+// Connexion
+// =====================
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
- /*  / Debug: Vérifiez que le secret est bien chargé */
-  console.log('JWT Secret:', process.env.ACCESS_TOKEN_SECRET);
-  
   if (!process.env.ACCESS_TOKEN_SECRET) {
-    console.error('ERROR: ACCESS_TOKEN_SECRET is not defined!');
     return res.status(500).json({
       success: false,
-      message: 'Configuration serveur invalide'
+      message: 'Erreur de configuration du serveur'
     });
   }
 
@@ -34,53 +27,52 @@ exports.login = async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).select('+password');
-    
     if (!user) {
-      return res.status(401).json({ 
-        success: false,
-        message: 'Identifiants incorrects' 
-      });
+      return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    
     if (!isMatch) {
-      return res.status(401).json({ 
-        success: false,
-        message: 'Identifiants incorrects' 
-      });
+      return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
     }
 
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: process.env.TOKEN_EXPIRATION || '1h' }
-    );
+    const payload = {
+      userId: user._id,
+      role: user.role
+    };
+
+    const expiresIn = process.env.TOKEN_EXPIRATION || '1h';
+
+    const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn
+    });
 
     const userWithoutPassword = user.toObject();
     delete userWithoutPassword.password;
 
     res.status(200).json({
       success: true,
-      token: 'Bearer ' + token, // Préfixe recommandé
+      token: `Bearer ${token}`,
       user: userWithoutPassword,
-      expiresIn: 3600
+      expiresIn
     });
 
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ 
+    console.error('Erreur login:', error);
+    res.status(500).json({
       success: false,
-      message: 'Erreur serveur' 
+      message: 'Erreur interne du serveur'
     });
   }
 };
 
+// =====================
+// Inscription
+// =====================
 exports.register = async (req, res) => {
   try {
     const { prenom, nom, email, password, telephone, role } = req.body;
 
-    // Validation simple
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -88,19 +80,17 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Création de l'utilisateur
     const user = new User({
       prenom,
       nom,
       email,
-      password, // Le middleware pre('save') va le hasher automatiquement
+      password,
       telephone,
-      role
+      role: role || 'user' // rôle par défaut
     });
 
     await user.save();
 
-    // Retourne l'utilisateur sans le mot de passe
     const userWithoutPassword = user.toObject();
     delete userWithoutPassword.password;
 
@@ -110,13 +100,12 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Erreur d\'inscription:', error);
-    
-    // Gestion des erreurs MongoDB
+    console.error('Erreur inscription:', error);
+
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: 'Cet email ou téléphone est déjà utilisé'
+        message: 'Email ou téléphone déjà utilisé'
       });
     }
 
@@ -127,15 +116,32 @@ exports.register = async (req, res) => {
   }
 };
 
-// src/controllers/auth.controller.js
+// =====================
+// Récupérer les infos de l'utilisateur connecté
+// =====================
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
+    const user = await User.findById(req.user._id).select('-password -__v').lean();
+
     if (!user) {
       return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
     }
-    res.status(200).json({ success: true, user });
+
+    res.status(200).json({
+      success: true,
+      user: {
+        ...user,
+        fullName: `${user.prenom} ${user.nom}`,
+        isAdmin: user.role === 'admin'
+      }
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
+    console.error('Erreur getMe:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
+

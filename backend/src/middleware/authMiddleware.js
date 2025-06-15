@@ -1,39 +1,47 @@
 const jwt = require('jsonwebtoken');
 
+/**
+ * Middleware pour authentifier les utilisateurs via JWT.
+ * Il extrait et vérifie le token, puis injecte les infos utilisateur dans req.user.
+ */
 const authenticate = async (req, res, next) => {
-  // 1. Vérification du header Authorization
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-  
-  if (!authHeader?.startsWith('Bearer ')) {
-    return res.status(401).json({ 
-      success: false,
-      message: 'Authorization token manquant' 
-    });
-  }
-
-  // 2. Extraction du token
-  const token = authHeader.split(' ')[1];
-
   try {
-    // 3. Vérification du token
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+
+    // Vérifier que le header commence bien par "Bearer "
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Token d\'authentification manquant ou mal formé'
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token non fourni'
+      });
+    }
+
+    // Vérifier et décoder le token
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    
-    // 4. Ajout des infos utilisateur à la requête
-    req.user = { 
-      id: decoded.userId, 
-      role: decoded.role 
+
+    // Injecter les données utilisateur dans req.user
+    req.user = {
+      _id: decoded.userId || decoded.id, // adapte selon ce que tu codes dans ton token
+      role: decoded.role
     };
-    
+
     next();
   } catch (error) {
     console.error('Erreur de vérification du token:', error);
-    
-    // Messages d'erreur spécifiques
+
     let message = 'Token invalide';
     if (error.name === 'TokenExpiredError') {
       message = 'Token expiré';
     } else if (error.name === 'JsonWebTokenError') {
-      message = 'Token malformé';
+      message = 'Token mal formé';
     }
 
     return res.status(401).json({ 

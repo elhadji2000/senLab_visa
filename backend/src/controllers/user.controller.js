@@ -7,7 +7,7 @@ console.log('[Auth] ACCESS_TOKEN_SECRET:', process.env.ACCESS_TOKEN_SECRET ? 'OK
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-const User = require('../models/UserModel');
+const User = require('../models/User.model');
 
 // Version adaptée de register avec gestion d'image
 exports.addUser = async (req, res) => {

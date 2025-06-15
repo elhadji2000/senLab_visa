@@ -4,7 +4,7 @@ const extract = require('extract-zip');
 const simulationController = require('../controllers/simulation.controller');
 const path = require('path');
 const fs = require('fs');
-const Simulation = require('../models/SimulationModel');
+const Simulation = require('../models/Simulation.model');
 const multer = require('multer');
 
 // Chemin relatif sûr

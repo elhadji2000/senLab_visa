@@ -1,4 +1,4 @@
-const Simulation = require('../models/SimulationModel');
+const Simulation = require('../models/Simulation.model');
 const fs = require('fs');
 const path = require('path');
 

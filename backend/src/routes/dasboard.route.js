@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const User = require('../models/UserModel');
-const Quiz = require('../models/QuizModel');
-const Simulation = require('../models/SimulationModel');
+const User = require('../models/User.model');
+const Quiz = require('../models/Quiz.model');
+const Simulation = require('../models/Simulation.model');
 const UserActivity = require('../models/UserActivity');
 const QuizResult = require('../models/quizResult');
 // Routes pour le dashboard
