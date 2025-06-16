@@ -1,332 +1,258 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import {
-  Box,
-  Typography,
-  TableContainer,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  Paper,
-  IconButton,
-  Chip,
-  TextField,
-  InputAdornment,
-  TablePagination,
-  Avatar,
-  LinearProgress,
-  Tooltip,
-  useMediaQuery,
-  Button, // Ajouté ici
-  Grid,
-  CircularProgress
-} from '@mui/material';
-import { 
-  Edit as EditIcon, 
-  Delete as DeleteIcon, 
-  Visibility as VisibilityIcon,
-  Search as SearchIcon,
-  Quiz as QuizIcon,
-  FilterList as FilterListIcon
-} from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-    transition: 'background-color 0.2s ease',
-  },
-  '&.MuiTableRow-root': {
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover,
-    },
-  }
-}));
-
-const DifficultyChip = styled(Chip)(({ difficulty, theme }) => {
-  const colors = {
-    '6e': theme.palette.info.light,
-    '5e': theme.palette.info.main,
-    '4e': theme.palette.primary.light,
-    '3e': theme.palette.primary.main,
-    '2nde': theme.palette.warning.light,
-    '1ère': theme.palette.warning.main,
-    'Terminale': theme.palette.error.main,
-  };
-
-  return {
-    backgroundColor: colors[difficulty] || theme.palette.grey[500],
-    color: 'white',
-    fontWeight: 'bold',
-    minWidth: 80,
-    borderRadius: 4,
-  };
-});
-
+import React, { useState, useEffect } from 'react';
+import { Container, Table, Spinner, Alert, Button, Modal, Card, Badge } from 'react-bootstrap';
+import { EyeFill, PencilFill, TrashFill, PlusCircleFill } from 'react-bootstrap-icons';
+import { fetchQuizzes, deleteQuiz, fetchQuizDetail } from '../../api/quizzes';
+import { useNavigate } from 'react-router-dom';
 
 const ListQuizz = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [searchTerm, setSearchTerm] = useState('');
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const [error, setError] = useState('');
+  const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [quizDetail, setQuizDetail] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadQuizzes = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/quizzes/all');
-        setQuizzes(response.data);
+        const response = await fetchQuizzes();
+        setQuizzes(response.data.quizzes);
         setLoading(false);
-      } catch (error) {
-        console.error("Erreur lors du chargement des quizzes :", error);
+      } catch (err) {
+        setError("Erreur lors du chargement des quiz.");
         setLoading(false);
       }
     };
-    
-    fetchData();
+    loadQuizzes();
   }, []);
 
-  const filteredQuizzes = quizzes.filter(quiz =>
-    quiz.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    quiz.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleDelete = async () => {
+    if (!selectedQuiz) return;
+    try {
+      await deleteQuiz(selectedQuiz._id);
+      setQuizzes(quizzes.filter(q => q._id !== selectedQuiz._id));
+      setShowDeleteModal(false);
+    } catch (error) {
+      alert("Erreur lors de la suppression.");
+    }
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const handleShowDetail = async (quizId) => {
+    try {
+      const response = await fetchQuizDetail(quizId);
+      setQuizDetail(response.data);
+      setShowDetailModal(true);
+    } catch (error) {
+      alert("Erreur lors du chargement des détails du quiz.");
+    }
   };
 
-  const handleAction = (action, quiz) => {
-    console.log(`${action} quiz:`, quiz);
-    // Implémentez vos actions ici (view, edit, delete)
+  const getBadgeVariant = (niveau) => {
+    switch(niveau.toLowerCase()) {
+      case 'facile': return 'success';
+      case 'moyen': return 'warning';
+      case 'difficile': return 'danger';
+      default: return 'primary';
+    }
   };
-
-  // Version mobile - Card
-  const MobileQuizItem = ({ quiz, index }) => (
-    <Paper elevation={1} sx={{ p: 2, mb: 2, borderRadius: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-          <QuizIcon />
-        </Avatar>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            {quiz.titre}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {quiz.description.length > 60 ? `${quiz.description.substring(0, 60)}...` : quiz.description}
-          </Typography>
-        </Box>
-      </Box>
-      
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-        <DifficultyChip label={quiz.niveau} difficulty={quiz.niveau} size="small" />
-        <Chip 
-          label={new Date(quiz.createdAt).toLocaleDateString()} 
-          variant="outlined" 
-          size="small"
-        />
-      </Box>
-      
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
-        <Tooltip title="Voir">
-          <IconButton size="small" onClick={() => handleAction('view', quiz)}>
-            <VisibilityIcon color="info" fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Modifier">
-          <IconButton size="small" onClick={() => handleAction('edit', quiz)}>
-            <EditIcon color="primary" fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Supprimer">
-          <IconButton size="small" onClick={() => handleAction('delete', quiz)}>
-            <DeleteIcon color="error" fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    </Paper>
-  );
 
   return (
-    <Box sx={{ p: isMobile ? 2 : 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ 
-        mb: 4,
-        fontWeight: 'bold',
-        color: 'primary.main',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        fontSize: isMobile ? '1.5rem' : '2rem'
-      }}>
-        <QuizIcon fontSize="inherit" />
-        Liste des Quizzes
-      </Typography>
-
-      {/* Barre de recherche et filtres */}
-      <Paper elevation={2} sx={{ p: isMobile ? 1 : 2, mb: 3, borderRadius: 2 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={9}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Rechercher un quiz..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              size={isMobile ? 'small' : 'medium'}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon color="action" />
-                  </InputAdornment>
-                ),
-                sx: { borderRadius: 2 }
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={3}>
+    <Container className="py-4">
+      <Card className="shadow-sm">
+        <Card.Header className="bg-white py-3">
+          <div className="d-flex justify-content-between align-items-center">
+            <h4 className="mb-0 text-primary">Gestion des Quiz</h4>
             <Button 
-              fullWidth
-              variant="outlined" 
-              startIcon={<FilterListIcon />}
-              size={isMobile ? 'small' : 'medium'}
+              variant="primary" 
+              onClick={() => navigate('/quizz/add')}
+              className="d-flex align-items-center"
             >
-              Filtres
+              <PlusCircleFill className="me-2" /> Ajouter un quiz
             </Button>
-          </Grid>
-        </Grid>
-      </Paper>
-
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress color="primary" />
-        </Box>
-      ) : isMobile ? (
-        // Version mobile
-        <Box>
-          {filteredQuizzes.length > 0 ? (
-            filteredQuizzes
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((quiz, index) => (
-                <MobileQuizItem key={quiz.id} quiz={quiz} index={index} />
-              ))
-          ) : (
-            <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
-              Aucun quiz trouvé
-            </Typography>
+          </div>
+        </Card.Header>
+        
+        <Card.Body>
+          {loading && (
+            <div className="text-center py-5">
+              <Spinner animation="border" variant="primary" />
+              <p className="mt-2">Chargement des quiz...</p>
+            </div>
           )}
           
-          <TablePagination
-            component="div"
-            count={filteredQuizzes.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage="Lignes/page:"
-            sx={{ mt: 2 }}
-          />
-        </Box>
-      ) : (
-        // Version desktop
-        <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
-          <TableContainer>
-            <Table>
-              <TableHead sx={{ bgcolor: 'primary.main' }}>
-                <TableRow>
-                  <TableCell sx={{ color: 'white', fontWeight: 'bold', width: 60 }}>#</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Titre</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Description</TableCell>
-                  <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold', width: 120 }}>Niveau</TableCell>
-                  <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold', width: 150 }}>Créé le</TableCell>
-                  <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold', width: 150 }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredQuizzes.length > 0 ? (
-                  filteredQuizzes
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((quiz, index) => (
-                      <StyledTableRow key={quiz.id} hover>
-                        <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                        <TableCell sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Avatar sx={{ bgcolor: 'primary.main' }}>
-                            <QuizIcon />
-                          </Avatar>
-                          <Typography variant="body1" fontWeight="medium">
-                            {quiz.titre}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {quiz.description.length > 100 ? `${quiz.description.substring(0, 100)}...` : quiz.description}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <DifficultyChip 
-                            label={quiz.niveau} 
-                            difficulty={quiz.niveau}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip 
-                            label={new Date(quiz.createdAt).toLocaleDateString()} 
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                            <Tooltip title="Voir">
-                              <IconButton color="info" onClick={() => handleAction('view', quiz)}>
-                                <VisibilityIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Modifier">
-                              <IconButton color="primary" onClick={() => handleAction('edit', quiz)}>
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Supprimer">
-                              <IconButton color="error" onClick={() => handleAction('delete', quiz)}>
-                                <DeleteIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        </TableCell>
-                      </StyledTableRow>
-                    ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                      <Typography variant="body1" color="text.secondary">
-                        Aucun quiz trouvé
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          {error && (
+            <Alert variant="danger" className="mt-3">
+              {error}
+            </Alert>
+          )}
 
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={filteredQuizzes.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage="Lignes par page:"
-          />
-        </Paper>
-      )}
-    </Box>
+          {!loading && !error && (
+            <div className="table-responsive">
+              <Table hover className="mb-0">
+                <thead className="bg-light">
+                  <tr>
+                    <th style={{width: '5%'}}>#</th>
+                    <th style={{width: '30%'}}>Titre</th>
+                    <th style={{width: '15%'}}>Niveau</th>
+                    <th style={{width: '25%'}}>Créé par</th>
+                    <th style={{width: '25%'}} className="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {quizzes.map((quiz, index) => (
+                    <tr key={quiz._id}>
+                      <td className="align-middle">{index + 1}</td>
+                      <td className="align-middle fw-semibold">{quiz.titre}</td>
+                      <td className="align-middle">
+                        <Badge bg={getBadgeVariant(quiz.niveau)} className="text-uppercase">
+                          {quiz.niveau}
+                        </Badge>
+                      </td>
+                      <td className="align-middle">
+                        {quiz.user?.prenom} {quiz.user?.nom}
+                      </td>
+                      <td className="align-middle text-end">
+                        <Button 
+                          variant="outline-primary" 
+                          size="sm" 
+                          className="me-2" 
+                          onClick={() => handleShowDetail(quiz._id)}
+                        >
+                          <EyeFill className="me-1" /> Voir
+                        </Button>
+                        <Button 
+                          variant="outline-secondary" 
+                          size="sm" 
+                          className="me-2" 
+                          onClick={() => navigate(`/quizz/edit/${quiz._id}`)}
+                        >
+                          <PencilFill className="me-1" /> Modifier
+                        </Button>
+                        <Button 
+                          variant="outline-danger" 
+                          size="sm" 
+                          onClick={() => { setSelectedQuiz(quiz); setShowDeleteModal(true); }}
+                        >
+                          <TrashFill className="me-1" /> Supprimer
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              
+              {quizzes.length === 0 && (
+                <div className="text-center py-5">
+                  <p className="text-muted">Aucun quiz disponible</p>
+                </div>
+              )}
+            </div>
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* MODAL DETAIL */}
+      <Modal 
+        show={showDetailModal} 
+        onHide={() => setShowDetailModal(false)} 
+        size="lg"
+        centered
+        backdrop="static"
+      >
+        <Modal.Header closeButton className="bg-light">
+          <Modal.Title className="text-primary">Détails du quiz</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{maxHeight: '60vh', overflowY: 'auto'}}>
+          {quizDetail ? (
+            <div>
+              <div className="mb-4">
+                <h4 className="text-primary">{quizDetail.quiz.titre}</h4>
+                <p className="text-muted">{quizDetail.quiz.description}</p>
+                
+                <div className="d-flex gap-3 mt-3">
+                  <div>
+                    <span className="fw-semibold">Niveau :</span>{' '}
+                    <Badge bg={getBadgeVariant(quizDetail.quiz.niveau)}>
+                      {quizDetail.quiz.niveau}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="fw-semibold">Créé par :</span>{' '}
+                    {quizDetail.quiz.user?.prenom} {quizDetail.quiz.user?.nom}
+                  </div>
+                </div>
+              </div>
+
+              <h5 className="mb-3 text-primary">Questions</h5>
+              
+              {quizDetail.questions.map((q, qi) => (
+                <Card key={q._id} className="mb-3 shadow-sm">
+                  <Card.Body>
+                    <div className="d-flex align-items-center mb-2">
+                      <span className="badge bg-primary me-2">Q{qi + 1}</span>
+                      <h6 className="mb-0">{q.titre}</h6>
+                    </div>
+                    
+                    <ul className="list-unstyled">
+                      {q.options.map((opt, oi) => (
+                        <li key={opt._id} className="mb-2 ps-3">
+                          <div className={`d-flex align-items-center p-2 rounded ${opt.is_correct ? 'bg-success bg-opacity-10' : 'bg-light'}`}>
+                            <span className="fw-semibold me-2">{opt.option})</span>
+                            <span className="flex-grow-1">{opt.text}</span>
+                            {opt.is_correct && (
+                              <Badge bg="success" className="ms-2">Correct</Badge>
+                            )}
+                            <Badge bg="info" className="ms-2">Note: {opt.note}</Badge>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-3">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer className="bg-light">
+          <Button variant="secondary" onClick={() => setShowDetailModal(false)}>Fermer</Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* MODAL SUPPRESSION */}
+      <Modal 
+        show={showDeleteModal} 
+        onHide={() => setShowDeleteModal(false)} 
+        centered
+        backdrop="static"
+      >
+        <Modal.Header closeButton className="bg-light">
+          <Modal.Title className="text-danger">Confirmation de suppression</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="d-flex align-items-center mb-3">
+            <div className="bg-danger bg-opacity-10 p-2 rounded me-3">
+              <TrashFill className="text-danger" size={24} />
+            </div>
+            <div>
+              <p className="mb-0 fw-semibold">Voulez-vous vraiment supprimer ce quiz ?</p>
+              <p className="mb-0 text-muted">{selectedQuiz?.titre}</p>
+            </div>
+          </div>
+          <p className="text-muted">Cette action est irréversible et supprimera toutes les données associées à ce quiz.</p>
+        </Modal.Body>
+        <Modal.Footer className="bg-light">
+          <Button variant="outline-secondary" onClick={() => setShowDeleteModal(false)}>Annuler</Button>
+          <Button variant="danger" onClick={handleDelete}>Supprimer définitivement</Button>
+        </Modal.Footer>
+      </Modal>
+    </Container>
   );
 };
 

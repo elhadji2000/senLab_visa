@@ -8,9 +8,15 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fonction pour récupérer le token depuis le bon stockage
+  const getToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
+
+  // Vérifie l'authentification dès le chargement
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token = getToken();
       if (token) {
         try {
           const response = await axios.get('http://localhost:5000/api/auth/verify', {
@@ -18,7 +24,8 @@ export const AuthProvider = ({ children }) => {
           });
           setUser(response.data.user);
         } catch (error) {
-          logout();
+          console.error('Erreur de vérification du token', error);
+          logout(); // Token invalide ou expiré
         }
       }
       setIsLoading(false);
@@ -27,20 +34,24 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  // Connexion : sauvegarde du token + utilisateur
   const login = (token, userData, remember) => {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData)); // Optionnel mais pratique
     setUser(userData);
   };
 
+  // Déconnexion
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     sessionStorage.removeItem('token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, getToken }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,7 +1,9 @@
-import React, { useContext } from 'react'; // Ajoutez useContext ici
+import React, { useContext } from 'react';
 import Login from '../pages/Login';
 import Footer2 from '../components/Footer2';
-import Dashboard from '../pages/Dashboard';
+import AdminDashboard from '../pages/dashboards/AdminDashboard';
+import TeacherDashboard from '../pages/dashboards/TeacherDashboard';
+import StudentDashboard from '../pages/dashboards/StudentDashboard';
 import Layout from '../components/Layout';
 import AddUsers from '../pages/users/AddUsers';
 import ListUsers from '../pages/users/ListUsers';
@@ -17,7 +19,10 @@ import { Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Unauthorized from '../pages/Unauthorized';
-// ... autres imports ...
+import ListeClasse from '../pages/professeur/classe/ListeClasse';
+import CreerClasse from '../pages/professeur/classe/CreerClasse';
+import Code from '../pages/professeur/codeClasse/Code';
+import Gestion from '../pages/professeur/eleves/Gestion';
 
 function AppRouter() {
   const { user, isLoading } = useContext(AuthContext);
@@ -37,8 +42,15 @@ function AppRouter() {
 
           {/* Routes protégées */}
           <Route element={<ProtectedLayout />}>
-            {/* Dashboard accessible à tous les rôles authentifiés */}
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Dashboard spécifique au rôle */}
+            <Route 
+              path="/dashboard" 
+              element={
+                user?.role === 'admin' ? <AdminDashboard /> :
+                user?.role === 'enseignant' ? <TeacherDashboard /> :
+                <StudentDashboard />
+              } 
+            />
 
             {/* Routes admin seulement */}
             <Route element={<RoleGuard allowedRoles={['admin']} />}>
@@ -51,6 +63,10 @@ function AppRouter() {
               <Route path="/quizz/lister" element={<ListQuizz />} />
               <Route path="/quizz/ajouter" element={<AddQuizz />} />
               <Route path="/simulations/ajouter" element={<Ajouter />} />
+              <Route path="/classe/gerer" element={<ListeClasse />} />
+              <Route path="/classe/creer" element={<CreerClasse />} />
+              <Route path="/codes/lister" element={<Code />} />
+              <Route path="/eleves/lister" element={<Gestion />} />
             </Route>
 
             {/* Routes accessibles à tous les utilisateurs connectés */}
