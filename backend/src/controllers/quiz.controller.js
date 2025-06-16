@@ -2,69 +2,56 @@ const Quiz = require('../models/Quiz.model');
 const Question = require('../models/Question.model');
 const Option = require('../models/Option.model');
 
-// ➕ Ajouter un quiz
+// ➕ Ajouter un quiz complet avec questions et options
 exports.addQuiz = async (req, res) => {
   try {
     const { titre, description, niveau, questions } = req.body;
 
-    // Créer le quiz en liant l'utilisateur courant
-    const quiz = new Quiz({
+    // Création du quiz
+    const quiz = await new Quiz({
       titre,
       description,
       niveau,
       user: req.user._id
-    });
-    const savedQuiz = await quiz.save();
+    }).save();
 
-    // Ajouter questions et options liées
+    // Ajout des questions et options si fournis
     if (Array.isArray(questions)) {
-      for (const questionData of questions) {
-        const question = new Question({
-          titre: questionData.titre,
-          quiz: savedQuiz._id
-        });
-        const savedQuestion = await question.save();
+      for (const q of questions) {
+        const question = await new Question({ titre: q.titre, quiz: quiz._id }).save();
 
-        if (Array.isArray(questionData.options)) {
-          for (const optionData of questionData.options) {
-            const option = new Option({
-              text: optionData.text,
-              is_correct: optionData.is_correct,
-              note: optionData.note,
-              option: optionData.option,
-              question: savedQuestion._id
-            });
-            await option.save();
-          }
+        if (Array.isArray(q.options)) {
+          const optionsToInsert = q.options.map(opt => ({
+            text: opt.text,
+            is_correct: opt.is_correct,
+            note: opt.note,
+            option: opt.option,
+            question: question._id
+          }));
+          await Option.insertMany(optionsToInsert);
         }
       }
     }
 
-    res.status(201).json({ success: true, message: "Quiz créé avec succès", quiz: savedQuiz });
+    res.status(201).json({ success: true, message: "Quiz créé avec succès", quiz });
   } catch (error) {
-    console.error("Erreur lors de l'ajout du quiz complet :", error);
+    console.error("Erreur création quiz :", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// 📋 Lister les quiz
+// 📋 Lister les quiz de l'utilisateur (ou tous si admin)
 exports.listQuizzes = async (req, res) => {
   try {
-    let quizzes;
-
-    if (req.user.role === 'admin') {
-      quizzes = await Quiz.find().populate('user', 'prenom nom email');
-    } else {
-      quizzes = await Quiz.find({ user: req.user.id }).populate('user', 'prenom nom email');
-    }
-
+    const condition = req.user.role === 'admin' ? {} : { user: req.user.id };
+    const quizzes = await Quiz.find(condition).populate('user', 'prenom nom email');
     res.json({ success: true, quizzes });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// 🔍 Récupérer un quiz avec questions et options (avec contrôle d’accès)
+// 🔍 Récupérer un quiz avec ses questions/options
 exports.getQuizWithQuestionsAndOptions = async (req, res) => {
   try {
     const { id } = req.params;
@@ -72,27 +59,25 @@ exports.getQuizWithQuestionsAndOptions = async (req, res) => {
     const quiz = await Quiz.findById(id).populate('user', 'prenom nom email');
     if (!quiz) return res.status(404).json({ success: false, message: "Quiz non trouvé" });
 
-    // Vérification d'accès : admin ou proprio
     if (req.user.role !== 'admin' && quiz.user._id.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: "Accès refusé" });
     }
 
     const questions = await Question.find({ quiz: id });
     const questionsWithOptions = await Promise.all(
-      questions.map(async (question) => {
-        const options = await Option.find({ question: question._id });
-        return { ...question._doc, options };
+      questions.map(async (q) => {
+        const options = await Option.find({ question: q._id });
+        return { ...q.toObject(), options };
       })
     );
 
     res.json({ success: true, quiz, questions: questionsWithOptions });
   } catch (error) {
-    console.error("Erreur lors de la récupération du quiz :", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// 🔄 Mettre à jour un quiz (avec contrôle d’accès)
+// ✏️ Mettre à jour un quiz
 exports.updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
@@ -109,14 +94,14 @@ exports.updateQuiz = async (req, res) => {
     quiz.description = description ?? quiz.description;
     quiz.niveau = niveau ?? quiz.niveau;
 
-    const updatedQuiz = await quiz.save();
-    res.json({ success: true, message: "Quiz mis à jour", quiz: updatedQuiz });
+    const updated = await quiz.save();
+    res.json({ success: true, message: "Quiz mis à jour", quiz: updated });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// ❌ Supprimer un quiz (avec contrôle d’accès)
+// ❌ Supprimer un quiz + questions + options associées
 exports.deleteQuiz = async (req, res) => {
   try {
     const { id } = req.params;
@@ -128,10 +113,10 @@ exports.deleteQuiz = async (req, res) => {
       return res.status(403).json({ success: false, message: "Accès refusé" });
     }
 
-    // Supprimer quiz + questions + options liées
-    await Option.deleteMany({ question: { $in: await Question.find({ quiz: id }).distinct('_id') } });
+    const questionIds = await Question.find({ quiz: id }).distinct('_id');
+    await Option.deleteMany({ question: { $in: questionIds } });
     await Question.deleteMany({ quiz: id });
-    await quiz.remove();
+    await quiz.deleteOne();
 
     res.json({ success: true, message: "Quiz supprimé avec succès" });
   } catch (error) {
@@ -139,15 +124,11 @@ exports.deleteQuiz = async (req, res) => {
   }
 };
 
-// 🔢 Nombre total de quiz (admin = tous, user = ses quiz)
+// 🔢 Compter les quiz visibles par l'utilisateur
 exports.countQuizzes = async (req, res) => {
   try {
-    let count;
-    if (req.user.role === 'admin') {
-      count = await Quiz.countDocuments();
-    } else {
-      count = await Quiz.countDocuments({ user: req.user.id });
-    }
+    const filter = req.user.role === 'admin' ? {} : { user: req.user.id };
+    const count = await Quiz.countDocuments(filter);
     res.json({ success: true, count });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

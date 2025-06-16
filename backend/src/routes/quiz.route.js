@@ -3,25 +3,25 @@ const router = express.Router();
 const quizController = require('../controllers/quiz.controller');
 const authenticate = require('../middleware/authMiddleware'); // middleware d'authentification
 
-// Toutes les routes nécessitent d'être connecté
+// ✅ Toutes les routes sont protégées par authentification
 router.use(authenticate);
 
-// Ajouter un quiz
+// ➕ Ajouter un nouveau quiz (avec questions et options)
 router.post('/add', quizController.addQuiz);
 
-// Lister tous les quiz (selon rôle dans controller)
+// 📋 Lister tous les quiz (admin = tous, sinon = ceux du user)
 router.get('/all', quizController.listQuizzes);
 
-// Obtenir un quiz avec ses questions et options
+// 🔢 Obtenir le nombre de quiz (admin = tous, sinon = user)
+router.get('/count', quizController.countQuizzes);
+
+// 🔍 Obtenir un quiz + questions + options
 router.get('/:id', quizController.getQuizWithQuestionsAndOptions);
 
-// Mise à jour d'un quiz
+// ✏️ Modifier un quiz (titre, desc, niveau)
 router.put('/:id', quizController.updateQuiz);
 
-// Suppression d'un quiz
+// ❌ Supprimer un quiz et ses dépendances
 router.delete('/:id', quizController.deleteQuiz);
-
-// Compter le nombre de quiz
-router.get('/count', quizController.countQuizzes);
 
 module.exports = router;

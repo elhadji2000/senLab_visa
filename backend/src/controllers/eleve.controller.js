@@ -1,6 +1,37 @@
 const Eleve = require('../models/Eleve.model');
 const Classe = require('../models/Classe.model'); // Pour vérifier la propriété user
 
+// Récupérer les élèves d'une classe spécifique
+exports.getElevesByClasse = async (req, res) => {
+  try {
+    const classeId = req.params.id;
+
+    // Vérifier que l'utilisateur a accès à cette classe (sauf admin)
+    if (req.user.role !== 'admin') {
+      const classeExists = await Classe.findOne({ _id: classeId, user: req.user.id });
+      if (!classeExists) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Vous n'avez pas accès à cette classe" 
+        });
+      }
+    }
+
+    // Récupérer les élèves de la classe
+    const eleves = await Eleve.find({ classe: classeId })
+      .select('nom prenom email date_naissance')
+      .sort({ nom: 1 });
+
+    res.json({ success: true, eleves });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+// ... (autres méthodes existantes)
 // Ajouter un élève
 exports.addEleve = async (req, res) => {
   try {
@@ -121,6 +152,35 @@ exports.deleteEleve = async (req, res) => {
     // Suppression
     await Eleve.findByIdAndDelete(eleveId);
     res.json({ success: true, message: "Élève supprimé avec succès" });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+// Obtenir le nombre d'élèves par classe (groupé)
+exports.countElevesParClasse = async (req, res) => {
+  try {
+    let filter = {};
+
+    if (req.user.role !== 'admin') {
+      const classesUser = await Classe.find({ user: req.user.id }).select('_id');
+      const classesIds = classesUser.map(c => c._id);
+      filter.classe = { $in: classesIds };
+    }
+
+    // Agrégation MongoDB : group by classe + count
+    const result = await Eleve.aggregate([
+      { $match: filter },
+      { $group: { _id: "$classe", count: { $sum: 1 } } }
+    ]);
+
+    // Format : { classeId: count }
+    const counts = {};
+    result.forEach(item => {
+      counts[item._id.toString()] = item.count;
+    });
+
+    res.json({ success: true, counts });
 
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
