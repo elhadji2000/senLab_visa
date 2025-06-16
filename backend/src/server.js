@@ -35,6 +35,7 @@ app.use('/api/dashboard', require('./routes/dasboard.route'));
 app.use('/api/classes', require('./routes/classe.route'));
 app.use('/api/codes', require('./routes/codeClasse.route'));
 app.use('/api/eleves', require('./routes/eleve.route'));
+app.use('/api/resultats', require('./routes/resultat.route'));
 
 /* 🛑 Gestion 404 */
 app.use((req, res, next) => {
