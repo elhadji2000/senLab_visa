@@ -115,7 +115,7 @@ function Ajouter() {
     if (!formData.categorie) newErrors.categorie = 'Ce champ est requis';
     if (!formData.photo) newErrors.photo = 'Une image est requise';
     if (!formData.simulation) newErrors.simulation = 'Un fichier ZIP est requis';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -138,9 +138,11 @@ function Ajouter() {
       if (formData.simulation) data.append('simulation', formData.simulation);
 
       // Envoi des données au backend
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await axios.post('http://localhost:5000/api/simulations/add', data, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          Authorization: `${token}`
         }
       });
 
@@ -192,16 +194,16 @@ function Ajouter() {
         p: 4,
         borderRadius: 2
       }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ 
+        <Typography variant="h4" component="h1" gutterBottom sx={{
           fontWeight: 600,
           color: 'primary.main',
           mb: 4
         }}>
           Ajouter une Simulation
         </Typography>
-        
+
         {loading && <LinearProgress sx={{ mb: 3 }} />}
-        
+
         <Snackbar
           open={success}
           autoHideDuration={3000}
@@ -230,14 +232,14 @@ function Ajouter() {
             </Alert>
           </Snackbar>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           {/* Section Photo */}
           <Box sx={{ mb: 4 }}>
             <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
               Photo de la simulation
             </Typography>
-            
+
             {preview ? (
               <Box sx={{ position: 'relative', width: 150 }}>
                 <Avatar
@@ -266,8 +268,8 @@ function Ajouter() {
                 <Typography variant="body2" color="text.secondary" align="center">
                   Cliquez pour télécharger ou glisser-déposer
                 </Typography>
-                <VisuallyHiddenInput 
-                  type="file" 
+                <VisuallyHiddenInput
+                  type="file"
                   accept="image/*"
                   onChange={handlePhotoChange}
                 />
@@ -279,7 +281,7 @@ function Ajouter() {
               </Typography>
             )}
           </Box>
-          
+
           {/* Champ Titre */}
           <TextField
             fullWidth
@@ -292,7 +294,7 @@ function Ajouter() {
             sx={{ mb: 3 }}
             variant="outlined"
           />
-          
+
           {/* Champ Catégorie */}
           <TextField
             select
@@ -311,7 +313,7 @@ function Ajouter() {
               </MenuItem>
             ))}
           </TextField>
-          
+
           {/* Champ Niveau */}
           <TextField
             select
@@ -330,7 +332,7 @@ function Ajouter() {
               </MenuItem>
             ))}
           </TextField>
-          
+
           {/* Champ Description */}
           <TextField
             fullWidth
@@ -345,13 +347,13 @@ function Ajouter() {
             sx={{ mb: 3 }}
             variant="outlined"
           />
-          
+
           {/* Section Fichier Simulation */}
           <Box sx={{ mb: 4 }}>
             <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
               Fichier de simulation (ZIP)
             </Typography>
-            
+
             {formData.simulation ? (
               <Card variant="outlined" sx={{ p: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -368,15 +370,16 @@ function Ajouter() {
                 </Box>
               </Card>
             ) : (
-              <FileUploadCard component="label">
+              <FileUploadCard component="label" sx={{ cursor: 'pointer' }}>
                 <UploadIcon color="primary" sx={{ fontSize: 50, mb: 1 }} />
                 <Typography variant="body2" color="text.secondary" align="center">
                   Cliquez pour télécharger un fichier ZIP
                 </Typography>
-                <VisuallyHiddenInput 
-                  type="file" 
+                <VisuallyHiddenInput
+                  type="file"
                   accept=".zip"
                   onChange={handleSimulationChange}
+                  style={{ display: 'none' }}
                 />
               </FileUploadCard>
             )}
@@ -386,7 +389,8 @@ function Ajouter() {
               </Typography>
             )}
           </Box>
-          
+
+
           {/* Bouton de soumission */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button

@@ -21,7 +21,6 @@ connectDB();
 app.use(cors());
 // Middleware
 app.use(express.json());
-
 /* 📁 Gestion des fichiers statiques (uploads) */
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

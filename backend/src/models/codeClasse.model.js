@@ -8,7 +8,13 @@ const codeClasseSchema = new mongoose.Schema({
   expiration: { type: String, required: true },
   classe: { type: mongoose.Schema.Types.ObjectId, ref: 'Classe' },
   quiz: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },
-  simulation: { type: mongoose.Schema.Types.ObjectId, ref: 'Simulation' }
+  simulation: { type: mongoose.Schema.Types.ObjectId, ref: 'Simulation' },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('CodeClasse', codeClasseSchema);

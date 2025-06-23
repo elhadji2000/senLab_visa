@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, Table, Spinner, Alert, Button, 
-  Card, Row, Col, Badge, Modal, Form,
-  InputGroup, Pagination
+import {
+    Container, Table, Spinner, Alert, Button,
+    Card, Row, Col, Badge, Modal, Form,
+    InputGroup, Pagination
 } from 'react-bootstrap';
-import { 
-  EyeFill, PencilFill, TrashFill, PlusCircleFill,
-  Search, CalendarFill, BookFill, PersonFill, InfoCircleFill
+import {
+    EyeFill, PencilFill, TrashFill, PlusCircleFill,
+    Search, CalendarFill, BookFill, PersonFill, InfoCircleFill
 } from 'react-bootstrap-icons';
 import { fetchClasses, createClass, deleteClass } from '../../../api/classes';
 import axios from 'axios';
@@ -67,9 +67,13 @@ const ListeClasse = () => {
     // Gestion de la création de classe
     const handleCreateClass = async () => {
         try {
-            const newClass = await createClass(formData);
-            setClasses([newClass, ...classes]);
-            setEleveCounts({...eleveCounts, [newClass._id]: 0});
+            const response = await createClass(formData);
+
+            // Recharge les classes à partir du serveur
+            const refreshed = await fetchClasses();
+            setClasses(refreshed.data);
+
+            // Reset modal
             setShowCreateModal(false);
             setFormData({
                 nom_classe: '',
@@ -78,9 +82,11 @@ const ListeClasse = () => {
                 description: ''
             });
         } catch (err) {
+            console.error(err);
             setError("Erreur lors de la création de la classe");
         }
     };
+
 
     // Gestion de la suppression
     const handleDelete = async () => {
@@ -94,10 +100,11 @@ const ListeClasse = () => {
     };
 
     // Filtrage et pagination
-    const filteredClasses = classes.filter(classe => 
-        classe.nom_classe.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        classe.niveau.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredClasses = classes.filter(classe =>
+        (classe?.nom_classe?.toLowerCase()?.includes(searchTerm.toLowerCase()) || false) ||
+        (classe?.niveau?.toLowerCase()?.includes(searchTerm.toLowerCase()) || false)
     );
+
 
     const indexOfLastClass = currentPage * classesPerPage;
     const indexOfFirstClass = indexOfLastClass - classesPerPage;
@@ -124,8 +131,8 @@ const ListeClasse = () => {
                             </h4>
                         </Col>
                         <Col md={6} className="d-flex justify-content-end">
-                            <Button 
-                                variant="primary" 
+                            <Button
+                                variant="primary"
                                 onClick={() => setShowCreateModal(true)}
                                 className="d-flex align-items-center"
                             >
@@ -296,7 +303,7 @@ const ListeClasse = () => {
                                         type="text"
                                         placeholder="Ex: Terminale S"
                                         value={formData.nom_classe}
-                                        onChange={(e) => setFormData({...formData, nom_classe: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, nom_classe: e.target.value })}
                                         required
                                     />
                                 </Form.Group>
@@ -306,7 +313,7 @@ const ListeClasse = () => {
                                     <Form.Label>Niveau</Form.Label>
                                     <Form.Select
                                         value={formData.niveau}
-                                        onChange={(e) => setFormData({...formData, niveau: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, niveau: e.target.value })}
                                         required
                                     >
                                         <option value="">Sélectionnez un niveau</option>
@@ -327,7 +334,7 @@ const ListeClasse = () => {
                                         type="text"
                                         placeholder="Ex: 2023-2024"
                                         value={formData.annee_scolaire}
-                                        onChange={(e) => setFormData({...formData, annee_scolaire: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, annee_scolaire: e.target.value })}
                                         required
                                     />
                                 </Form.Group>
@@ -340,7 +347,7 @@ const ListeClasse = () => {
                                         rows={3}
                                         placeholder="Description de la classe..."
                                         value={formData.description}
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     />
                                 </Form.Group>
                             </Col>
@@ -363,7 +370,7 @@ const ListeClasse = () => {
                     <Modal.Title>Confirmer la suppression</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    Êtes-vous sûr de vouloir supprimer la classe <strong>"{selectedClass?.nom_classe}"</strong> ? 
+                    Êtes-vous sûr de vouloir supprimer la classe <strong>"{selectedClass?.nom_classe}"</strong> ?
                     Cette action est irréversible et supprimera également tous les élèves associés.
                 </Modal.Body>
                 <Modal.Footer>

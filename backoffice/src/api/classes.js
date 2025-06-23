@@ -1,15 +1,15 @@
 import axiosInstance from './axiosInstance';
 
 export const fetchClasses = () => {
-  return axiosInstance.get('/classes/all');
+  return axiosInstance.get('/api/classes/all');
 };
 
 export const createClass = (classeData) => {
-  return axiosInstance.post('/classes/add', classeData);
+  return axiosInstance.post('/api/classes/add', classeData);
 };
 
 export const deleteClass = (id) => {
-  return axiosInstance.delete(`/classes/delete/${id}`);
+  return axiosInstance.delete(`/api/classes/delete/${id}`);
 };
 
 // Tu peux aussi ajouter updateClass si nécessaire

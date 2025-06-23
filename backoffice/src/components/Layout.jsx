@@ -1,6 +1,5 @@
 import React from 'react';
 import Navbar from './Navbar';
-import SecondaryNavbar from './SecondaryNavbar';
 import { Outlet } from 'react-router-dom';
 import Assistant from './Assistant';
 

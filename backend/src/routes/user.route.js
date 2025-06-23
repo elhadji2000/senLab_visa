@@ -1,19 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
 const userController = require('../controllers/user.controller');
+const authenticate = require('../middleware/authMiddleware');
 
-// 📦 Multer config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) =>
-        cb(null, Date.now() + path.extname(file.originalname)),
-});
-const upload = multer({ storage });
+router.use(authenticate); // Toutes les routes sont protégées
 
-// Routes
-router.post('/', userController.addUser);
-router.get('/', userController.listerUsers);
+// CRUD complet
+router.post('/add', userController.addUser);
+router.get('/all', userController.listerUsers);
+router.get('/:id', userController.getUserById);
+router.put('/update/:id', userController.updateUser);
+router.delete('/delete/:id', userController.deleteUser);
 
 module.exports = router;

@@ -247,6 +247,53 @@ const Navbar = () => {
                     )}
                   </Box>
                 )}
+                {/* Menu Utilisateur - Admin seulement */}
+                {hasPermission(['admin']) && (
+                  <Box sx={{ position: 'relative' }}>
+                    <NavLink
+                      onClick={() => toggleDropdown('sim')}
+                      startIcon={<Person />}
+                      endIcon={openDropdown === 'user' ? <ExpandLess /> : <ExpandMore />}
+                      active={isActive('/simulation')}
+                    >
+                      Simulation
+                    </NavLink>
+                    {openDropdown === 'sim' && (
+                      <DropdownContainer>
+                        <List dense>
+                          <ListItem
+                            button
+                            component={Link}
+                            to="/simulations/ajouter"
+                            selected={isActive('/simulations/ajouter')}
+                          >
+                            <ListItemIcon><Add fontSize="small" /></ListItemIcon>
+                            <ListItemText primary="Ajouter simulation" />
+                          </ListItem>
+                          <ListItem
+                            button
+                            component={Link}
+                            to="/simulations/all1"
+                            selected={isActive('/simulations/all1')}
+                          >
+                            <ListItemIcon><ListIcon fontSize="small" /></ListItemIcon>
+                            <ListItemText primary="Liste des simulations" />
+                          </ListItem>
+                          <ListItem
+                            button
+                            component={Link}
+                            to="/simulations/explorer"
+                            selected={isActive('/simulations/explorer')}
+                          >
+                            <ListItemIcon><ListIcon fontSize="small" /></ListItemIcon>
+                            <ListItemText primary="Explorer" />
+                          </ListItem>
+                        </List>
+                      </DropdownContainer>
+                    )}
+                  </Box>
+                )}
+
 
                 {/* Menu Formations - Admin + Enseignant */}
                 {hasPermission(['admin', 'enseignant']) && (

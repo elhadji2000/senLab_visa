@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Spinner, Alert, Button, Modal, Card, Badge } from 'react-bootstrap';
 import { EyeFill, PencilFill, TrashFill, PlusCircleFill } from 'react-bootstrap-icons';
-import { fetchQuizzes, deleteQuiz, fetchQuizDetail } from '../../api/quizzes';
+import { fetchQuizzes, deleteQuiz, fetchQuizDetail } from '../../api/quizAPI';
 import { useNavigate } from 'react-router-dom';
 
 const ListQuizz = () => {

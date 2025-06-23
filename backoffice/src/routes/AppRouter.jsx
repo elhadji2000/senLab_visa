@@ -11,7 +11,7 @@ import ListQuizz from '../pages/quizz/ListQuizz';
 import AddQuizz from '../pages/quizz/AddQuizz';
 import Toutes from '../pages/simulations/Toutes';
 import Ajouter from '../pages/simulations/Ajouter';
-import Explorer from '../pages/simulations/explorer';
+import Explorer from '../pages/simulations/Explorer';
 import CircularProgress from '@mui/material/CircularProgress';
 import ProtectedRoute from '../components/ProtectedRoute';
 import '../App.css';
@@ -23,6 +23,7 @@ import ListeClasse from '../pages/professeur/classe/ListeClasse';
 import CreerClasse from '../pages/professeur/classe/CreerClasse';
 import Code from '../pages/professeur/codeClasse/Code';
 import Gestion from '../pages/professeur/eleves/Gestion';
+import SimulationViewer from '../components/SimulationViewer';
 
 function AppRouter() {
   const { user, isLoading } = useContext(AuthContext);
@@ -72,6 +73,7 @@ function AppRouter() {
             {/* Routes accessibles à tous les utilisateurs connectés */}
             <Route path="/simulations/all1" element={<Toutes />} />
             <Route path="/simulations/explorer" element={<Explorer />} />
+            <Route path="/simulations/view/:id" element={<SimulationViewer />} />
           </Route>
 
           {/* Redirection pour les routes non trouvées */}

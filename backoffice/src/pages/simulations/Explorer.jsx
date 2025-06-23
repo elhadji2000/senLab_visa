@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
     Container,
     Grid,
@@ -18,6 +17,8 @@ import {
     Button
 } from '@mui/material';
 import { Search as SearchIcon, FilterList, Close } from '@mui/icons-material';
+import { fetchSimulations } from '../../api/simulationAPI';
+import { Link, useNavigate } from 'react-router-dom';
 import './Explorer.css';
 
 function Explorer() {
@@ -28,48 +29,32 @@ function Explorer() {
     const [categoryFilter, setCategoryFilter] = useState('');
     const [levelFilter, setLevelFilter] = useState('');
     const [filtersOpen, setFiltersOpen] = useState(false);
-    const API_BASE_URL = 'http://localhost:5000';
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchSimulations = async () => {
+        const loadSimulations = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/simulations`);
+                const response = await fetchSimulations();
                 setSimulations(response.data);
-                setLoading(false);
             } catch (err) {
-                setError(err.message);
+                setError("Erreur lors du chargement des simulations");
+            } finally {
                 setLoading(false);
             }
         };
 
-        fetchSimulations();
+        loadSimulations();
     }, []);
 
-    const filteredSimulations = simulations.filter(simulation => {
-        const matchesSearch = simulation.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            simulation.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = categoryFilter ? simulation.categorie === categoryFilter : true;
-        const matchesLevel = levelFilter ? simulation.niveau === levelFilter : true;
+    const filteredSimulations = simulations.filter((sim) => {
+        const matchSearch =
+            sim.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            sim.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchCategory = categoryFilter ? sim.categorie === categoryFilter : true;
+        const matchLevel = levelFilter ? sim.niveau === levelFilter : true;
 
-        return matchesSearch && matchesCategory && matchesLevel;
+        return matchSearch && matchCategory && matchLevel;
     });
-
-    const handleSimulationClick = async (simulationId) => {
-        try {
-            // Extraire le ZIP et obtenir le chemin HTML
-            const response = await axios.get(`${API_BASE_URL}/api/simulations/${simulationId}/archive`);
-
-            if (response.data.success) {
-                // Ouvrir dans un nouvel onglet
-                window.open(`${API_BASE_URL}/api/simulations/html/${simulationId}`, '_blank');
-            } else {
-                setError("Impossible de charger la simulation");
-            }
-        } catch (err) {
-            console.error('Erreur:', err);
-            setError(err.message);
-        }
-    };
 
     const resetFilters = () => {
         setSearchTerm('');
@@ -80,7 +65,7 @@ function Explorer() {
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-                <CircularProgress size={60} thickness={4} sx={{ color: '#3f51b5' }} />
+                <CircularProgress size={60} />
             </Box>
         );
     }
@@ -88,63 +73,47 @@ function Explorer() {
     if (error) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-                <Typography color="error" variant="h6">
-                    Erreur lors du chargement: {error}
-                </Typography>
+                <Typography color="error" variant="h6">{error}</Typography>
             </Box>
         );
     }
 
     return (
-        <Container maxWidth="xl" className="explorer-container" sx={{ py: 4 }}>
-            <Typography variant="h3" component="h1" gutterBottom align="center"
-                className="explorer-title" sx={{ mb: 4, fontWeight: 800 }}>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Typography variant="h3" align="center" sx={{ fontWeight: 'bold', mb: 4 }}>
                 Explorez Nos Simulations
             </Typography>
 
-            {/* Filtres et recherche */}
-            <Box className="filter-container" sx={{ mb: 4 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            {/* Zone de recherche et filtres */}
+            <Box sx={{ mb: 4 }}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <TextField
                         fullWidth
-                        variant="outlined"
                         placeholder="Rechercher une simulation..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         InputProps={{
-                            startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />,
-                            sx: { borderRadius: '12px' }
+                            startAdornment: <SearchIcon sx={{ mr: 1 }} />
                         }}
                     />
-                    <Button
-                        variant="outlined"
-                        startIcon={<FilterList />}
-                        onClick={() => setFiltersOpen(!filtersOpen)}
-                        sx={{ borderRadius: '12px', px: 3 }}
-                    >
+                    <Button variant="outlined" onClick={() => setFiltersOpen(!filtersOpen)} startIcon={<FilterList />}>
                         Filtres
                     </Button>
                     {(searchTerm || categoryFilter || levelFilter) && (
-                        <Button
-                            variant="text"
-                            startIcon={<Close />}
-                            onClick={resetFilters}
-                            sx={{ color: 'text.secondary' }}
-                        >
+                        <Button variant="text" onClick={resetFilters} startIcon={<Close />}>
                             Réinitialiser
                         </Button>
                     )}
                 </Box>
 
                 {filtersOpen && (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, pt: 2 }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                         <FormControl sx={{ minWidth: 200 }}>
                             <InputLabel>Catégorie</InputLabel>
                             <Select
                                 value={categoryFilter}
                                 onChange={(e) => setCategoryFilter(e.target.value)}
                                 label="Catégorie"
-                                sx={{ borderRadius: '12px' }}
                             >
                                 <MenuItem value="">Toutes les catégories</MenuItem>
                                 <MenuItem value="Mathematique">Mathématique</MenuItem>
@@ -153,14 +122,12 @@ function Explorer() {
                                 <MenuItem value="Biologie">Biologie</MenuItem>
                             </Select>
                         </FormControl>
-
                         <FormControl sx={{ minWidth: 200 }}>
-                            <InputLabel>Niveau scolaire</InputLabel>
+                            <InputLabel>Niveau</InputLabel>
                             <Select
                                 value={levelFilter}
                                 onChange={(e) => setLevelFilter(e.target.value)}
                                 label="Niveau"
-                                sx={{ borderRadius: '12px' }}
                             >
                                 <MenuItem value="">Tous les niveaux</MenuItem>
                                 <MenuItem value="6e">6ème</MenuItem>
@@ -176,93 +143,53 @@ function Explorer() {
                 )}
             </Box>
 
-            {/* Liste des simulations */}
+            {/* Affichage des simulations */}
             {filteredSimulations.length === 0 ? (
-                <Box className="empty-message" textAlign="center">
-                    <Typography variant="h6" color="textSecondary">
-                        Aucune simulation ne correspond à vos critères
-                    </Typography>
-                    <Button
-                        variant="outlined"
-                        onClick={resetFilters}
-                        sx={{ mt: 2, borderRadius: '12px' }}
-                    >
-                        Réinitialiser les filtres
-                    </Button>
-                </Box>
+                <Typography variant="h6" align="center" color="text.secondary">
+                    Aucune simulation trouvée avec les filtres actuels.
+                </Typography>
             ) : (
                 <Grid container spacing={4}>
-                    {filteredSimulations.map((simulation, index) => (
-                        <Grid item xs={12} sm={6} md={4} lg={3} key={simulation._id}
-                            style={{ '--index': index }} className="grid-item">
-                            <Card
-                                className="simulation-card"
-                                onClick={() => handleSimulationClick(simulation._id)}
-                                sx={{
+                    {filteredSimulations.map((simulation) => (
+                        <Grid item xs={12} sm={6} md={4} lg={3} key={simulation._id}>
+                            <Link
+                                to={`/simulations/view/${simulation._id}`}
+                                style={{ textDecoration: 'none' }}
+                                aria-label={`Voir la simulation ${simulation.titre}`}
+                            >
+                                <Card sx={{
                                     height: '100%',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    boxShadow: 3,
-                                    position: 'relative',
-                                    '&:before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: 4,
-                                        background: 'linear-gradient(to right, #3f51b5, #2196f3)'
+                                    transition: 'transform 0.2s',
+                                    '&:hover': {
+                                        transform: 'scale(1.03)',
+                                        boxShadow: 4
                                     }
-                                }}
-                            >
-                                <CardMedia
-                                    component="img"
-                                    image={`${API_BASE_URL}${simulation.photo}`}
-                                    alt={simulation.titre}
-                                    className="simulation-image"
-                                    sx={{
-                                        height: 200,
-                                        objectFit: 'cover',
-                                        width: '100%'
-                                    }}
-                                    onError={(e) => {
-                                        e.target.src = 'https://via.placeholder.com/400x200?text=Image+non+disponible';
-                                    }}
-                                />
-                                <CardContent className="simulation-content" sx={{ flexGrow: 1 }}>
-                                    <Typography gutterBottom variant="h5" component="h2"
-                                        sx={{ fontWeight: 600, mb: 1 }}>
-                                        {simulation.titre}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary"
-                                        sx={{
-                                            mb: 2, display: '-webkit-box',
-                                            WebkitLineClamp: 3,
-                                            WebkitBoxOrient: 'vertical',
-                                            overflow: 'hidden'
-                                        }}>
-                                        {simulation.description}
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', gap: 1, mt: 'auto', flexWrap: 'wrap' }}>
-                                        <Chip
-                                            label={simulation.categorie}
-                                            className="simulation-badge"
-                                            sx={{
-                                                backgroundColor: '#3f51b5',
-                                                color: 'white'
-                                            }}
-                                        />
-                                        <Chip
-                                            label={simulation.niveau}
-                                            className="simulation-badge"
-                                            sx={{
-                                                backgroundColor: '#2196f3',
-                                                color: 'white'
-                                            }}
-                                        />
-                                    </Box>
-                                </CardContent>
-                            </Card>
+                                }}>
+                                    <CardMedia
+                                        component="img"
+                                        height="200"
+                                        image={`http://localhost:5000${simulation.photo}`}
+                                        alt={simulation.titre}
+                                        onError={(e) => {
+                                            e.target.src = 'https://via.placeholder.com/400x200?text=Image+non+disponible';
+                                        }}
+                                    />
+                                    <CardContent sx={{ flexGrow: 1 }}>
+                                        <Typography variant="h6" gutterBottom>{simulation.titre}</Typography>
+                                        <Typography variant="body2" sx={{ mb: 2 }}>
+                                            {simulation.description.length > 120
+                                                ? simulation.description.substring(0, 117) + '...'
+                                                : simulation.description}
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <Chip label={simulation.categorie} sx={{ backgroundColor: '#3f51b5', color: 'white' }} />
+                                            <Chip label={simulation.niveau} sx={{ backgroundColor: '#2196f3', color: 'white' }} />
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Link>
                         </Grid>
                     ))}
                 </Grid>

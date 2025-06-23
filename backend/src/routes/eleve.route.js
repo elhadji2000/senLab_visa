@@ -13,9 +13,7 @@ router.post('/add', eleveController.addEleve);
 router.get('/all', eleveController.listEleves);
 // Récupérer les élèves d'une classe spécifique
 router.get('/classe/:id', eleveController.getElevesByClasse);
-router.get('/count-by-classe', authenticate, eleveController.countElevesParClasse);
-
-
+router.get('/count-by-classe', eleveController.countElevesParClasse);
 // Mettre à jour un élève par ID
 router.put('/update/:id', eleveController.updateEleve);
 
