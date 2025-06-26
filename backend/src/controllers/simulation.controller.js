@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const unzipper = require('unzipper');
 
-// 📌 Récupérer toutes les simulations (liste générale)
+// Récupérer toutes les simulations (liste générale)
 exports.getAllSimulations = async (req, res) => {
   try {
     const simulations = await Simulation.find().sort({ createdAt: -1 });
@@ -13,7 +13,7 @@ exports.getAllSimulations = async (req, res) => {
   }
 };
 
-// 📌 Ajouter une simulation avec extraction du zip
+// Ajouter une simulation avec extraction du zip
 exports.createSimulation = async (req, res) => {
   try {
     const { titre, description, categorie, niveau } = req.body;
@@ -68,7 +68,7 @@ exports.createSimulation = async (req, res) => {
   }
 };
 
-// 📌 Obtenir une simulation par ID
+// Obtenir une simulation par ID
 exports.getSimulationById = async (req, res) => {
   try {
     const simulation = await Simulation.findById(req.params.id);
@@ -84,7 +84,7 @@ exports.getSimulationById = async (req, res) => {
   }
 };
 
-// 📌 Supprimer une simulation
+// Supprimer une simulation
 exports.deleteSimulation = async (req, res) => {
   try {
     const simulation = await Simulation.findByIdAndDelete(req.params.id);
@@ -109,7 +109,7 @@ exports.deleteSimulation = async (req, res) => {
   }
 };
 
-// ✅ Méthode : Compter les simulations par catégorie
+//Méthode : Compter les simulations par catégorie
 exports.countByCategory = async (req, res) => {
   try {
     const counts = await Simulation.aggregate([
@@ -138,7 +138,7 @@ exports.countByCategory = async (req, res) => {
   }
 };
 
-// ✅ Fonction utilitaire : trouver le chemin de index.html
+// Fonction utilitaire : trouver le chemin de index.html
 function findIndexHtml(dir) {
   const items = fs.readdirSync(dir, { withFileTypes: true });
   for (const item of items) {

@@ -1,8 +1,11 @@
 const Quiz = require('../models/Quiz.model');
 const Question = require('../models/Question.model');
 const Option = require('../models/Option.model');
+const CodeClasses = require('../models/codeClasse.model')
+const Eleves = require('../models/Eleve.model');
+const Resultats = require('../models/Resultat.model')
 
-// ➕ Ajouter un quiz complet avec questions et options
+// Ajouter un quiz complet avec questions et options
 exports.addQuiz = async (req, res) => {
   try {
     const { titre, description, niveau, questions } = req.body;
@@ -40,7 +43,7 @@ exports.addQuiz = async (req, res) => {
   }
 };
 
-// 📋 Lister les quiz de l'utilisateur (ou tous si admin)
+//Lister les quiz de l'utilisateur (ou tous si admin)
 exports.listQuizzes = async (req, res) => {
   try {
     const condition = req.user.role === 'admin' ? {} : { user: req.user.id };
@@ -51,19 +54,24 @@ exports.listQuizzes = async (req, res) => {
   }
 };
 
-// 🔍 Récupérer un quiz avec ses questions/options
+// Récupérer un quiz avec ses questions/options
+// controllers/quizController.js
 exports.getQuizWithQuestionsAndOptions = async (req, res) => {
   try {
     const { id } = req.params;
 
     const quiz = await Quiz.findById(id).populate('user', 'prenom nom email');
-    if (!quiz) return res.status(404).json({ success: false, message: "Quiz non trouvé" });
-
-    if (req.user.role !== 'admin' && quiz.user._id.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: "Accès refusé" });
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: "Quiz non trouvé" });
     }
 
+    // 🔐 Si le quiz n'est pas public, on peut ajouter une restriction ici si tu veux :
+    // if (!quiz.isPublic) {
+    //   return res.status(403).json({ success: false, message: "Ce quiz n'est pas public" });
+    // }
+
     const questions = await Question.find({ quiz: id });
+
     const questionsWithOptions = await Promise.all(
       questions.map(async (q) => {
         const options = await Option.find({ question: q._id });
@@ -72,12 +80,15 @@ exports.getQuizWithQuestionsAndOptions = async (req, res) => {
     );
 
     res.json({ success: true, quiz, questions: questionsWithOptions });
+
   } catch (error) {
+    console.error("Erreur getQuizWithQuestionsAndOptions :", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// ✏️ Mettre à jour un quiz
+
+// Mettre à jour un quiz
 exports.updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,7 +112,7 @@ exports.updateQuiz = async (req, res) => {
   }
 };
 
-// ❌ Supprimer un quiz + questions + options associées
+// Supprimer un quiz + questions + options associées
 exports.deleteQuiz = async (req, res) => {
   try {
     const { id } = req.params;
@@ -124,7 +135,7 @@ exports.deleteQuiz = async (req, res) => {
   }
 };
 
-// 🔢 Compter les quiz visibles par l'utilisateur
+// Compter les quiz visibles par l'utilisateur
 exports.countQuizzes = async (req, res) => {
   try {
     const filter = req.user.role === 'admin' ? {} : { user: req.user.id };
@@ -134,3 +145,93 @@ exports.countQuizzes = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+// Quizz public visibles à tous
+exports.getPublicQuizz = async (req, res) => {
+  try {
+    const quizz = await Quiz.find({ isPublic: true });
+    res.status(200).json(quizz);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération des quizz publics.' });
+  }
+};
+exports.getQuizzByCode = async (req, res) => {
+  const { code } = req.params;
+
+  try {
+    const codeClasse = await CodeClasses.findOne({ code }).populate('quiz');
+
+    if (!codeClasse) {
+      return res.status(404).json({ success: false, message: 'Code invalide' });
+    }
+
+    const now = new Date();
+    const dateDebut = new Date(codeClasse.date_debut);
+    const expiration = new Date(codeClasse.expiration);
+
+    if (now < dateDebut) {
+      return res.status(403).json({ success: false, message: 'Le quiz n\'est pas encore disponible' });
+    }
+    if (now > expiration) {
+      return res.status(403).json({ success: false, message: "Ce quiz est expiré. Merci de contacter ton enseignant pour un nouveau lien." });
+    }
+
+    const questions = await Question.find({ quiz: codeClasse.quiz._id });
+    const questionsWithOptions = await Promise.all(
+      questions.map(async (q) => {
+        const options = await Option.find({ question: q._id });
+        return { ...q.toObject(), options };
+      })
+    );
+
+    res.json({ success: true, quiz: codeClasse.quiz, questions: questionsWithOptions });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erreur serveur', error: error.message });
+  }
+};
+exports.submitQuizzParCode = async (req, res) => {
+  const { code, email, answers } = req.body;
+
+  try {
+    const codeClasse = await CodeClasses.findOne({ code });
+    if (!codeClasse) {
+      return res.status(404).json({ success: false, message: 'Code invalide' });
+    }
+
+    const now = new Date();
+    const dateDebut = new Date(codeClasse.date_debut);
+    const expiration = new Date(codeClasse.expiration);
+    if (now < dateDebut || now > expiration) {
+      return res.status(403).json({ success: false, message: 'Quiz hors période autorisée' });
+    }
+
+    const eleve = await Eleves.findOne({ email });
+    if (!eleve) {
+      return res.status(404).json({ success: false, message: "Aucun élève trouvé avec cet email. Vérifie l’orthographe ou contacte ton enseignant." });
+    }
+
+    let correct = 0;
+    for (const answer of answers) {
+      const correctOption = await Option.findOne({ question: answer.questionId, is_correct: true });
+      if (correctOption && correctOption._id.toString() === answer.optionId) {
+        correct++;
+      }
+    }
+
+    const score = Math.round((correct / answers.length) * 100);
+    const note = `${correct} / ${answers.length}`;
+
+    const resultat = await Resultats.create({
+      score,
+      note,
+      quiz: codeClasse.quiz,
+      eleve: eleve._id,
+    });
+
+    res.json({ success: true, score, note });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erreur serveur', error: error.message });
+  }
+};
+

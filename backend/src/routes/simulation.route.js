@@ -7,10 +7,10 @@ const fs = require('fs');
 const authenticate = require('../middleware/authMiddleware');
 const simulationController = require('../controllers/simulation.controller');
 
-// 📁 Dossier d'upload principal
+// Dossier d'upload principal
 const uploadDir = path.join(__dirname, '..', 'uploads');
 
-// 🎒 Multer : stockage des fichiers photo + zip
+// Multer : stockage des fichiers photo + zip
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -24,9 +24,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-/* ========== 🔐 PROTECTED ROUTES (auth required) ========== */
+/* ========== PROTECTED ROUTES (auth required) ========== */
 
-// ➕ Ajouter une simulation (photo + zip)
+// Ajouter une simulation (photo + zip)
 router.post(
   '/add',
   authenticate,
@@ -37,18 +37,18 @@ router.post(
   simulationController.createSimulation
 );
 
-// 🗑️ Supprimer une simulation
+// Supprimer une simulation
 router.delete('/:id', authenticate, simulationController.deleteSimulation);
 
-/* ========== 📖 PUBLIC ROUTES ========== */
+/* ==========  PUBLIC ROUTES ========== */
 
-// 📄 Récupérer toutes les simulations
+//Récupérer toutes les simulations
 router.get('/', simulationController.getAllSimulations);
 
-// 🔍 Récupérer une simulation par ID
+// Récupérer une simulation par ID
 router.get('/:id', simulationController.getSimulationById);
 
-// 📊 Statistiques par catégorie
+// Statistiques par catégorie
 router.get('/count', simulationController.countByCategory);
 
 router.get('/html/:simulationId', (req, res) => {
