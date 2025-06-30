@@ -11,13 +11,14 @@ import Contact from './pages/Contact';
 import QuizzPublic from './pages/QuizzPublic';
 import QuizzRepondre from './pages/QuizzRepondre';
 import QuizzCodeRepondre from './pages/QuizzCodeRepondre';
+import 'animate.css';
 // ... autres imports
 
 function App() {
   return (
     <BrowserRouter>
       <NavbarLab />
-      <div style={{ marginTop: '80px' }}>
+      <div style={{ marginTop: '90px' }}>
         <Routes>
           <Route path="/" element={<Accueil />} />
           <Route path="/simulations" element={<AllSimulations />} />

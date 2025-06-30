@@ -8,41 +8,34 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fonction pour récupérer le token depuis le bon stockage
-  const getToken = () => {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  // 🔐 Récupérer le token depuis le bon stockage
+  const getToken = () =>
+    localStorage.getItem('token') || sessionStorage.getItem('token');
+
+  // 🔄 Récupérer l'utilisateur avec le token courant
+  const fetchUser = async () => {
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const res = await axios.get('http://localhost:5000/api/auth/verify', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data.user);
+    } catch (error) {
+      console.error('Erreur de vérification du token', error);
+      logout();
+    }
   };
 
-  // Vérifie l'authentification dès le chargement
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = getToken();
-      if (token) {
-        try {
-          const response = await axios.get('http://localhost:5000/api/auth/verify', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(response.data.user);
-        } catch (error) {
-          console.error('Erreur de vérification du token', error);
-          logout(); // Token invalide ou expiré
-        }
-      }
-      setIsLoading(false);
-    };
-
-    checkAuth();
-  }, []);
-
-  // Connexion : sauvegarde du token + utilisateur
-  const login = (token, userData, remember) => {
+  // 📦 Connexion
+  const login = (token, userData, remember = false) => {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData)); // Optionnel mais pratique
     setUser(userData);
   };
 
-  // Déconnexion
+  // 🚪 Déconnexion
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -50,8 +43,31 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // 🕵️ Chargement au démarrage
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const token = getToken();
+      if (token) await fetchUser();
+      setIsLoading(false);
+    };
+    initializeAuth();
+  }, []);
+
+  // 💡 Facilité d'utilisation
+  const isAuthenticated = () => !!user;
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, getToken }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        login,
+        logout,
+        getToken,
+        isAuthenticated,
+        refreshUser: fetchUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

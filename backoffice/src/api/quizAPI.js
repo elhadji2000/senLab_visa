@@ -21,7 +21,9 @@ export const fetchQuizDetail = (id) => {
 export const updateQuiz = (id, updatedData) => {
   return axiosInstance.put(`/api/quizzes/${id}`, updatedData);
 };
-
+export const updateQuizVisibility = (id, updatedData) => {
+  return axiosInstance.put(`/api/quizzes/${id}`, updatedData);
+};
 // ❌ Supprimer un quiz
 export const deleteQuiz = (id) => {
   return axiosInstance.delete(`/api/quizzes/${id}`);

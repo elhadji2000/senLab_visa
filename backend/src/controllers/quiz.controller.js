@@ -47,12 +47,48 @@ exports.addQuiz = async (req, res) => {
 exports.listQuizzes = async (req, res) => {
   try {
     const condition = req.user.role === 'admin' ? {} : { user: req.user.id };
-    const quizzes = await Quiz.find(condition).populate('user', 'prenom nom email');
-    res.json({ success: true, quizzes });
+
+    const quizzes = await Quiz.aggregate([
+      { $match: condition },
+
+      // Joindre les questions liées au quiz
+      {
+        $lookup: {
+          from: 'questions',
+          localField: '_id',
+          foreignField: 'quiz',
+          as: 'questions'
+        }
+      },
+
+      // Ajouter le champ nombre de questions
+      {
+        $addFields: {
+          questionCount: { $size: '$questions' }
+        }
+      },
+
+      // Supprimer le tableau des questions pour ne pas alourdir la réponse
+      {
+        $project: {
+          questions: 0
+        }
+      }
+    ]);
+
+    // Pour compléter avec les infos utilisateur (prenom, nom)
+    const quizzesWithUser = await Quiz.populate(quizzes, {
+      path: 'user',
+      select: 'prenom nom email'
+    });
+
+    res.json({ success: true, quizzes: quizzesWithUser });
   } catch (error) {
+    console.error("Erreur lors du chargement des quiz :", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
 
 // Récupérer un quiz avec ses questions/options
 // controllers/quizController.js
@@ -87,30 +123,64 @@ exports.getQuizWithQuestionsAndOptions = async (req, res) => {
   }
 };
 
-
-// Mettre à jour un quiz
 exports.updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
-    const { titre, description, niveau } = req.body;
+    const { titre, description, niveau, isPublic, questions } = req.body;
 
+    // Vérifier que le quiz existe
     const quiz = await Quiz.findById(id);
-    if (!quiz) return res.status(404).json({ success: false, message: "Quiz non trouvé" });
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: "Quiz non trouvé" });
+    }
 
+    // Vérification de permission
     if (req.user.role !== 'admin' && quiz.user.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: "Accès refusé" });
     }
 
+    // Mettre à jour les champs du quiz
     quiz.titre = titre ?? quiz.titre;
     quiz.description = description ?? quiz.description;
     quiz.niveau = niveau ?? quiz.niveau;
+    quiz.isPublic = isPublic ?? quiz.isPublic;
+    await quiz.save();
 
-    const updated = await quiz.save();
-    res.json({ success: true, message: "Quiz mis à jour", quiz: updated });
+    // Supprimer toutes les anciennes questions et options
+    const oldQuestions = await Question.find({ quiz: quiz._id });
+    const questionIds = oldQuestions.map(q => q._id);
+
+    await Option.deleteMany({ question: { $in: questionIds } });
+    await Question.deleteMany({ _id: { $in: questionIds } });
+
+    // Ajouter les nouvelles questions + options
+    if (Array.isArray(questions)) {
+      for (const q of questions) {
+        const newQuestion = await new Question({
+          titre: q.titre,
+          quiz: quiz._id
+        }).save();
+
+        if (Array.isArray(q.options)) {
+          const optionsToInsert = q.options.map(opt => ({
+            option: opt.option,               // champ correct
+            is_correct: opt.is_correct,
+            note: opt.note,
+            question: newQuestion._id
+          }));
+          await Option.insertMany(optionsToInsert);
+        }
+      }
+    }
+
+    res.json({ success: true, message: "Quiz mis à jour avec succès", quiz });
+
   } catch (error) {
+    console.error("Erreur mise à jour quiz :", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
 
 // Supprimer un quiz + questions + options associées
 exports.deleteQuiz = async (req, res) => {

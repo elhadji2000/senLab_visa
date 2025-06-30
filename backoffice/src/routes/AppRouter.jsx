@@ -1,56 +1,67 @@
 import React, { useContext } from 'react';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import Navbar from '../components/Navbar'; // juste en haut
+
 import Login from '../pages/Login';
 import Footer2 from '../components/Footer2';
+import LoadingSpinner from '../components/LoadingSpinner';
+import Unauthorized from '../pages/Unauthorized';
+
 import AdminDashboard from '../pages/dashboards/AdminDashboard';
 import TeacherDashboard from '../pages/dashboards/TeacherDashboard';
 import StudentDashboard from '../pages/dashboards/StudentDashboard';
-import Layout from '../components/Layout';
+
 import AddUsers from '../pages/users/AddUsers';
 import ListUsers from '../pages/users/ListUsers';
-import ListQuizz from '../pages/quizz/ListQuizz';
+
 import AddQuizz from '../pages/quizz/AddQuizz';
+import ListQuizz from '../pages/quizz/ListQuizz';
+
 import Toutes from '../pages/simulations/Toutes';
-import Ajouter from '../pages/simulations/Ajouter';
 import Explorer from '../pages/simulations/Explorer';
-import CircularProgress from '@mui/material/CircularProgress';
-import ProtectedRoute from '../components/ProtectedRoute';
-import '../App.css';
-import { Route, Routes, Navigate, Outlet } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Unauthorized from '../pages/Unauthorized';
+import SimulationViewer from '../components/SimulationViewer';
+import Ajouter from '../pages/simulations/Ajouter';
+
 import ListeClasse from '../pages/professeur/classe/ListeClasse';
 import CreerClasse from '../pages/professeur/classe/CreerClasse';
 import Code from '../pages/professeur/codeClasse/Code';
 import Gestion from '../pages/professeur/eleves/Gestion';
-import SimulationViewer from '../components/SimulationViewer';
+
+import { AuthContext } from '../contexts/AuthContext';
+import '../App.css';
 
 function AppRouter() {
   const { user, isLoading } = useContext(AuthContext);
 
   if (isLoading) {
-    return <LoadingSpinner fullPage />;
+    return (
+      <>
+        <LoadingSpinner fullPage />
+      </>
+    );
   }
+
 
   return (
     <div className="page-container">
-      <main className="container-fluid">
+      {user && <Navbar />}     {/* Affiche la barre uniquement si connecté */}
+      <main className="container-fluid" style={{ marginTop: '90px' }}>
         <Routes>
           {/* Routes publiques */}
-          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/log"} />} />
-          <Route path="/log" element={user ? <Navigate to="/dashboard" /> : <Login />} />
+          <Route path="/" element={<Navigate to={getDefaultRoute(user?.role)} />} />
+          <Route path="/log" element={user ? <Navigate to={getDefaultRoute(user.role)} /> : <Login />} />
+
           <Route path="/unauthorized" element={<Unauthorized />} />
 
           {/* Routes protégées */}
-          <Route element={<ProtectedLayout />}>
-            {/* Dashboard spécifique au rôle */}
-            <Route 
-              path="/dashboard" 
+          <Route element={<PrivateRoute />}>
+            <Route
+              path="/dashboard"
               element={
                 user?.role === 'admin' ? <AdminDashboard /> :
-                user?.role === 'enseignant' ? <TeacherDashboard /> :
-                <StudentDashboard />
-              } 
+                  user?.role === 'enseignant' ? <TeacherDashboard /> :
+                    <StudentDashboard />
+              }
             />
 
             {/* Routes admin seulement */}
@@ -63,6 +74,7 @@ function AppRouter() {
             <Route element={<RoleGuard allowedRoles={['admin', 'enseignant']} />}>
               <Route path="/quizz/lister" element={<ListQuizz />} />
               <Route path="/quizz/ajouter" element={<AddQuizz />} />
+              <Route path="/quizz/edit/:id" element={<AddQuizz />} />
               <Route path="/simulations/ajouter" element={<Ajouter />} />
               <Route path="/classe/gerer" element={<ListeClasse />} />
               <Route path="/classe/creer" element={<CreerClasse />} />
@@ -70,41 +82,46 @@ function AppRouter() {
               <Route path="/eleves/lister" element={<Gestion />} />
             </Route>
 
-            {/* Routes accessibles à tous les utilisateurs connectés */}
+            {/* Accessible à tout utilisateur connecté */}
             <Route path="/simulations/all1" element={<Toutes />} />
             <Route path="/simulations/explorer" element={<Explorer />} />
+            <Route path="/simulations/ajouter" element={<Ajouter />} />
             <Route path="/simulations/view/:id" element={<SimulationViewer />} />
           </Route>
 
-          {/* Redirection pour les routes non trouvées */}
+          {/* Fallback */}
           <Route path="*" element={<Navigate to={user ? "/dashboard" : "/log"} />} />
         </Routes>
       </main>
-      
+
       {user && <Footer2 />}
     </div>
   );
 }
 
-// Composant de protection du layout
-const ProtectedLayout = () => {
+// ✅ Protège les routes (connexion requise)
+const PrivateRoute = () => {
   const { user } = useContext(AuthContext);
-  return user ? <Layout><Outlet /></Layout> : <Navigate to="/log" replace />;
+  return user ? <Outlet /> : <Navigate to="/log" replace />;
 };
 
-// Garde de rôle
-const RoleGuard = ({ allowedRoles, children }) => {
+// ✅ Protège selon le rôle
+const RoleGuard = ({ allowedRoles }) => {
   const { user } = useContext(AuthContext);
 
-  if (!user) {
-    return <Navigate to="/log" replace />;
-  }
+  if (!user) return <Navigate to="/log" replace />;
+  if (!allowedRoles.includes(user.role)) return <Navigate to="/unauthorized" replace />;
 
-  if (!allowedRoles.includes(user.role)) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-
-  return children ? children : <Outlet />;
+  return <Outlet />;
 };
+const getDefaultRoute = (role) => {
+  switch (role) {
+    case 'admin': return '/dashboard';
+    case 'enseignant': return '/dashboard';
+    case 'etudiant': return '/dashboard';
+    default: return '/log';
+  }
+};
+
 
 export default AppRouter;

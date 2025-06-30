@@ -1,0 +1,24 @@
+.quizz-page {
+  background-color: #f8f9fc;
+  min-height: 100vh;
+}
+
+.quizz-card {
+  border-radius: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.quizz-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.badge.bg-gradient {
+  background: linear-gradient(to right, #17a2b8, #0dcaf0);
+  color: #fff !important;
+}
+
+.btn-outline-primary {
+  border-radius: 50px;
+  padding: 0.6rem 1.2rem;
+}
