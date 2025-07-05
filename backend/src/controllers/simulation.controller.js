@@ -4,14 +4,39 @@ const fs = require('fs');
 const unzipper = require('unzipper');
 
 // Récupérer toutes les simulations (liste générale)
+// simulations.controller.js
 exports.getAllSimulations = async (req, res) => {
   try {
-    const simulations = await Simulation.find().sort({ createdAt: -1 });
+    const simulations = await Simulation.find()
+      .sort({ createdAt: -1 }); // Tri décroissant : les plus récentes en haut
     res.status(200).json(simulations);
   } catch (error) {
+    console.error("Erreur getAllSimulations:", error);
     res.status(500).json({ message: error.message });
   }
 };
+// simulations.controller.js
+exports.getSimulationsByUser = async (req, res) => {
+  try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Non autorisé" });
+    }
+
+    const filter = req.user.role === "admin"
+      ? {} // admin voit tout
+      : { user: req.user._id }; // autres ne voient que leurs propres simulations
+
+    const simulations = await Simulation.find(filter)
+      .sort({ createdAt: -1 })
+      .populate("user", "prenom nom email");
+
+    res.status(200).json(simulations);
+  } catch (error) {
+    console.error("Erreur getSimulationsByUser:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 // Ajouter une simulation avec extraction du zip
 exports.createSimulation = async (req, res) => {

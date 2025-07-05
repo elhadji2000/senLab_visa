@@ -8,13 +8,15 @@ const Resultats = require('../models/Resultat.model')
 // Ajouter un quiz complet avec questions et options
 exports.addQuiz = async (req, res) => {
   try {
-    const { titre, description, niveau, questions } = req.body;
+    const { titre, description, niveau, categorie,isPublic, questions } = req.body;
 
     // Création du quiz
     const quiz = await new Quiz({
       titre,
       description,
       niveau,
+      categorie,
+      isPublic,
       user: req.user._id
     }).save();
 
@@ -25,9 +27,7 @@ exports.addQuiz = async (req, res) => {
 
         if (Array.isArray(q.options)) {
           const optionsToInsert = q.options.map(opt => ({
-            text: opt.text,
             is_correct: opt.is_correct,
-            note: opt.note,
             option: opt.option,
             question: question._id
           }));
@@ -50,7 +50,7 @@ exports.listQuizzes = async (req, res) => {
 
     const quizzes = await Quiz.aggregate([
       { $match: condition },
-
+      { $sort: { createdAt: -1 } },
       // Joindre les questions liées au quiz
       {
         $lookup: {
@@ -126,7 +126,7 @@ exports.getQuizWithQuestionsAndOptions = async (req, res) => {
 exports.updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
-    const { titre, description, niveau, isPublic, questions } = req.body;
+    const { titre, description, niveau, categorie, isPublic, questions } = req.body;
 
     // Vérifier que le quiz existe
     const quiz = await Quiz.findById(id);
@@ -143,6 +143,7 @@ exports.updateQuiz = async (req, res) => {
     quiz.titre = titre ?? quiz.titre;
     quiz.description = description ?? quiz.description;
     quiz.niveau = niveau ?? quiz.niveau;
+    quiz.categorie = categorie ?? quiz.categorie;
     quiz.isPublic = isPublic ?? quiz.isPublic;
     await quiz.save();
 

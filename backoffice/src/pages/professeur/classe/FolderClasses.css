@@ -1,0 +1,27 @@
+.folder-card {
+  cursor: pointer;
+  text-align: center;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f4f4f4;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.folder-card:hover {
+  background: #e6f0ff;
+  box-shadow: 0 3px 10px rgba(0, 110, 255, 0.15);
+  transform: scale(1.03);
+}
+
+.folder-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  color: #0d6efd;
+}
+
+.folder-label {
+  margin-top: 8px;
+}

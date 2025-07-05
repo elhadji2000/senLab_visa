@@ -1,24 +1,14 @@
-.quizz-page {
-  background-color: #f8f9fc;
-  min-height: 100vh;
+.list-group-item a:hover {
+  text-decoration: underline;
 }
 
-.quizz-card {
-  border-radius: 1rem;
-  transition: transform 0.3s ease;
+.card-body hr {
+  margin: 1rem 0;
 }
-
-.quizz-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+.form-control, .form-select {
+  box-shadow: none;
+  border-radius: 0.5rem;
 }
-
-.badge.bg-gradient {
-  background: linear-gradient(to right, #17a2b8, #0dcaf0);
-  color: #fff !important;
-}
-
-.btn-outline-primary {
-  border-radius: 50px;
-  padding: 0.6rem 1.2rem;
+.ms-3 h6 {
+  font-weight: 600;
 }

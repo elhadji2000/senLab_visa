@@ -44,6 +44,8 @@ router.delete('/:id', authenticate, simulationController.deleteSimulation);
 
 //Récupérer toutes les simulations
 router.get('/', simulationController.getAllSimulations);
+// Route privée — simulations de l'utilisateur connecté (ou tout si admin)
+router.get('/byuser', authenticate, simulationController.getSimulationsByUser);
 
 // Récupérer une simulation par ID
 router.get('/:id', simulationController.getSimulationById);

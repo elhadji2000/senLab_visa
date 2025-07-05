@@ -1,31 +1,77 @@
 const CodeClasse = require("../models/codeClasse.model");
 
-// 🔹 Ajouter un code de classe
-exports.ajouterCodeClasse = async (req, res) => {
-    try {
-        const { nom, code, description, date_debut, expiration, classe, quiz, simulation } = req.body;
-
-        const nouveauCode = new CodeClasse({
-            nom,
-            code,
-            description,
-            date_debut,
-            expiration,
-            classe,
-            quiz,
-            simulation,
-            user: req.user._id // associer à l'utilisateur courant
-        });
-
-        const savedCode = await nouveauCode.save();
-        res.status(201).json({ message: "Code de classe créé avec succès", codeClasse: savedCode });
-    } catch (error) {
-        console.error("Erreur création codeClasse:", error);
-        res.status(500).json({ error: error.message });
-    }
+// Fonction pour générer un code aléatoire
+const generateCode = (length = 8) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
 };
 
-// 🔹 Lister tous les codes de classe
+// Génère un code unique (vérifie dans la base)
+const generateUniqueCode = async () => {
+  let code;
+  let exists = true;
+  while (exists) {
+    code = generateCode(8); // 8 caractères alphanumériques
+    const existing = await CodeClasse.findOne({ code });
+    exists = !!existing;
+  }
+  return code;
+};
+
+exports.ajouterCodeClasse = async (req, res) => {
+  try {
+    const { nom, date_debut, expiration, lienTP, classe, quiz, simulation } = req.body;
+
+    // Générer un code unique
+    const code = await generateUniqueCode();
+
+    const nouveauCode = new CodeClasse({
+      nom,
+      code,
+      date_debut,
+      expiration,
+      lienTP,
+      classe,
+      quiz,
+      simulation,
+      user: req.user._id // utilisateur connecté
+    });
+
+    const savedCode = await nouveauCode.save();
+
+    res.status(201).json({
+      message: "Code de classe créé avec succès",
+      codeClasse: savedCode
+    });
+  } catch (error) {
+    console.error("Erreur création codeClasse:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// GET /api/codes/classe/:classeId
+exports.getCodesByClasse = async (req, res) => {
+  try {
+    const { classeId } = req.params;
+
+    const codes = await CodeClasse.find({ classe: classeId })
+      .populate("quiz", "titre") // facultatif : affiche le titre du quiz
+      .populate("simulation", "titre") // facultatif : affiche le titre de la simulation
+      .populate("user", "nom prenom email"); // facultatif : infos sur le créateur
+
+    res.status(200).json(codes);
+  } catch (error) {
+    console.error("Erreur récupération des codes de classe :", error);
+    res.status(500).json({ error: "Erreur lors de la récupération des codes de classe" });
+  }
+};
+
+
+// Lister tous les codes de classe
 exports.listCodeClasses = async (req, res) => {
     try {
         const query = req.user.role === 'admin' ? {} : { user: req.user._id };
@@ -41,7 +87,7 @@ exports.listCodeClasses = async (req, res) => {
     }
 };
 
-// 🔹 Récupérer un code de classe par ID
+// Récupérer un code de classe par ID
 exports.getCodeClasseById = async (req, res) => {
     try {
         const code = await CodeClasse.findById(req.params.id)
@@ -62,7 +108,7 @@ exports.getCodeClasseById = async (req, res) => {
     }
 };
 
-// 🔹 Mettre à jour un code de classe
+// Mettre à jour un code de classe
 exports.updateCodeClasse = async (req, res) => {
     try {
         const code = await CodeClasse.findById(req.params.id);
@@ -79,7 +125,7 @@ exports.updateCodeClasse = async (req, res) => {
     }
 };
 
-// 🔹 Supprimer un code de classe
+// Supprimer un code de classe
 exports.deleteCodeClasse = async (req, res) => {
     try {
         const code = await CodeClasse.findById(req.params.id);

@@ -5,8 +5,13 @@ const authenticate = require('../middleware/authMiddleware'); // <-- importer le
 
 router.post("/add", authenticate, classeController.ajouterClasse);
 router.get("/all", authenticate, classeController.listClasses);
+router.get("/count", authenticate, classeController.countClasses); // (si tu ajoutes une route comme ça)
 router.put("/update/:id", authenticate, classeController.updateClasse);
 router.delete("/delete/:id", authenticate, classeController.deleteClasse);
-router.get("/count", authenticate, classeController.countClasses);
+
+// ✅ la route dynamique en dernier
+router.get('/:id', authenticate, classeController.getClasseById);
+
+
 
 module.exports = router;

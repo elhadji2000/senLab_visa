@@ -26,6 +26,9 @@ import ListeClasse from '../pages/professeur/classe/ListeClasse';
 import CreerClasse from '../pages/professeur/classe/CreerClasse';
 import Code from '../pages/professeur/codeClasse/Code';
 import Gestion from '../pages/professeur/eleves/Gestion';
+import FolderClasses from '../pages/professeur/classe/FolderClasses';
+import ClasseDetails from '../pages/professeur/classe/ClasseDetails';
+import AjouterElevesTable from '../pages/professeur/eleves/AjouterElevesTable';
 
 import { AuthContext } from '../contexts/AuthContext';
 import '../App.css';
@@ -78,8 +81,11 @@ function AppRouter() {
               <Route path="/simulations/ajouter" element={<Ajouter />} />
               <Route path="/classe/gerer" element={<ListeClasse />} />
               <Route path="/classe/creer" element={<CreerClasse />} />
+              <Route path="/classe/folder" element={<FolderClasses />} />
+              <Route path="/classes/:id/details" element={<ClasseDetails />} />
               <Route path="/codes/lister" element={<Code />} />
               <Route path="/eleves/lister" element={<Gestion />} />
+              <Route path="/classes/:id/eleves/ajouter" element={<AjouterElevesTable />} />
             </Route>
 
             {/* Accessible à tout utilisateur connecté */}

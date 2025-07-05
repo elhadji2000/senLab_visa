@@ -8,7 +8,7 @@ router.use(authenticate);
 
 // Ajouter un élève
 router.post('/add', eleveController.addEleve);
-
+router.post("/add-multiple", eleveController.addMultipleEleves);
 // Lister les élèves (admin voit tout, les autres voient leurs propres classes)
 router.get('/all', eleveController.listEleves);
 // Récupérer les élèves d'une classe spécifique

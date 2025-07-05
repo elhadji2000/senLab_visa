@@ -16,7 +16,8 @@
   font-weight: 600;
   font-size: 1rem;
   padding: 12px;
-  background-color: #ffa726 !important;
+  /* background-color: #ffa726 !important; */
+  background: linear-gradient(to right, #3fa2bd, #e7c593) !important;
   color: white !important;
   border-bottom: none;
 }

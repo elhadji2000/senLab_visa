@@ -70,14 +70,13 @@ const NavbarLab = () => {
             >
               Utilisateurs
             </Nav.Link>
-
             <Nav.Link
               as={Link}
-              to="/contact"
+              to="/classe/folder"
               className="text-dark px-2"
               style={{ fontWeight: 500 }}
             >
-              Contact
+              Classes
             </Nav.Link>
 
             <NavDropdown
@@ -91,27 +90,6 @@ const NavbarLab = () => {
               <NavDropdown.Divider />
               <NavDropdown.Item as={Link} to="/quizz/ajouter">
                 Ajouter
-              </NavDropdown.Item>
-            </NavDropdown>
-            <NavDropdown
-              title="Classes"
-              id="classes-dropdown"
-              className="text-dark px-2"
-            >
-              <NavDropdown.Item as={Link} to="/classe/gerer">
-                Mes Classes
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/codes/lister">
-                Code Classe
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/eleves/lister">
-                Eléves
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/matieres">
-                Resultats
               </NavDropdown.Item>
             </NavDropdown>
           </Nav>

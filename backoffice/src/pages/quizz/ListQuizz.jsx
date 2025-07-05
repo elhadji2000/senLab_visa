@@ -184,12 +184,13 @@ const ListQuizz = () => {
                 <thead className="bg-light">
                   <tr>
                     <th style={{width: '5%'}}>#</th>
-                    <th style={{width: '25%'}}>Titre</th>
-                    <th style={{width: '15%'}}>Niveau</th>
+                    <th style={{width: '30%'}}>Titre</th>
+                    <th style={{width: '10%'}}>Niveau</th>
+                    <th style={{width: '12%'}}>Dicipline</th>
                     <th style={{width: '10%'}}>Questions</th>
-                    <th style={{width: '15%'}}>Visibilité</th>
-                    <th style={{width: '15%'}}>Créé par</th>
-                    <th style={{width: '15%'}} className="text-end">Actions</th>
+                    <th style={{width: '10%'}}>Visibilité</th>
+                    <th style={{width: '10%'}}>Créé par</th>
+                    <th style={{width: '13%'}} className="text-end">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -200,6 +201,11 @@ const ListQuizz = () => {
                       <td className="align-middle">
                         <Badge bg={getBadgeVariant(quiz.niveau)} className="text-uppercase">
                           {quiz.niveau}
+                        </Badge>
+                      </td>
+                       <td className="align-middle">
+                        <Badge bg="dark" pill>
+                          {quiz.categorie || "general"}
                         </Badge>
                       </td>
                       <td className="align-middle">
@@ -274,91 +280,102 @@ const ListQuizz = () => {
         </Card.Body>
       </Card>
 
-      {/* MODAL DETAIL */}
-      <Modal 
-        show={showDetailModal} 
-        onHide={() => setShowDetailModal(false)} 
-        size="lg"
-        centered
-        backdrop="static"
-      >
-        <Modal.Header closeButton className="bg-light">
-          <Modal.Title className="text-primary">Détails du quiz</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{maxHeight: '60vh', overflowY: 'auto'}}>
-          {quizDetail ? (
-            <div>
-              <div className="mb-4">
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <h4 className="text-primary">{quizDetail.quiz.titre}</h4>
-                    <p className="text-muted">{quizDetail.quiz.description}</p>
-                  </div>
-                  <Badge bg={quizDetail.quiz.isPublic ? "success" : "secondary"}>
-                    {quizDetail.quiz.isPublic ? 'Public' : 'Privé'}
-                  </Badge>
-                </div>
-                
-                <div className="d-flex gap-3 mt-3 flex-wrap">
-                  <div>
-                    <span className="fw-semibold">Niveau :</span>{' '}
-                    <Badge bg={getBadgeVariant(quizDetail.quiz.niveau)}>
-                      {quizDetail.quiz.niveau}
-                    </Badge>
-                  </div>
-                  <div>
-                    <span className="fw-semibold">Questions :</span>{' '}
-                    <Badge bg="info" pill>{quizDetail.questions_count}</Badge>
-                  </div>
-                  <div>
-                    <span className="fw-semibold">Créé par :</span>{' '}
-                    {quizDetail.quiz.user?.prenom} {quizDetail.quiz.user?.nom}
-                  </div>
-                </div>
-              </div>
+      <Modal
+  show={showDetailModal}
+  onHide={() => setShowDetailModal(false)}
+  size="lg"
+  centered
+  backdrop="static"
+>
+  <Modal.Header closeButton className="bg-primary text-white">
+    <Modal.Title>
+      📋 Aperçu complet du quiz
+    </Modal.Title>
+  </Modal.Header>
 
-              <h5 className="mb-3 text-primary">Questions</h5>
-              
-              {quizDetail.questions && quizDetail.questions.length > 0 ? (
-                quizDetail.questions.map((q, qi) => (
-                  <Card key={q._id} className="mb-3 shadow-sm">
-                    <Card.Body>
-                      <div className="d-flex align-items-center mb-2">
-                        <span className="badge bg-primary me-2">Q{qi + 1}</span>
-                        <h6 className="mb-0">{q.titre}</h6>
+  <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto', background: "#f8f9fa" }}>
+    {quizDetail ? (
+      <>
+        {/* Section titre et infos principales */}
+        <div className="mb-4">
+          <div className="d-flex justify-content-between align-items-start">
+            <div>
+              <h4 className="fw-bold text-dark">{quizDetail.quiz.titre}</h4>
+              <p className="text-muted fst-italic">{quizDetail.quiz.description || 'Pas de description'}</p>
+            </div>
+            <Badge bg={quizDetail.quiz.isPublic ? "success" : "secondary"} className="fs-6">
+              {quizDetail.quiz.isPublic ? '🌐 Public' : '🔒 Privé'}
+            </Badge>
+          </div>
+
+          <div className="d-flex gap-4 mt-3 flex-wrap">
+            <div>
+              <strong>Niveau :</strong>{' '}
+              <Badge bg={getBadgeVariant(quizDetail.quiz.niveau)}>{quizDetail.quiz.niveau}</Badge>
+            </div>
+            <div>
+              <strong>Questions :</strong>{' '}
+              <Badge bg="info" pill>{quizDetail.questions_count}</Badge>
+            </div>
+            <div>
+              <strong>Auteur :</strong>{' '}
+              <span className="text-dark">
+                {quizDetail.quiz.user?.prenom} {quizDetail.quiz.user?.nom}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Section des questions */}
+        <h5 className="mb-3 text-primary border-bottom pb-1">🧠 Questions du quiz</h5>
+
+        {quizDetail.questions && quizDetail.questions.length > 0 ? (
+          quizDetail.questions.map((q, qi) => (
+            <Card key={q._id} className="mb-3 shadow-sm border-0">
+              <Card.Body className="bg-white rounded">
+                <div className="d-flex align-items-center mb-2">
+                  <span className="badge bg-primary me-2 fs-6">Q{qi + 1}</span>
+                  <h6 className="mb-0">{q.titre}</h6>
+                </div>
+
+                <ul className="list-unstyled">
+                  {q.options.map((opt, oi) => (
+                    <li key={opt._id} className="mb-2 ps-2">
+                      <div className={`d-flex align-items-center p-2 rounded shadow-sm ${opt.is_correct ? 'bg-success bg-opacity-10' : 'bg-light'}`}>
+                        <span className="fw-semibold me-2">{opt.option}.</span>
+                        <span className="flex-grow-1">{opt.text}</span>
+                        {opt.is_correct && (
+                          <Badge bg="success" className="ms-2">✔ Correcte</Badge>
+                        )}
+                        <Badge bg="info" className="ms-2">Note : {opt.note}</Badge>
                       </div>
-                      
-                      <ul className="list-unstyled">
-                        {q.options && q.options.map((opt, oi) => (
-                          <li key={opt._id} className="mb-2 ps-3">
-                            <div className={`d-flex align-items-center p-2 rounded ${opt.is_correct ? 'bg-success bg-opacity-10' : 'bg-light'}`}>
-                              <span className="fw-semibold me-2">{opt.option}</span>
-                              <span className="flex-grow-1">{opt.text}</span>
-                              {opt.is_correct && (
-                                <Badge bg="success" className="ms-2">Correct</Badge>
-                              )}
-                              <Badge bg="info" className="ms-2">Note: {opt.note}</Badge>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </Card.Body>
-                  </Card>
-                ))
-              ) : (
-                <Alert variant="info">Aucune question dans ce quiz</Alert>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-3">
-              <Spinner animation="border" variant="primary" />
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer className="bg-light">
-          <Button variant="secondary" onClick={() => setShowDetailModal(false)}>Fermer</Button>
-        </Modal.Footer>
-      </Modal>
+                    </li>
+                  ))}
+                </ul>
+              </Card.Body>
+            </Card>
+          ))
+        ) : (
+          <Alert variant="info" className="text-center">
+            Ce quiz ne contient actuellement aucune question.
+          </Alert>
+        )}
+      </>
+    ) : (
+      <div className="text-center py-4">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Chargement des détails du quiz...</p>
+      </div>
+    )}
+  </Modal.Body>
+
+  <Modal.Footer className="bg-light d-flex justify-content-end">
+    <Button variant="outline-secondary" onClick={() => setShowDetailModal(false)}>
+      ✖ Fermer
+    </Button>
+  </Modal.Footer>
+</Modal>
+
 
       {/* MODAL SUPPRESSION */}
       <Modal 

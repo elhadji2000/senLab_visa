@@ -54,7 +54,7 @@ const ExplorerBackoffice = () => {
     <Container className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3 className="fw-bold text-primary">📁 Gestion des Simulations</h3>
-        <Button variant="warning" onClick={() => navigate('/simulations/add')}>
+        <Button variant="warning" onClick={() => navigate('/simulations/ajouter')}>
           + Ajouter une Simulation
         </Button>
       </div>

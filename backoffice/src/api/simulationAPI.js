@@ -11,7 +11,7 @@ export const addSimulation = (simData) => {
 
 // 📋 Lister toutes les simulations
 export const fetchSimulations = () => {
-  return axiosInstance.get('/api/simulations');
+  return axiosInstance.get('/api/simulations/byuser');
 };
 
 // 📊 Nombre de simulations par catégorie

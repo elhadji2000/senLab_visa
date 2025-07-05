@@ -3,15 +3,16 @@ const Classe = require("../models/Classe.model");
 
 exports.ajouterClasse = async (req, res) => {
   try {
-    const { nom_classe, niveau, annee_scolaire } = req.body;
+    const { nom_classe, niveau, annee_scolaire, etablissement } = req.body;
 
     const classe = new Classe({
       nom_classe,
       niveau,
       annee_scolaire,
+      etablissement,
       user: req.user._id  // 🔥 Lien avec l'utilisateur connecté
     });
-
+    //console.log("Reçu dans req.body :", req.body);
     const savedClasse = await classe.save();
 
     res.status(201).json({
@@ -27,21 +28,44 @@ exports.ajouterClasse = async (req, res) => {
 
 exports.listClasses = async (req, res) => {
   try {
-    let classes;
+    const query = req.user.role === 'admin'
+      ? {} // admin voit tout
+      : { user: req.user._id }; // les autres ne voient que leurs classes
 
-    if (req.user.role === 'admin') {
-      // L'admin peut tout voir
-      classes = await Classe.find().populate("user", "nom email");
-    } else {
-      // Les autres utilisateurs ne voient que leurs classes
-      classes = await Classe.find({ user: req.user._id });
-    }
+    const classes = await Classe.find(query)
+      .sort({ createdAt: -1 }) // tri décroissant par date de création
+      .populate("user", "nom email"); // info sur le créateur
 
     res.json(classes);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getClasseById = async (req, res) => {
+  try {
+    const classeId = req.params.id;
+
+    let classe;
+
+    if (req.user.role === 'admin') {
+      // Admin peut accéder à toutes les classes
+      classe = await Classe.findById(classeId).populate("user", "nom email");
+    } else {
+      // Les autres utilisateurs ne peuvent voir que leurs propres classes
+      classe = await Classe.findOne({ _id: classeId, user: req.user._id }).populate("user", "nom email");
+    }
+
+    if (!classe) {
+      return res.status(404).json({ error: "Classe introuvable ou accès non autorisé" });
+    }
+
+    res.json(classe);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.updateClasse = async (req, res) => {
   try {
     const { id } = req.params;

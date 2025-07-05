@@ -9,6 +9,8 @@ export const addUser = (userData) => {
 export const fetchUsers = () => {
   return axiosInstance.get('/api/users/all');
 };
+export const toggleUserStatus = (id, status) =>
+  axios.patch(`/api/users/${id}/status`, { status });
 
 // Récupérer un utilisateur par ID
 export const fetchUserById = (id) => {

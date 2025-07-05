@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démonstration visuelle de π</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #ef233c;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            width: 100%;
+        }
+
+        .title {
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .control-panel {
+            flex: 1 1 300px;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .visualization-panel {
+            flex: 0 0 auto;
+            width: 500px;
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-panel {
+            flex: 1 1 300px;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-outline-secondary {
+            color: var(--dark-color);
+            border-color: #dee2e6;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f1f3f5;
+            border-color: #dee2e6;
+        }
+
+        .form-control {
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .pi-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .explanation-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .explanation-list li {
+            position: relative;
+            padding-left: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .explanation-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 1200px) {
+            .visualization-panel {
+                width: 450px;
+                height: 450px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .content-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-panel, .info-panel {
+                max-width: 500px;
+                width: 100%;
+            }
+            
+            .visualization-panel {
+                order: -1;
+                width: 100%;
+                max-width: 500px;
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .visualization-panel {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="title-section">
+            <h1 class="title display-5">Démonstration Visuelle de π</h1>
+            <p class="subtitle lead">Visualisez le rapport entre la circonférence et le diamètre d'un cercle</p>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Panneau de contrôle -->
+            <div class="control-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-sliders-h me-2"></i>Paramètres
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="diameter" class="form-label">Diamètre du cercle (cm)</label>
+                            <input type="range" class="form-range mb-2" id="diameter" min="5" max="20" step="0.5" value="10">
+                            <div class="d-flex justify-content-between">
+                                <span>5 cm</span>
+                                <span id="diameterValue">10 cm</span>
+                                <span>20 cm</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100 mb-2" id="drawBtn">
+                            <i class="fas fa-play me-2"></i>Démarrer la démonstration
+                        </button>
+                        <button class="btn btn-outline-secondary w-100" id="resetBtn">
+                            <i class="fas fa-redo me-2"></i>Réinitialiser
+                        </button>
+                        
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar me-2"></i>Résultats
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Diamètre (d):</span>
+                            <span class="result-value" id="displayDiameter">10.0 cm</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Circonférence (C):</span>
+                            <span class="result-value" id="circumference">0.00 cm</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Nombre de diamètres:</span>
+                            <span class="result-value" id="diametersCount">0.00</span>
+                        </div>
+                        <div class="pi-value text-center">
+                            π = C / d ≈ <span id="piValue">0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualisation centrale -->
+            <div class="visualization-panel">
+                <canvas id="circleCanvas" width="500" height="500"></canvas>
+            </div>
+
+            <!-- Panneau d'information -->
+            <div class="info-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle me-2"></i>Légende
+                    </div>
+                    <div class="card-body">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #4361ee;"></span>
+                            <span>Cercle principal</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #ef233c;"></span>
+                            <span>Diamètre (d)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #4cc9f0;"></span>
+                            <span>1er diamètre sur la circonférence</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #7209b7;"></span>
+                            <span>2ème diamètre sur la circonférence</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #f8961e;"></span>
+                            <span>3ème diamètre sur la circonférence</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #2b9348;"></span>
+                            <span>Reste (≈0.14d)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-lightbulb me-2"></i>Explication
+                    </div>
+                    <div class="card-body">
+                        <ol class="explanation-list">
+                            <li>Un cercle est dessiné avec un diamètre <strong>d</strong></li>
+                            <li>Le diamètre est reporté sur la circonférence</li>
+                            <li>On constate qu'il faut 3 diamètres complets</li>
+                            <li>Plus un petit segment supplémentaire</li>
+                            <li>Ce segment mesure environ 0.14 × d</li>
+                            <li>Ainsi, la circonférence ≈ 3.14 × d</li>
+                            <li>Donc π ≈ C/d ≈ 3.14</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+            // Configuration initiale
+            const canvas = document.getElementById('circleCanvas');
+            const ctx = canvas.getContext('2d');
+            const diameterSlider = document.getElementById('diameter');
+            const diameterValue = document.getElementById('diameterValue');
+            const drawBtn = document.getElementById('drawBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const displayDiameter = document.getElementById('displayDiameter');
+            const circumferenceDisplay = document.getElementById('circumference');
+            const diametersCountDisplay = document.getElementById('diametersCount');
+            const piValueDisplay = document.getElementById('piValue');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+
+            // Variables d'état
+            let diameter = 10;
+            let animationFrameId = null;
+            let animationProgress = 0;
+            const totalSteps = 100;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Couleurs
+            const colors = {
+                circle: '#4361ee',
+                diameter: '#ef233c',
+                arcs: ['#4cc9f0', '#7209b7', '#f8961e', '#2b9348'],
+                text: '#2b2d42',
+                guide: 'rgba(0, 0, 0, 0.1)'
+            };
+
+            // Initialisation
+            function init() {
+                updateDiameterDisplay();
+                drawStaticCircle();
+            }
+
+            // Mettre à jour l'affichage du diamètre
+            function updateDiameterDisplay() {
+                diameter = parseFloat(diameterSlider.value);
+                diameterValue.textContent = `${diameter} cm`;
+                displayDiameter.textContent = `${diameter.toFixed(1)} cm`;
+            }
+
+            // Dessiner le cercle statique
+            function drawStaticCircle() {
+                clearCanvas();
+                drawCircle();
+                drawDiameter();
+            }
+
+            // Effacer le canvas
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Dessiner le cercle
+            function drawCircle(alpha = 1) {
+                const radius = diameter / 2 * scale();
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = applyAlpha(colors.circle, alpha);
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+
+            // Dessiner le diamètre
+            function drawDiameter(alpha = 1) {
+                const radius = diameter / 2 * scale();
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX - radius, centerY);
+                ctx.lineTo(centerX + radius, centerY);
+                ctx.strokeStyle = applyAlpha(colors.diameter, alpha);
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // Étiquette du diamètre
+                ctx.font = '16px Arial';
+                ctx.fillStyle = applyAlpha(colors.diameter, alpha);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(`d = ${diameter} cm`, centerX, centerY - 10);
+            }
+
+            // Fonction d'échelle pour adapter la taille à l'affichage
+            function scale() {
+                return Math.min(canvas.width, canvas.height) / 30;
+            }
+
+            // Appliquer la transparence à une couleur
+            function applyAlpha(color, alpha) {
+                if (alpha >= 1) return color;
+                
+                const r = parseInt(color.substr(1, 2), 16);
+                const g = parseInt(color.substr(3, 2), 16);
+                const b = parseInt(color.substr(5, 2), 16);
+                
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+
+            // Réinitialiser l'animation
+            function resetAnimation() {
+                cancelAnimation();
+                animationProgress = 0;
+                progressBar.style.width = '0%';
+                progressContainer.style.display = 'none';
+                drawStaticCircle();
+                updateResults(0);
+            }
+
+            // Annuler l'animation en cours
+            function cancelAnimation() {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            }
+
+            // Démarrer la démonstration
+            function startDemonstration() {
+                resetAnimation();
+                progressContainer.style.display = 'block';
+                animateDemonstration();
+            }
+
+            // Animer la démonstration
+            function animateDemonstration() {
+                const progress = animationProgress / totalSteps;
+                const circumference = Math.PI * diameter;
+                const radius = diameter / 2 * scale();
+                
+                // Mettre à jour la barre de progression
+                progressBar.style.width = `${progress * 100}%`;
+                
+                // Effacer le canvas
+                clearCanvas();
+                
+                // Dessiner le cercle (avec transparence croissante)
+                drawCircle(1 - progress * 0.7);
+                
+                // Dessiner le diamètre (avec transparence croissante)
+                drawDiameter(1 - progress * 0.7);
+                
+                // Dessiner les diamètres sur la circonférence
+                if (progress > 0.2) {
+                    const arcProgress = Math.min(1, (progress - 0.2) / 0.8);
+                    drawDiametersOnCircumference(arcProgress, circumference);
+                }
+                
+                // Mettre à jour les résultats
+                updateResults(progress * circumference);
+                
+                animationProgress++;
+                
+                if (animationProgress <= totalSteps) {
+                    animationFrameId = requestAnimationFrame(animateDemonstration);
+                } else {
+                    // Animation terminée
+                    animationFrameId = null;
+                    updateResults(circumference);
+                }
+            }
+
+            // Dessiner les diamètres sur la circonférence
+            function drawDiametersOnCircumference(progress, circumference) {
+                const radius = diameter / 2 * scale();
+                const totalDiameters = 3.14159; // Valeur approximative de π
+                const shownDiameters = progress * totalDiameters;
+                
+                // Dessiner la circonférence déroulée (ligne droite)
+                const lineY = centerY + radius + 60;
+                const lineLength = circumference * scale();
+                const lineX1 = centerX - lineLength / 2;
+                const lineX2 = centerX + lineLength / 2;
+                
+                ctx.beginPath();
+                ctx.moveTo(lineX1, lineY);
+                ctx.lineTo(lineX2, lineY);
+                ctx.strokeStyle = colors.circle;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Dessiner les diamètres sur la circonférence
+                let remaining = shownDiameters;
+                let currentX = lineX1;
+                
+                for (let i = 0; i < 4 && remaining > 0; i++) {
+                    const segment = Math.min(1, remaining);
+                    const segmentLength = diameter * scale() * segment;
+                    const colorIndex = Math.min(i, colors.arcs.length - 1);
+                    
+                    // Dessiner le segment
+                    ctx.beginPath();
+                    ctx.moveTo(currentX, lineY);
+                    ctx.lineTo(currentX + segmentLength, lineY);
+                    ctx.strokeStyle = colors.arcs[colorIndex];
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                    
+                    // Dessiner les marques de diamètre
+                    if (segment >= 1) {
+                        // Ligne verticale au début
+                        ctx.beginPath();
+                        ctx.moveTo(currentX, lineY - 15);
+                        ctx.lineTo(currentX, lineY + 15);
+                        ctx.strokeStyle = colors.arcs[colorIndex];
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        
+                        // Ligne verticale à la fin
+                        ctx.beginPath();
+                        ctx.moveTo(currentX + segmentLength, lineY - 15);
+                        ctx.lineTo(currentX + segmentLength, lineY + 15);
+                        ctx.strokeStyle = colors.arcs[colorIndex];
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        
+                        // Étiquette
+                        ctx.font = '14px Arial';
+                        ctx.fillStyle = colors.arcs[colorIndex];
+                        ctx.textAlign = 'center';
+                        ctx.fillText('1d', currentX + segmentLength / 2, lineY - 20);
+                    } else if (i === 3) {
+                        // Étiquette pour le reste
+                        ctx.font = '14px Arial';
+                        ctx.fillStyle = colors.arcs[colorIndex];
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`${segment.toFixed(2)}d`, currentX + segmentLength / 2, lineY - 20);
+                    }
+                    
+                    currentX += segmentLength;
+                    remaining -= segment;
+                }
+                
+                // Dessiner les diamètres sur le cercle lui-même
+                if (progress > 0) {
+                    const angleStep = (2 * Math.PI) / totalDiameters;
+                    const shownAngle = 2 * Math.PI * progress;
+                    
+                    for (let i = 0; i < shownAngle; i += angleStep) {
+                        const angle = Math.min(i, shownAngle);
+                        const colorIndex = Math.min(Math.floor(i / angleStep), colors.arcs.length - 1);
+                        
+                        // Calculer les points de début et fin
+                        const startAngle = angle;
+                        const endAngle = Math.min(angle + angleStep, shownAngle);
+                        
+                        // Dessiner l'arc
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                        ctx.strokeStyle = colors.arcs[colorIndex];
+                        ctx.lineWidth = 4;
+                        ctx.stroke();
+                        
+                        // Dessiner le diamètre sur le cercle
+                        if (endAngle - startAngle >= angleStep * 0.9) {
+                            const midAngle = (startAngle + endAngle) / 2;
+                            const x1 = centerX + radius * Math.cos(midAngle);
+                            const y1 = centerY + radius * Math.sin(midAngle);
+                            const x2 = centerX + (radius + 20) * Math.cos(midAngle);
+                            const y2 = centerY + (radius + 20) * Math.sin(midAngle);
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(x1, y1);
+                            ctx.lineTo(x2, y2);
+                            ctx.strokeStyle = colors.arcs[colorIndex];
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            
+                            ctx.fillStyle = colors.arcs[colorIndex];
+                            ctx.textAlign = Math.abs(Math.cos(midAngle)) < 0.5 ? 'center' : (Math.cos(midAngle) > 0 ? 'left' : 'right');
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText('d', x2 + (Math.cos(midAngle) * 10), y2 + (Math.sin(midAngle) * 10));
+                        }
+                    }
+                }
+            }
+
+            // Mettre à jour les résultats
+            function updateResults(currentCirc) {
+                const circ = Math.min(currentCirc, Math.PI * diameter);
+                const diametersInCircumference = circ / diameter;
+                
+                circumferenceDisplay.textContent = circ.toFixed(2);
+                diametersCountDisplay.textContent = diametersInCircumference.toFixed(2);
+                piValueDisplay.textContent = diametersInCircumference.toFixed(5);
+            }
+
+            // Écouteurs d'événements
+            diameterSlider.addEventListener('input', function() {
+                updateDiameterDisplay();
+                resetAnimation();
+            });
+
+            drawBtn.addEventListener('click', startDemonstration);
+            resetBtn.addEventListener('click', resetAnimation);
+
+            // Initialisation
+            init();
+        });
+    </script>
+</body>
+
+</html>

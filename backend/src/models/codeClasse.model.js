@@ -6,6 +6,8 @@ const codeClasseSchema = new mongoose.Schema({
   description: { type: String },
   date_debut: { type: String, required: true },
   expiration: { type: String, required: true },
+  actif: {type: Boolean,default: false,get: v => !!v },
+  lienTP: { type: String},
   classe: { type: mongoose.Schema.Types.ObjectId, ref: 'Classe' },
   quiz: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },
   simulation: { type: mongoose.Schema.Types.ObjectId, ref: 'Simulation' },

@@ -18,13 +18,40 @@ exports.ajouterResultat = async (req, res) => {
 exports.listResultats = async (req, res) => {
   try {
     const resultats = await Resultat.find()
-      .populate("quiz", "titre")
+      .populate("quiz", "titre categorie")
       .populate("eleve", "nom prenom email");
     res.json(resultats);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.listResultatsParClasse = async (req, res) => {
+  const { classeId } = req.params;
+
+  try {
+    const resultats = await Resultat.find()
+      .populate({
+        path: "eleve",
+        select: "nom prenom email classe", // on récupère la classe de l'élève
+        populate: {
+          path: "classe",
+          select: "nom" // optionnel : récupérer aussi le nom de la classe
+        },
+      })
+      .populate("quiz", "titre categorie");
+
+    // Filtrer les résultats appartenant à la classe demandée
+    const filtres = resultats.filter(
+      (r) => r.eleve?.classe?._id.toString() === classeId
+    );
+
+    res.json(filtres);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 // 🔍 Obtenir un résultat par ID
 exports.getResultatById = async (req, res) => {

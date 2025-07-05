@@ -1,37 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUsers, deleteUser } from '../../api/users.api';
+import { fetchUsers, toggleUserStatus } from '../../api/users.api'; // ➕ API update
 import { useNavigate } from 'react-router-dom';
-import { Button, Table } from 'react-bootstrap';
+import { FaUserEdit, FaPowerOff, FaToggleOn, FaToggleOff, FaUserPlus, FaUserCircle } from 'react-icons/fa';
+import { Button, Spinner } from 'react-bootstrap';
+import './ListUsers.css'; // ➕ Ajoute une feuille de style personnalisée
 
 const ListUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // ✅ Charger la liste des utilisateurs au chargement du composant
   useEffect(() => {
     loadUsers();
   }, []);
 
   const loadUsers = async () => {
     try {
-      const response = await fetchUsers();
-      setUsers(response.data);
+      const res = await fetchUsers();
+      setUsers(res.data);
     } catch (error) {
-      console.error('Erreur lors du chargement des utilisateurs', error);
+      console.error('Erreur chargement utilisateurs', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Confirmer la suppression de cet utilisateur ?')) return;
-
+  const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await deleteUser(id);
-      setUsers(users.filter((u) => u._id !== id));
-    } catch (error) {
-      console.error('Erreur de suppression', error);
+      await toggleUserStatus(id, !currentStatus);
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, status: !currentStatus } : u))
+      );
+    } catch (err) {
+      console.error('Erreur lors du changement de statut', err);
     }
   };
 
@@ -44,67 +45,51 @@ const ListUsers = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3>Liste des utilisateurs</h3>
+    <div className="user-container container">
+      <div className="user-header">
+        <h2>👥 Gestion des Utilisateurs</h2>
         <Button variant="success" onClick={handleAdd}>
-          ➕ Ajouter un utilisateur
+          <FaUserPlus className="me-2" /> Ajouter
         </Button>
       </div>
 
       {loading ? (
-        <p>Chargement...</p>
+        <Spinner animation="border" />
       ) : users.length === 0 ? (
         <p>Aucun utilisateur trouvé.</p>
       ) : (
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Prénom</th>
-              <th>Email</th>
-              <th>Téléphone</th>
-              <th>Statut</th>
-              <th>Rôle</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u._id}>
-                <td>{u.nom}</td>
-                <td>{u.prenom}</td>
-                <td>{u.email}</td>
-                <td>{u.telephone}</td>
-                <td>
-                  {u.status ? (
-                    <span className="badge bg-success">Actif</span>
-                  ) : (
-                    <span className="badge bg-secondary">Inactif</span>
-                  )}
-                </td>
-                <td>{u.role}</td>
-                <td>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleEdit(u._id)}
-                  >
-                    ✏️ Modifier
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(u._id)}
-                  >
-                    🗑️ Supprimer
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <div className="user-grid">
+          {users.map((u) => (
+            <div key={u._id} className={`user-card ${u.status ? 'active' : 'inactive'}`}>
+              <div className="user-icon">
+                <FaUserCircle size={40} />
+              </div>
+              <div className="user-info">
+                <h5>{u.nom} {u.prenom}</h5>
+                <p>{u.email}</p>
+                <p>Tél: {u.telephone}</p>
+                <span className={`badge ${u.status ? 'bg-success' : 'bg-secondary'}`}>
+                  {u.status ? 'Actif' : 'Inactif'}
+                </span>
+                <span className="badge bg-info ms-2">{u.role}</span>
+              </div>
+              <div className="user-actions">
+                <Button variant="outline-warning" size="sm" onClick={() => handleEdit(u._id)}>
+                  <FaUserEdit /> Modifier
+                </Button>
+                <Button
+                  variant={u.status ? 'outline-danger' : 'outline-success'}
+                  size="sm"
+                  onClick={() => handleToggleStatus(u._id, u.status)}
+                  className="ms-2"
+                >
+                  {u.status ? <FaToggleOff /> : <FaToggleOn />} {u.status ? 'Désactiver' : 'Activer'}
+                </Button>
+
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

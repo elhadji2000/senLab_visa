@@ -2,40 +2,56 @@ const Eleve = require('../models/Eleve.model');
 const Classe = require('../models/Classe.model'); // Pour vérifier la propriété user
 
 // Récupérer les élèves d'une classe spécifique
+const mongoose = require('mongoose');
+
 exports.getElevesByClasse = async (req, res) => {
   try {
     const classeId = req.params.id;
 
-    // Vérifier que l'utilisateur a accès à cette classe (sauf admin)
-    if (req.user.role !== 'admin') {
-      const classeExists = await Classe.findOne({ _id: classeId, user: req.user.id });
-      if (!classeExists) {
-        return res.status(403).json({ 
-          success: false, 
-          message: "Vous n'avez pas accès à cette classe" 
-        });
-      }
+    // Validation de l'ID
+    if (!mongoose.Types.ObjectId.isValid(classeId)) {
+      return res.status(400).json({ success: false, message: "ID de classe invalide." });
     }
 
-    // Récupérer les élèves de la classe
+    // Vérifier que la classe existe et appartient bien à l'utilisateur connecté (si non admin)
+    const classe = await Classe.findById(classeId);
+
+    if (!classe) {
+      return res.status(404).json({
+        success: false,
+        message: "Classe introuvable."
+      });
+    }
+
+    // Si l'utilisateur n'est pas admin, il doit être le créateur de la classe
+    if (req.user.role !== 'admin' && String(classe.user) !== String(req.user._id)) {
+      return res.status(403).json({
+        success: false,
+        message: "Vous n'avez pas l'autorisation d'accéder à cette classe."
+      });
+    }
+
+    // Récupération des élèves de cette classe
     const eleves = await Eleve.find({ classe: classeId })
-      .select('nom prenom email date_naissance')
+      .select('nom prenom email date_naissance telephone')
       .sort({ nom: 1 });
 
     res.json({ success: true, eleves });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    console.error("Erreur getElevesByClasse:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 };
+
 
 // ... (autres méthodes existantes)
 // Ajouter un élève
 exports.addEleve = async (req, res) => {
   try {
-    const { nom, prenom, email, date_naissance, classe } = req.body;
+    const { nom, prenom, email, telephone, date_naissance, classe } = req.body;
 
     // Vérifier que la classe appartient à l'utilisateur (sauf admin)
     if (req.user.role !== 'admin') {
@@ -45,7 +61,7 @@ exports.addEleve = async (req, res) => {
       }
     }
 
-    const eleve = new Eleve({ nom, prenom, email, date_naissance, classe });
+    const eleve = new Eleve({ nom, prenom, email, telephone, date_naissance, classe });
     const savedEleve = await eleve.save();
     res.status(201).json({ success: true, eleve: savedEleve });
 
@@ -53,6 +69,56 @@ exports.addEleve = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+exports.addMultipleEleves = async (req, res) => {
+  try {
+    const eleves = req.body;
+
+    if (!Array.isArray(eleves) || eleves.length === 0) {
+      return res.status(400).json({ success: false, message: "Aucun élève à ajouter." });
+    }
+
+    // Extraire tous les IDs de classes uniques
+    const classeIds = [...new Set(eleves.map(e => e.classe))];
+
+    // Vérification que chaque ID est valide (évite erreurs MongoDB)
+    for (const id of classeIds) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+          success: false,
+          message: `ID de classe invalide : ${id}`
+        });
+      }
+    }
+
+    if (req.user.role !== 'admin') {
+      // Récupérer les classes créées par l'utilisateur connecté
+      const ownedClasses = await Classe.find({
+        _id: { $in: classeIds },
+        user: req.user._id
+      });
+
+      const ownedClassIds = ownedClasses.map(c => c._id.toString());
+
+      const nonAutorisees = classeIds.filter(id => !ownedClassIds.includes(id));
+      if (nonAutorisees.length > 0) {
+        return res.status(403).json({
+          success: false,
+          message: `Vous ne pouvez pas ajouter d'élèves dans ces classes : ${nonAutorisees.join(', ')}`
+        });
+      }
+    }
+
+    // Insérer les élèves
+    const inserted = await Eleve.insertMany(eleves);
+    res.status(201).json({ success: true, eleves: inserted });
+
+  } catch (error) {
+    console.error("Erreur lors de l'ajout des élèves :", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+
 
 // Lister les élèves visibles par l'utilisateur
 exports.listEleves = async (req, res) => {

@@ -1,0 +1,117 @@
+/* Reset + typographie */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+  overflow-x: hidden;
+}
+
+canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Conteneur principal centré */
+.container-simulation {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  box-sizing: border-box;
+}
+
+/* Ligne principale : gauche + centre */
+.simulation-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Colonnes */
+.left-panel,
+.right-panel {
+  width: 260px;
+  min-width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.center-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cartes */
+.simulation-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.scene-3d-container {
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fff;
+  height: 500px;
+  margin-top: 0.5rem;
+}
+
+/* Sliders */
+input[type="range"] {
+  width: 100%;
+}
+
+label.form-label,
+.simulation-card label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+select.form-select {
+  border-radius: 6px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Texte explicatif */
+.explanation-text p,
+.explanation-text ul {
+  font-size: 14px;
+  color: #333;
+}
+
+.explanation-text ul {
+  padding-left: 20px;
+}
+
+.explanation-text li {
+  margin-bottom: 0.4rem;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .simulation-row {
+    flex-direction: column;
+  }
+
+  .left-panel,
+  .right-panel,
+  .center-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .scene-3d-container {
+    height: 400px;
+  }
+}

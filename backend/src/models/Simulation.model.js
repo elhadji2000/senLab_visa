@@ -27,6 +27,11 @@ const simulationSchema = new mongoose.Schema({
     type: String, 
     required: [true, 'Le fichier de simulation est obligatoire'] 
   },
+ user: {
+     type: mongoose.Schema.Types.ObjectId,
+     ref: 'User',
+     required: true
+   }
 }, { 
   timestamps: true 
 });
