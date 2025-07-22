@@ -1,4 +1,13 @@
 import axiosInstance from './axiosInstance';
+// src/api/class.api.js
+import axios from "axios";
+import { toast } from "react-toastify";
+
+export const sendClassCode = async (codeClasseId) => {
+  if (!codeClasseId) throw new Error("codeClasseId est requis");
+  const response = await axiosInstance.post(`/api/codes/send-code/${codeClasseId}`);
+  return response.data;
+};
 
 // ➕ Ajouter un code de classe
 export const addCodeClasse = (codeData) => {

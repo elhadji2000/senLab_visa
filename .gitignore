@@ -1,0 +1,21 @@
+# Ignorer les dossiers node_modules dans tous les sous-dossiers
+**/node_modules/
+
+# Ignorer les dossiers de build Vite
+**/dist/
+
+# Ignorer les logs
+*.log
+npm-debug.log
+yarn-error.log
+
+# Ignorer les fichiers d'environnement
+**/.env
+
+# Ignorer .vscode ou autres fichiers d'IDE
+.vscode/
+.idea/
+
+# Fichiers système
+.DS_Store
+Thumbs.db

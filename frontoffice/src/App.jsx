@@ -11,7 +11,9 @@ import Contact from './pages/Contact';
 import QuizzPublic from './pages/QuizzPublic';
 import QuizzRepondre from './pages/QuizzRepondre';
 import QuizzCodeRepondre from './pages/QuizzCodeRepondre';
+import ChatbotAssistant from './components/ChatbotAssistant';
 import 'animate.css';
+import './App.css';
 // ... autres imports
 
 function App() {
@@ -38,6 +40,7 @@ function App() {
           {/* Ajoute les autres pages ici */}
         </Routes>
       </div>
+      <ChatbotAssistant></ChatbotAssistant>
     </BrowserRouter>
   );
 }

@@ -1,5 +1,5 @@
 // ✅ Charger les variables d'environnement
-require('dotenv').config({ path: __dirname + '/.env' });
+require('dotenv').config();
 
 /* 🌐 Debug de configuration */
 console.log('=== Variables ENV chargées ===');

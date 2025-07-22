@@ -18,6 +18,7 @@ import {
 import { toast } from "react-toastify";
 import moment from "moment";
 import { fetchQuizzes } from "../../api/quizAPI"; // à adapter selon ton arborescence
+import { sendClassCode } from "../../api/codeClasseAPI";
 
 const ClassCodeSection = ({ classId }) => {
   const [codes, setCodes] = useState([]);
@@ -26,6 +27,8 @@ const ClassCodeSection = ({ classId }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [codeToDelete, setCodeToDelete] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedCode, setSelectedCode] = useState(null);
 
   const [quizzList, setQuizzList] = useState([]);
   const [newCode, setNewCode] = useState({
@@ -86,7 +89,7 @@ const ClassCodeSection = ({ classId }) => {
         date_debut: "",
         expiration: "",
         lienTP: "",
-        quiz:"",
+        quiz: "",
       });
 
       toast.success("Code ajouté avec succès !");
@@ -108,6 +111,20 @@ const ClassCodeSection = ({ classId }) => {
     } catch (err) {
       console.error("Erreur suppression code :", err);
       toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  // handleSend déclenché quand on clique sur “Soumettre”
+  const handleSend = async (code) => {
+    try {
+      console.log("Envoi du code ID :", code._id);
+      const res = await sendClassCode(code._id);
+      console.log("Réponse API:", res);
+      toast.success(`Code envoyé à ${res.sent} élèves 🎉`);
+      loadCodes();
+    } catch (err) {
+      console.error("Erreur lors de l'envoi du code :", err);
+      toast.error("Erreur lors de l’envoi du code");
     }
   };
 
@@ -196,16 +213,22 @@ const ClassCodeSection = ({ classId }) => {
                           "-"
                         )}
                       </td>
+                      {/* <td> conditionnel pour “Soumettre” */}
                       <td>
-                        <Button
-                          size="sm"
-                          variant="outline-primary"
-                          onClick={() =>
-                            toast.info("Fonction soumettre à venir...")
-                          }
-                        >
-                          Soumettre
-                        </Button>
+                        {code.actif ? (
+                          <Badge bg="success">Déjà envoyé</Badge>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline-primary"
+                            onClick={() => {
+                              setSelectedCode(code);
+                              setShowConfirmModal(true);
+                            }}
+                          >
+                            Soumettre
+                          </Button>
+                        )}
                       </td>
                       <td>
                         <Button
@@ -325,6 +348,38 @@ const ClassCodeSection = ({ classId }) => {
           </Button>
           <Button variant="danger" onClick={handleDelete}>
             Supprimer
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal
+        show={showConfirmModal}
+        onHide={() => setShowConfirmModal(false)}
+        backdrop="static"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmer l’envoi</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Voulez-vous vraiment <strong>envoyer ce code</strong> aux élèves ?
+          <br />
+          Une fois envoyé, il sera marqué comme <strong>actif</strong>.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            Annuler
+          </Button>
+          <Button
+            variant="primary"
+            onClick={async () => {
+              await handleSend(selectedCode);
+              setShowConfirmModal(false);
+            }}
+          >
+            Confirmer l’envoi
           </Button>
         </Modal.Footer>
       </Modal>
