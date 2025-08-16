@@ -34,8 +34,8 @@ import Newsletter from "./sections/Newsletter";
 import Featuring from "./sections/Featuring";
 
 // Routes
-import AppRouter from "../../../routes/AppRouter";
 import footerRoutes from "../../../footer.routes";
+import routes from "../../../footer.routes";
 
 // Images
 import bgImage from "../../../assets/images/bg-about-us.jpg";

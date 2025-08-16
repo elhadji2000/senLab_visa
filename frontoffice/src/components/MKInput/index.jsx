@@ -18,8 +18,7 @@ import { forwardRef } from "react";
 // prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
 
-// Custom styles for MKInput
-import MKInputRoot from "components/MKInput/MKInputRoot";
+import MKInputRoot from "./MKInputRoot";
 
 const MKInput = forwardRef(({ error, success, disabled, ...rest }, ref) => (
   <MKInputRoot {...rest} ref={ref} ownerState={{ error, success, disabled }} />

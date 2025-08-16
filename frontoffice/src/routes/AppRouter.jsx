@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from '../components/Header';
 import Home from '../pages/Home';
 import About from '../pages/About';
 import AboutUs from '../pages/LandingPages/AboutUs';
@@ -12,7 +11,6 @@ function AppRouter() {
         <Router>
             <div className="page-container">
                 {/* Header fixe en haut */}
-                <Header />
 
                 {/* Contenu principal */}
                 <main className="content-wrap">

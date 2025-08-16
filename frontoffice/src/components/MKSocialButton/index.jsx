@@ -19,7 +19,7 @@ import { forwardRef } from "react";
 import PropTypes from "prop-types";
 
 // Custom styles for MKSocialButton
-import MKSocialButtonRoot from "components/MKSocialButton/MKSocialButtonRoot";
+import MKSocialButtonRoot from "./MKSocialButtonRoot";
 
 const MKSocialButton = forwardRef(({ color, size, iconOnly, circular, children, ...rest }, ref) => (
   <MKSocialButtonRoot

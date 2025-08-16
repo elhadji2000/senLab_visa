@@ -19,7 +19,7 @@ import { forwardRef } from "react";
 import PropTypes from "prop-types";
 
 // Custom styles for MKTypography
-import MKTypographyRoot from "components/MKTypography/MKTypographyRoot";
+import MKTypographyRoot from "./MKTypographyRoot";
 
 const MKTypography = forwardRef(
   (
