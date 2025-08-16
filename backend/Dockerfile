@@ -4,15 +4,17 @@ FROM node:18
 # Étape 2 : définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Étape 3 : copier les fichiers package.json et installer les dépendances
+# Étape 3 : copier uniquement les fichiers de dépendances
 COPY package*.json ./
+
+# Étape 4 : installer les dépendances
 RUN npm install
 
-# Étape 4 : copier tout le projet
+# Étape 5 : copier le reste du projet
 COPY . .
 
-# Étape 5 : exposer le port utilisé par le backend
+# Étape 6 : exposer le port utilisé par le backend
 EXPOSE 5000
 
-# Étape 6 : démarrer le serveur
-CMD ["npm", "start"]
+# Étape 7 : lancer le backend en mode développement
+CMD ["npm", "run", "dev"]

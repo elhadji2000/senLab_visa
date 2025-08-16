@@ -1,15 +1,19 @@
 FROM node:18
 
+# Crée le dossier de travail
 WORKDIR /app
 
+# Copie les fichiers de dépendances
 COPY package*.json ./
+
+# Installe les dépendances
 RUN npm install
 
+# Copie le reste du code
 COPY . .
 
-RUN npm run build
+# Expose le port de Vite (ou React)
+EXPOSE 5173
 
-RUN npm install -g serve
-
-EXPOSE 3000
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Démarre le serveur de dev
+CMD ["npm", "run", "dev"]

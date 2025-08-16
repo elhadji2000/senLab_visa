@@ -6,8 +6,8 @@ import './css/Apropos.css';
 
 // Images (remplacez par vos propres images)
 const teamPhoto = "https://images.unsplash.com/photo-1522071820081-009f0129c71c";
-const labPhoto = "/src/assets/logo-uadb.png";
-const stemPhoto = "/src/assets/senLab2.jpg";
+const labPhoto = "../../assets/logo-uadb.png";
+const stemPhoto = "../../assets/senLab2.jpg";
 
 function Apropos() {
   const teamMembers = [
@@ -15,19 +15,19 @@ function Apropos() {
       name: "Votre Nom",
       role: "Porteur du projet",
       bio: "Étudiant en Master Informatique, spécialisé dans les technologies éducatives",
-      photo: "/src/assets/logo2.png"
+      photo: "../../assets/logo2.png"
     },
     {
       name: "Encadreur Académique",
       role: "Directeur de mémoire",
       bio: "Professeur en Sciences de l'Éducation, expert en pédagogie numérique",
-      photo: "/src/assets/prof.jpg"
+      photo: "../../assets/prof.jpg"
     },
     {
       name: "Collaborateur",
       role: "Expert STEM",
       bio: "Enseignant-chercheur en Physique, spécialiste des laboratoires virtuels",
-      photo: "/src/assets/uidt.png"
+      photo: "../../assets/uidt.png"
     }
   ];
 

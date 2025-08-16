@@ -43,7 +43,7 @@ function Assistant() {
       <div onClick={() => setShow(true)} className="assistant-float">
         <div className="pulse-circle" />
         <img
-          src="/src/assets/icons8-siri.svg"
+          src="../assets/icons8-siri.svg"
           alt="Assistant"
           className="assistant-icon"
         />

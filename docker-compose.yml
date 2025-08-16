@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   mongo:
     image: mongo
@@ -9,24 +7,43 @@ services:
       - mongo-data:/data/db
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     env_file: ./backend/.env
     ports:
       - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run dev
     depends_on:
       - mongo
 
   frontoffice:
-    build: ./frontoffice
+    build:
+      context: ./frontoffice
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "5173:5173"
+    volumes:
+      - ./frontoffice:/app
+      - /app/node_modules
+
+    command: npm run dev
     depends_on:
       - backend
 
   backoffice:
-    build: ./backoffice
+    build:
+      context: ./backoffice
+      dockerfile: Dockerfile
     ports:
-      - "3001:3000"
+      - "5174:5174"
+    volumes:
+      - ./backoffice:/app
+      - /app/node_modules
+    command: npm run dev
     depends_on:
       - backend
 

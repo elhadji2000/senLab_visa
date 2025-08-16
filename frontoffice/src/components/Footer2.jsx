@@ -1,10 +1,10 @@
 import React from 'react';
 import { Container } from 'react-bootstrap';
-import logo1 from '/src/assets/ugb.png';
-import logo2 from '/src/assets/uidt.png';
-import logo3 from '/src/assets/logo-uadb.png';
-import logo4 from '/src/assets/logo.png';
-import logo5 from '/src/assets/uasz.png';
+import logo1 from '../assets/ugb.png';
+import logo2 from '../assets/uidt.png';
+import logo3 from '../assets/logo-uadb.png';
+import logo4 from '../assets/logo.png';
+import logo5 from '../assets/uasz.png';
 
 function Footer2() {
   return (
