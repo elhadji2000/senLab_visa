@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from '../components/Header';
 import Home from '../pages/Home';
 import About from '../pages/About';
+import AboutUs from '../pages/LandingPages/AboutUs';
 import Footer from '../components/Footer';
 import Footer2 from '../components/Footer2';
 
@@ -19,6 +20,7 @@ function AppRouter() {
                         <Route path="" element={<Home />} />
                         <Route path="/home" element={<Home />} />
                         <Route path="/about" element={<About />} />
+                        <Route path="/aboutUs" element={<AboutUs />} />
                         {/* Ajoutez vos autres routes ici */}
                     </Routes>
                 </main>

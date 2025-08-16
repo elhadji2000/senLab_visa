@@ -12,6 +12,7 @@ import QuizzPublic from './pages/QuizzPublic';
 import QuizzRepondre from './pages/QuizzRepondre';
 import QuizzCodeRepondre from './pages/QuizzCodeRepondre';
 import ChatbotAssistant from './components/ChatbotAssistant';
+import AboutUs from './pages/LandingPages/AboutUs/index';
 import 'animate.css';
 import './App.css';
 // ... autres imports
@@ -28,6 +29,7 @@ function App() {
           <Route path="/matieres" element={<Matieres />} />
           <Route path="/matieres/:matiereId" element={<SimulationsParMatiere />} />
           <Route path="/apropos" element={<Apropos />} />
+          <Route path="/aboutUs" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/quizz/public" element={<QuizzPublic />} />
           <Route path="/quizz/:id" element={<QuizzRepondre />} />
