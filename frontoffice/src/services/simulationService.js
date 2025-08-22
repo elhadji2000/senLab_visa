@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/simulations';// Adapte si besoin
-const BASE_URL = 'http://localhost:5000'; 
+const API_URL = "http://localhost:5000/api/simulations"; // Adapte si besoin
+const BASE_URL = "http://localhost:5000";
 
 // Récupérer toutes les simulations
 export const getAllSimulations = async () => {
@@ -23,5 +23,6 @@ export const getSimulationCountByCategory = async () => {
 
 // Obtenir le chemin HTML d'une simulation (à afficher dans un iframe)
 export const getSimulationHtmlUrl = (simulationId) => {
-  return `${BASE_URL}`;
+  // On suppose que l'URL complète pour afficher une simulation est /simulations/:id/html
+  return `${BASE_URL}/simulations/${simulationId}/html`;
 };

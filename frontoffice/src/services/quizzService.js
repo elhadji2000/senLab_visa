@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/quizzes'; // 🔁 adapte si nécessaire
+const API_URL = "http://localhost:5000/api/quizzes"; // 🔁 adapte si nécessaire
 
 // 🔹 Obtenir tous les quizz publics
 export const getPublicQuizz = async () => {

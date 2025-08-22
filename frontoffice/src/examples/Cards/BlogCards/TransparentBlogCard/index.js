@@ -1,22 +1,4 @@
-/**
-=========================================================
-* Material Kit 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/soft-ui-dashboard-pro-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-// react-router components
 import { Link } from "react-router-dom";
-
-// prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
 
 // @mui material components
@@ -34,7 +16,7 @@ function TransparentBlogCard({ image, title, description, action }) {
     alignItems: "center",
     width: "max-content",
 
-    "& .material-icons, .material-icons-round,": {
+    "& .material-icons, .material-icons-round": {
       transform: `translateX(2px)`,
       transition: "transform 0.2s cubic-bezier(0.34,1.61,0.7,1.3)",
     },
@@ -46,16 +28,22 @@ function TransparentBlogCard({ image, title, description, action }) {
   };
 
   const imageTemplate = (
-    <MKBox position="relative" borderRadius="lg">
+    <MKBox position="relative" borderRadius="lg" mb={2}>
       <MKBox
         component="img"
         src={image}
         alt={title}
         borderRadius="lg"
         shadow="md"
-        width="100%"
-        position="relative"
-        zIndex={1}
+        sx={{
+          width: "150px",
+          height: "150px",
+          objectFit: "cover",
+          display: "block",
+          margin: "0 auto",
+          position: "relative",
+          zIndex: 1,
+        }}
       />
       <MKBox
         borderRadius="lg"
@@ -76,13 +64,7 @@ function TransparentBlogCard({ image, title, description, action }) {
   );
 
   return (
-    <Card
-      sx={{
-        background: "transparent",
-        boxShadow: "none",
-        overflow: "visible",
-      }}
-    >
+    <Card sx={{ background: "transparent", boxShadow: "none", overflow: "visible" }}>
       {action.type === "internal" ? (
         <Link to={action.route}>{imageTemplate}</Link>
       ) : (
@@ -90,23 +72,71 @@ function TransparentBlogCard({ image, title, description, action }) {
           {imageTemplate}
         </MuiLink>
       )}
-      <MKBox pt={2} pb={3}>
+
+      <MKBox pt={1} pb={2} textAlign="center">
         {action.type === "internal" ? (
-          <Link to={action.route} sx={cardActionStyles}>
-            <MKTypography variant="h5" gutterBottom>
+          <Link to={action.route} style={{ textDecoration: "none" }}>
+            <MKTypography
+              variant="h6"
+              gutterBottom
+              sx={{
+                fontSize: "1rem",
+                fontWeight: 600,
+                textAlign: "center",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+              }}
+            >
               {title}
             </MKTypography>
           </Link>
         ) : (
-          <MuiLink href={action.route} target="_blank" rel="noreferrer" sx={cardActionStyles}>
-            <MKTypography variant="h5" gutterBottom>
+          <MuiLink
+            href={action.route}
+            target="_blank"
+            rel="noreferrer"
+            style={{ textDecoration: "none" }}
+          >
+            <MKTypography
+              variant="h6"
+              gutterBottom
+              sx={{
+                fontSize: "1rem",
+                fontWeight: 600,
+                textAlign: "center",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+              }}
+            >
               {title}
             </MKTypography>
           </MuiLink>
         )}
-        <MKTypography variant="body2" component="p" color="text" mb={3}>
+
+        <MKTypography
+          variant="body2"
+          component="p"
+          color="text"
+          mb={1}
+          sx={{
+            fontSize: "0.875rem",
+            textAlign: "center",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
           {description}
         </MKTypography>
+
         {action.type === "internal" ? (
           <MKTypography
             component={Link}
@@ -115,10 +145,10 @@ function TransparentBlogCard({ image, title, description, action }) {
             fontWeight="regular"
             color={action.color}
             textTransform="capitalize"
-            sx={cardActionStyles}
+            sx={{ ...cardActionStyles, mt: 0.5 }}
           >
             {action.label}
-            <Icon sx={{ fontWeight: "bold" }}>arrow_forward</Icon>
+            <Icon sx={{ fontWeight: "bold", ml: 0.5 }}>arrow_forward</Icon>
           </MKTypography>
         ) : (
           <MKTypography
@@ -130,10 +160,10 @@ function TransparentBlogCard({ image, title, description, action }) {
             fontWeight="regular"
             color={action.color}
             textTransform="capitalize"
-            sx={cardActionStyles}
+            sx={{ ...cardActionStyles, mt: 0.5 }}
           >
             {action.label}
-            <Icon sx={{ fontWeight: "bold" }}>arrow_forward</Icon>
+            <Icon sx={{ fontWeight: "bold", ml: 0.5 }}>arrow_forward</Icon>
           </MKTypography>
         )}
       </MKBox>
@@ -141,7 +171,6 @@ function TransparentBlogCard({ image, title, description, action }) {
   );
 }
 
-// Typechecking props for the TransparentBlogCard
 TransparentBlogCard.propTypes = {
   image: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,

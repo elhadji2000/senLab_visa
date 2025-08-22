@@ -1,80 +1,103 @@
-import React, { useContext } from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import Navbar from '../components/Navbar'; // juste en haut
+// AppRouter.jsx
+import React, { useContext, useMemo } from "react";
+import { Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer2 from "../components/Footer2";
+import LoadingSpinner from "../components/LoadingSpinner";
+import Unauthorized from "../pages/Unauthorized";
 
-import Login from '../pages/Login';
-import Footer2 from '../components/Footer2';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Unauthorized from '../pages/Unauthorized';
+import AdminDashboard from "../pages/dashboards/AdminDashboard";
+import TeacherDashboard from "../pages/dashboards/TeacherDashboard";
+import StudentDashboard from "../pages/dashboards/StudentDashboard";
 
-import AdminDashboard from '../pages/dashboards/AdminDashboard';
-import TeacherDashboard from '../pages/dashboards/TeacherDashboard';
-import StudentDashboard from '../pages/dashboards/StudentDashboard';
+import AddUsers from "../pages/users/AddUsers";
+import ListUsers from "../pages/users/ListUsers";
 
-import AddUsers from '../pages/users/AddUsers';
-import ListUsers from '../pages/users/ListUsers';
+import AddQuizz from "../pages/quizz/AddQuizz";
+import ListQuizz from "../pages/quizz/ListQuizz";
 
-import AddQuizz from '../pages/quizz/AddQuizz';
-import ListQuizz from '../pages/quizz/ListQuizz';
+import Toutes from "../pages/simulations/Toutes";
+import Explorer from "../pages/simulations/Explorer";
+import SimulationViewer from "../components/SimulationViewer";
+import Ajouter from "../pages/simulations/Ajouter";
 
-import Toutes from '../pages/simulations/Toutes';
-import Explorer from '../pages/simulations/Explorer';
-import SimulationViewer from '../components/SimulationViewer';
-import Ajouter from '../pages/simulations/Ajouter';
+import ListeClasse from "../pages/professeur/classe/ListeClasse";
+import CreerClasse from "../pages/professeur/classe/CreerClasse";
+import Code from "../pages/professeur/codeClasse/Code";
+import Gestion from "../pages/professeur/eleves/Gestion";
+import FolderClasses from "../pages/professeur/classe/FolderClasses";
+import ClasseDetails from "../pages/professeur/classe/ClasseDetails";
+import AjouterElevesTable from "../pages/professeur/eleves/AjouterElevesTable";
 
-import ListeClasse from '../pages/professeur/classe/ListeClasse';
-import CreerClasse from '../pages/professeur/classe/CreerClasse';
-import Code from '../pages/professeur/codeClasse/Code';
-import Gestion from '../pages/professeur/eleves/Gestion';
-import FolderClasses from '../pages/professeur/classe/FolderClasses';
-import ClasseDetails from '../pages/professeur/classe/ClasseDetails';
-import AjouterElevesTable from '../pages/professeur/eleves/AjouterElevesTable';
+import { AuthContext } from "../contexts/AuthContext";
+import "../App.css";
 
-import { AuthContext } from '../contexts/AuthContext';
-import '../App.css';
+// ⚠️ Mets ici la vraie URL du frontoffice (port différent)
+const FRONT_OFFICE_LOGIN =
+  import.meta.env.VITE_FRONT_LOGIN_URL || "http://localhost:3000/pages/authentication/sign-in";
+
+/** Redirection externe (changement d’origin) */
+const ExternalRedirect = ({ to }) => {
+  React.useEffect(() => {
+    // replace() évite d’ajouter une entrée dans l’historique
+    window.location.replace(to);
+  }, [to]);
+  return <LoadingSpinner fullPage text="Redirection vers la page de connexion..." />;
+};
+
+/** Construit l’URL de login frontoffice avec un param `next` (optionnel) */
+const useFrontLoginUrl = () => {
+  const location = useLocation();
+  return useMemo(() => {
+    try {
+      const url = new URL(FRONT_OFFICE_LOGIN);
+      // après login, le front peut te renvoyer vers `next` si tu le gères
+      url.searchParams.set("next", window.location.origin + location.pathname);
+      return url.toString();
+    } catch {
+      return FRONT_OFFICE_LOGIN; // fallback si FRONT_OFFICE_LOGIN n’est pas une URL absolue
+    }
+  }, [location]);
+};
 
 function AppRouter() {
   const { user, isLoading } = useContext(AuthContext);
+  const frontLoginUrl = useFrontLoginUrl();
 
-  if (isLoading) {
-    return (
-      <>
-        <LoadingSpinner fullPage />
-      </>
-    );
-  }
-
+  if (isLoading) return <LoadingSpinner fullPage />;
 
   return (
     <div className="page-container">
-      {user && <Navbar />}     {/* Affiche la barre uniquement si connecté */}
-      <main className="container-fluid" style={{ marginTop: '90px' }}>
+      {user && <Navbar />}
+      <main className="container-fluid" style={{ marginTop: user ? "90px" : 0 }}>
         <Routes>
-          {/* Routes publiques */}
-          <Route path="/" element={<Navigate to={getDefaultRoute(user?.role)} />} />
-          <Route path="/log" element={user ? <Navigate to={getDefaultRoute(user.role)} /> : <Login />} />
+          {/* Racine */}
+          <Route
+            path="/"
+            element={
+              user ? (
+                <Navigate to={getDefaultRoute(user.role)} replace />
+              ) : (
+                <ExternalRedirect to={frontLoginUrl} />
+              )
+            }
+          />
+
+          {/* Route de “login” interne -> redirige vers le frontoffice */}
+          <Route path="/log" element={<ExternalRedirect to={frontLoginUrl} />} />
 
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Routes protégées */}
+          {/* Protégées */}
           <Route element={<PrivateRoute />}>
-            <Route
-              path="/dashboard"
-              element={
-                user?.role === 'admin' ? <AdminDashboard /> :
-                  user?.role === 'enseignant' ? <TeacherDashboard /> :
-                    <StudentDashboard />
-              }
-            />
+            <Route path="/dashboard" element={<DashboardByRole />} />
 
-            {/* Routes admin seulement */}
-            <Route element={<RoleGuard allowedRoles={['admin']} />}>
+            <Route element={<RoleGuard allowedRoles={["admin"]} />}>
               <Route path="/utilisateur/ajouter" element={<AddUsers />} />
               <Route path="/utilisateur/lister" element={<ListUsers />} />
             </Route>
 
-            {/* Routes admin + enseignant */}
-            <Route element={<RoleGuard allowedRoles={['admin', 'enseignant']} />}>
+            <Route element={<RoleGuard allowedRoles={["admin", "enseignant"]} />}>
               <Route path="/quizz/lister" element={<ListQuizz />} />
               <Route path="/quizz/ajouter" element={<AddQuizz />} />
               <Route path="/quizz/edit/:id" element={<AddQuizz />} />
@@ -88,15 +111,16 @@ function AppRouter() {
               <Route path="/classes/:id/eleves/ajouter" element={<AjouterElevesTable />} />
             </Route>
 
-            {/* Accessible à tout utilisateur connecté */}
             <Route path="/simulations/all1" element={<Toutes />} />
             <Route path="/simulations/explorer" element={<Explorer />} />
-            <Route path="/simulations/ajouter" element={<Ajouter />} />
             <Route path="/simulations/view/:id" element={<SimulationViewer />} />
           </Route>
 
           {/* Fallback */}
-          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/log"} />} />
+          <Route
+            path="*"
+            element={user ? <Navigate to="/dashboard" replace /> : <ExternalRedirect to={frontLoginUrl} />}
+          />
         </Routes>
       </main>
 
@@ -105,29 +129,48 @@ function AppRouter() {
   );
 }
 
-// ✅ Protège les routes (connexion requise)
+/* Guards */
+
 const PrivateRoute = () => {
-  const { user } = useContext(AuthContext);
-  return user ? <Outlet /> : <Navigate to="/log" replace />;
+  const { user, isLoading } = useContext(AuthContext);
+  const frontLoginUrl = useFrontLoginUrl();
+  if (isLoading) return <LoadingSpinner fullPage />;
+  return user ? <Outlet /> : <ExternalRedirect to={frontLoginUrl} />;
 };
 
-// ✅ Protège selon le rôle
 const RoleGuard = ({ allowedRoles }) => {
-  const { user } = useContext(AuthContext);
-
-  if (!user) return <Navigate to="/log" replace />;
+  const { user, isLoading } = useContext(AuthContext);
+  const frontLoginUrl = useFrontLoginUrl();
+  if (isLoading) return <LoadingSpinner fullPage />;
+  if (!user) return <ExternalRedirect to={frontLoginUrl} />;
   if (!allowedRoles.includes(user.role)) return <Navigate to="/unauthorized" replace />;
-
   return <Outlet />;
 };
-const getDefaultRoute = (role) => {
-  switch (role) {
-    case 'admin': return '/dashboard';
-    case 'enseignant': return '/dashboard';
-    case 'etudiant': return '/dashboard';
-    default: return '/log';
+
+const DashboardByRole = () => {
+  const { user } = useContext(AuthContext);
+  if (!user) return null;
+  switch (user.role) {
+    case "admin":
+      return <AdminDashboard />;
+    case "enseignant":
+      return <TeacherDashboard />;
+    case "etudiant":
+      return <StudentDashboard />;
+    default:
+      return <Navigate to="/unauthorized" replace />;
   }
 };
 
+const getDefaultRoute = (role) => {
+  switch (role) {
+    case "admin":
+    case "enseignant":
+    case "etudiant":
+      return "/dashboard";
+    default:
+      return "/unauthorized";
+  }
+};
 
 export default AppRouter;
