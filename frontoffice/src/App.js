@@ -13,6 +13,7 @@ import Presentation from "layouts/pages/presentation";
 import ResponsePage from "layouts/pages/landing-pages/quizzes";
 import Quizzes from "layouts/pages/landing-pages/quizz-all";
 import ViewSimulation from "layouts/pages/landing-pages/view-simu";
+import ChatbotWidget from "components/ChatBot";
 
 // Material Kit 2 React routes
 import routes from "routes";
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/quizz/public" element={<Quizzes />} />
         <Route path="/simulations/:id" element={<ViewSimulation />} />
       </Routes>
+      <ChatbotWidget></ChatbotWidget>
     </ThemeProvider>
   );
 }
