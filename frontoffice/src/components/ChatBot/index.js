@@ -1,210 +1,96 @@
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React from "react";
+import ChatBot from "react-chatbotify";
+
+const API_BASE = "http://localhost:5050";
 
 export default function ChatbotWidget() {
-  const [open, setOpen] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  // --- Flow chatbot ---
+  const flow = {
+    start: {
+      message: "👋 Bonjour ! Posez-moi une question (STEM uniquement).",
+      path: "user_input",
+    },
+    user_input: {
+      message: "Écrivez votre question ci-dessous 👇",
+      user: true,
+      async: true,
+      function: async ({ userInput }) => {
+        try {
+          const response = await fetch(`${API_BASE}/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: userInput }),
+          });
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+          if (!response.body) {
+            return "⚠️ Pas de flux reçu du serveur.";
+          }
 
-  const toggleChat = () => setOpen(!open);
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+          let botAnswer = "";
+          let done = false;
 
-  const sendQuestion = async () => {
-    if (!question.trim()) return;
+          while (!done) {
+            const { value, done: streamDone } = await reader.read();
+            done = streamDone;
 
-    setMessages((prev) => [...prev, { type: "user", text: question }]);
-    setLoading(true);
+            if (value) {
+              const text = decoder.decode(value, { stream: true });
+              const lines = text.split("\n\n");
 
-    try {
-      const response = await fetch("http://127.0.0.1:5050/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
-      });
-      const data = await response.json();
+              for (const line of lines) {
+                if (line.startsWith("data:")) {
+                  const payload = line.replace("data: ", "").trim();
+                  if (payload === "[DONE]") {
+                    return botAnswer; // fin du flux
+                  }
 
-      setMessages((prev) => [...prev, { type: "bot", text: data.answer }]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        { type: "bot", text: "⚠️ Erreur : impossible de contacter le serveur." },
-      ]);
-    } finally {
-      setLoading(false);
-      setQuestion("");
-    }
+                  try {
+                    const json = JSON.parse(payload);
+                    if (json.token) {
+                      botAnswer += json.token;
+                    }
+                  } catch (err) {
+                    console.error("Erreur JSON SSE:", err);
+                  }
+                }
+              }
+            }
+          }
+
+          return botAnswer || "⚠️ Réponse vide du serveur.";
+        } catch (err) {
+          console.error(err);
+          return (
+            "⚠️ Impossible de contacter le serveur. Vérifie que le backend tourne sur : " + API_BASE
+          );
+        }
+      },
+      path: "user_input",
+    },
+  };
+
+  // --- Settings chatbot ---
+  const settings = {
+    showHeader: true,
+    headerTitle: "Assistant IA STEM",
+    hideBranding: true,
+    floating: true,
+    width: "380px",
+    height: "520px",
+    autoFocus: true,
+    placeholder: "Tapez votre question (maths, physique, info, etc.)…",
+  };
+
+  const containerStyle = {
+    zIndex: 2000,
+    position: "relative",
   };
 
   return (
-    <div>
-      {/* Bouton flottant */}
-      <motion.button
-        onClick={toggleChat}
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        style={{
-          position: "fixed",
-          bottom: 20,
-          right: 20,
-          borderRadius: "50%",
-          width: 65,
-          height: 65,
-          background: "linear-gradient(135deg, #007bff, #00d4ff)",
-          color: "#fff",
-          border: "none",
-          cursor: "pointer",
-          fontSize: 26,
-          boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
-          zIndex: 1000,
-        }}
-      >
-        💬
-      </motion.button>
-
-      {/* Modal Chat */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: "fixed",
-              bottom: 100,
-              right: 20,
-              width: 380,
-              height: 520,
-              background: "rgba(255,255,255,0.95)",
-              backdropFilter: "blur(12px)",
-              borderRadius: 20,
-              boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
-              zIndex: 1000,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
-            {/* Header */}
-            <div
-              style={{
-                padding: "15px",
-                background: "linear-gradient(135deg, #007bff, #00d4ff)",
-                color: "#fff",
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
-            >
-              🔮 Assistant IA
-            </div>
-
-            {/* Messages */}
-            <div style={{ flex: 1, padding: 15, overflowY: "auto" }}>
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  style={{
-                    textAlign: msg.type === "user" ? "right" : "left",
-                    marginBottom: 10,
-                  }}
-                >
-                  <span
-                    style={{
-                      background:
-                        msg.type === "user"
-                          ? "linear-gradient(135deg, #007bff, #00d4ff)"
-                          : "#f1f1f1",
-                      color: msg.type === "user" ? "#fff" : "#000",
-                      padding: "8px 14px",
-                      borderRadius: 18,
-                      display: "inline-block",
-                      maxWidth: "80%",
-                      wordBreak: "break-word",
-                      boxShadow:
-                        msg.type === "user"
-                          ? "0 4px 10px rgba(0,123,255,0.3)"
-                          : "0 2px 5px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {msg.text}
-                  </span>
-                </div>
-              ))}
-
-              {/* Loader quand bot réfléchit */}
-              {loading && (
-                <div style={{ textAlign: "left", marginBottom: 10 }}>
-                  <span
-                    style={{
-                      background: "#f1f1f1",
-                      color: "#555",
-                      padding: "8px 14px",
-                      borderRadius: 18,
-                      display: "inline-block",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    ...
-                  </span>
-                </div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input */}
-            <div
-              style={{
-                display: "flex",
-                padding: 12,
-                borderTop: "1px solid #eee",
-                background: "#fafafa",
-              }}
-            >
-              <input
-                type="text"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Écrire un message..."
-                style={{
-                  flex: 1,
-                  padding: "10px 14px",
-                  borderRadius: 25,
-                  border: "1px solid #ccc",
-                  outline: "none",
-                  fontSize: 14,
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") sendQuestion();
-                }}
-              />
-              <button
-                onClick={sendQuestion}
-                disabled={loading}
-                style={{
-                  marginLeft: 8,
-                  padding: "10px 16px",
-                  borderRadius: 25,
-                  background: "linear-gradient(135deg, #007bff, #00d4ff)",
-                  color: "#fff",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  boxShadow: "0 4px 10px rgba(0,123,255,0.3)",
-                }}
-              >
-                ➤
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div style={containerStyle}>
+      <ChatBot flow={flow} settings={settings} />
     </div>
   );
 }

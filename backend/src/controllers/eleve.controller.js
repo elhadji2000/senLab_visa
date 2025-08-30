@@ -1,5 +1,9 @@
 const Eleve = require('../models/Eleve.model');
-const Classe = require('../models/Classe.model'); // Pour vérifier la propriété user
+const Classe = require('../models/Classe.model');
+const CodeClasse = require('../models/codeClasse.model');
+const User = require("../models/User.model"); // adapte le chemin
+const Quiz = require("../models/Quiz.model");
+
 
 // Récupérer les élèves d'une classe spécifique
 const mongoose = require('mongoose');
@@ -252,3 +256,78 @@ exports.countElevesParClasse = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+// Dashboard utilisateur : infos globales
+exports.getUserDashboard = async (req, res) => {
+  try {
+    let eleves, classes, codeClasses, totalQuizzes, totalUsers;
+
+    if (req.user.role === "admin") {
+      // Admin -> toutes les infos
+      classes = await Classe.find().select("nom_classe user");
+      eleves = await Eleve.find().populate("classe", "nom_classe");
+      codeClasses = await CodeClasse.find().populate("classe", "nom_classe");
+
+      // Admin -> tous les quizzes et tous les users
+      totalQuizzes = await Quiz.countDocuments();
+      totalUsers = await User.countDocuments();
+    } else {
+      // Récupérer les classes de l'utilisateur connecté
+      classes = await Classe.find({ user: req.user._id }).select("nom_classe");
+
+      const classIds = classes.map(c => c._id);
+
+      eleves = await Eleve.find({ classe: { $in: classIds } }).populate("classe", "nom_classe");
+      codeClasses = await CodeClasse.find({ classe: { $in: classIds } }).populate("classe", "nom_classe");
+
+      // Quizzes créés par cet utilisateur
+      totalQuizzes = await Quiz.countDocuments({ user: req.user._id });
+
+      // Pas logique de donner tous les users à un prof -> on renvoie que lui-même
+      totalUsers = 1;
+    }
+
+    // Compter le total d'élèves
+    const totalEleves = eleves.length;
+
+    // Compter le total de classes
+    const totalClasses = classes.length;
+
+    // Compter le total de codesClasse
+    const totalCodeClasses = codeClasses.length;
+
+    // Compter les élèves par classe
+    const countsByClasse = {};
+    eleves.forEach(e => {
+      const classeId = e.classe?._id?.toString();
+      if (classeId) {
+        countsByClasse[classeId] = (countsByClasse[classeId] || 0) + 1;
+      }
+    });
+
+    res.json({
+      success: true,
+      user: {
+        id: req.user._id,
+        nom: req.user.nom,
+        prenom: req.user.prenom,
+        email: req.user.email,
+        role: req.user.role,
+      },
+      stats: {
+        totalEleves,
+        totalClasses,
+        totalCodeClasses,
+        totalQuizzes,  // ✅ ajouté
+        totalUsers,    // ✅ ajouté
+        elevesParClasse: countsByClasse,
+      },
+      classes,
+      eleves,
+      codeClasses,
+    });
+  } catch (error) {
+    console.error("Erreur getUserDashboard:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+

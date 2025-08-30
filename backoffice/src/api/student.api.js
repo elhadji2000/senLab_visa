@@ -4,6 +4,12 @@ import axiosInstance from './axiosInstance';
 export const addEleve = (eleveData) => {
   return axiosInstance.post('/api/eleves/add', eleveData);
 };
+export const fetchDashboard = () => {
+  return axiosInstance.get('/api/eleves/dashboard');
+};
+export const fetchDashboardResultats = () => {
+  return axiosInstance.get('/api/resultats/dashboard');
+};
 // Ajouter plusieurs élèves à la fois
 export const addMultipleEleves = (eleves) => {
   return axiosInstance.post('/api/eleves/add-multiple', eleves);

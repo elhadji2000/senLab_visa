@@ -1,4 +1,93 @@
 const Resultat = require("../models/Resultat.model");
+const Quiz = require("../models/Quiz.model");
+const Classe = require("../models/Classe.model");
+const Eleve = require("../models/Eleve.model");
+
+exports.getResultatsDashboard = async (req, res) => {
+  try {
+    // ⚡ Charger tous les résultats de l'utilisateur connecté
+    const resultats = await Resultat.find()
+      .populate({
+        path: "eleve",
+        select: "nom prenom classe",
+        populate: { path: "classe", select: "nom_classe" }, // ✅ bien peupler la classe
+      })
+      .populate("quiz", "titre");
+
+    if (resultats.length === 0) {
+      return res.json({
+        success: true,
+        tauxReussite: 0,
+        evaluations: [],
+      });
+    }
+
+    // ➗ Calcul taux de réussite global
+    let totalPourcentages = 0;
+    let countValides = 0;
+
+    resultats.forEach((r) => {
+      if (r.note) {
+        const [numerateur, denominateur] = r.note.split("/").map(Number);
+        if (denominateur > 0) {
+          const pourcentage = (numerateur / denominateur) * 100;
+          totalPourcentages += pourcentage;
+          countValides++;
+        }
+      }
+    });
+
+    const tauxReussite =
+      countValides > 0 ? (totalPourcentages / countValides).toFixed(2) : 0;
+
+    // 📋 Evaluations récentes (par quiz)
+    const evaluationsMap = {};
+
+    resultats.forEach((r) => {
+      if (!r.quiz?._id) return;
+
+      const quizId = r.quiz._id.toString();
+      if (!evaluationsMap[quizId]) {
+        evaluationsMap[quizId] = {
+          id: quizId,
+          title: r.quiz.titre,
+          class: r.eleve?.classe?.nom_classe || "N/A",
+          submissions: 0,
+          totalPourcentages: 0,
+          countNotes: 0,
+        };
+      }
+
+      evaluationsMap[quizId].submissions++;
+      if (r.note) {
+        const [num, den] = r.note.split("/").map(Number);
+        if (den > 0) {
+          evaluationsMap[quizId].totalPourcentages += (num / den) * 100;
+          evaluationsMap[quizId].countNotes++;
+        }
+      }
+    });
+
+    const evaluations = Object.values(evaluationsMap).map((e) => ({
+      id: e.id,
+      title: e.title,
+      class: e.class,
+      submissions: e.submissions,
+      average:
+        e.countNotes > 0
+          ? (e.totalPourcentages / e.countNotes).toFixed(2)
+          : null,
+    }));
+
+    res.json({
+      success: true,
+      tauxReussite,
+      evaluations,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 // ➕ Ajouter un résultat
 exports.ajouterResultat = async (req, res) => {
@@ -36,7 +125,7 @@ exports.listResultatsParClasse = async (req, res) => {
         select: "nom prenom email classe", // on récupère la classe de l'élève
         populate: {
           path: "classe",
-          select: "nom" // optionnel : récupérer aussi le nom de la classe
+          select: "nom", // optionnel : récupérer aussi le nom de la classe
         },
       })
       .populate("quiz", "titre categorie");
@@ -52,7 +141,6 @@ exports.listResultatsParClasse = async (req, res) => {
   }
 };
 
-
 // 🔍 Obtenir un résultat par ID
 exports.getResultatById = async (req, res) => {
   try {
@@ -60,7 +148,8 @@ exports.getResultatById = async (req, res) => {
       .populate("quiz")
       .populate("eleve");
 
-    if (!resultat) return res.status(404).json({ message: "Résultat non trouvé" });
+    if (!resultat)
+      return res.status(404).json({ message: "Résultat non trouvé" });
     res.json(resultat);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -94,8 +183,11 @@ exports.getResultatsByQuiz = async (req, res) => {
 // ✏️ Modifier un résultat
 exports.updateResultat = async (req, res) => {
   try {
-    const updated = await Resultat.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ message: "Résultat introuvable" });
+    const updated = await Resultat.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!updated)
+      return res.status(404).json({ message: "Résultat introuvable" });
     res.json({ message: "Résultat mis à jour", resultat: updated });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -106,7 +198,8 @@ exports.updateResultat = async (req, res) => {
 exports.deleteResultat = async (req, res) => {
   try {
     const deleted = await Resultat.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Résultat non trouvé" });
+    if (!deleted)
+      return res.status(404).json({ message: "Résultat non trouvé" });
     res.json({ message: "Résultat supprimé" });
   } catch (error) {
     res.status(500).json({ error: error.message });

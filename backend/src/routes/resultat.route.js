@@ -5,13 +5,16 @@ const authenticate = require('../middleware/authMiddleware'); // Si vous protég
 
 router.use(authenticate); // Toutes les routes nécessitent une authentification
 
+// 📊 Dashboard résultats
+router.get('/dashboard', resultatController.getResultatsDashboard);
+
 // CRUD + filtres
 router.post('/add', resultatController.ajouterResultat);
 router.get('/all', resultatController.listResultats);
 router.get('/count', resultatController.countResultats);
 router.get('/:id', resultatController.getResultatById);
 router.get('/eleve/:eleveId', resultatController.getResultatsByEleve);
-router.get("/par-classe/:classeId", resultatController.listResultatsParClasse);
+router.get('/par-classe/:classeId', resultatController.listResultatsParClasse);
 router.get('/quiz/:quizId', resultatController.getResultatsByQuiz);
 router.put('/update/:id', resultatController.updateResultat);
 router.delete('/delete/:id', resultatController.deleteResultat);
