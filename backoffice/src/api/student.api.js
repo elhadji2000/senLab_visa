@@ -4,6 +4,15 @@ import axiosInstance from './axiosInstance';
 export const addEleve = (eleveData) => {
   return axiosInstance.post('/api/eleves/add', eleveData);
 };
+// Importer des élèves depuis Excel
+export const importElevesFromExcel = (formData) => {
+  return axiosInstance.post('/api/eleves/import-excel', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 export const fetchDashboard = () => {
   return axiosInstance.get('/api/eleves/dashboard');
 };

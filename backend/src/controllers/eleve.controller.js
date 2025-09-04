@@ -8,6 +8,79 @@ const Quiz = require("../models/Quiz.model");
 // Récupérer les élèves d'une classe spécifique
 const mongoose = require('mongoose');
 
+const multer = require("multer");
+const xlsx = require("xlsx");
+const path = require("path");
+const fs = require("fs");
+
+// Configuration multer pour upload temporaire
+const upload = multer({ dest: "uploads/" });
+
+// Middleware pour utiliser dans la route
+exports.uploadExcel = upload.single("file");
+
+// Importer des élèves depuis un fichier Excel
+exports.importElevesFromExcel = async (req, res) => {
+  try {
+    const file = req.file;
+    const { classId } = req.body;
+
+    if (!file) {
+      return res.status(400).json({ success: false, message: "Fichier Excel manquant." });
+    }
+
+    if (!classId) {
+      return res.status(400).json({ success: false, message: "ID de classe requis." });
+    }
+
+    // Vérifier si la classe existe
+    const classe = await Classe.findById(classId);
+    if (!classe) {
+      return res.status(404).json({ success: false, message: "Classe introuvable." });
+    }
+
+    // Lire le fichier Excel
+    const workbook = xlsx.readFile(file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    if (!data || data.length === 0) {
+      return res.status(400).json({ success: false, message: "Fichier Excel vide." });
+    }
+
+    // Mapper les données Excel au modèle Eleve
+    const elevesToInsert = data.map((row) => ({
+      nom: row.Nom || row.nom,
+      prenom: row.Prénom || row.prenom,
+      email: row.Email || row.email || "",
+      telephone: row.telephone || row.Téléphone ||row.téléphone || "",
+      date_naissance: row.DateNaissance ? new Date(row.DateNaissance) : null,
+      classe: classId,
+    }));
+
+    // Vérifier si l'utilisateur a le droit d'ajouter dans cette classe
+    if (req.user.role !== "admin" && String(classe.user) !== String(req.user._id)) {
+      return res.status(403).json({ success: false, message: "Vous n'avez pas l'autorisation d'ajouter des élèves dans cette classe." });
+    }
+
+    // Insérer dans MongoDB
+    const insertedEleves = await Eleve.insertMany(elevesToInsert);
+
+    // Supprimer le fichier temporaire
+    fs.unlinkSync(file.path);
+
+    res.status(201).json({
+      success: true,
+      message: `${insertedEleves.length} élèves importés avec succès.`,
+      eleves: insertedEleves,
+    });
+  } catch (error) {
+    console.error("Erreur importElevesFromExcel:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 exports.getElevesByClasse = async (req, res) => {
   try {
     const classeId = req.params.id;

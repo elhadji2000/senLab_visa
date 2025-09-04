@@ -69,7 +69,7 @@ const routes = [
       {
         name: "Quizzes",
         description: "See all quizzes",
-        route: "/sections/navigation/navbars",
+        route: "/sections/quizz/all",
         component: <Quizzes />,
       },
     ],

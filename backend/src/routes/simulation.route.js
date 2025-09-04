@@ -36,22 +36,20 @@ router.post(
   ]),
   simulationController.createSimulation
 );
-
-// Supprimer une simulation
-router.delete('/:id', authenticate, simulationController.deleteSimulation);
-
-/* ==========  PUBLIC ROUTES ========== */
-
-//Récupérer toutes les simulations
+// Récupérer toutes les simulations
 router.get('/', simulationController.getAllSimulations);
+
 // Route privée — simulations de l'utilisateur connecté (ou tout si admin)
 router.get('/byuser', authenticate, simulationController.getSimulationsByUser);
 
-// Récupérer une simulation par ID
-router.get('/:id', simulationController.getSimulationById);
-
 // Statistiques par catégorie
 router.get('/count', simulationController.countByCategory);
+
+// Récupérer une simulation par ID (⚠️ doit être après /count et /byuser)
+router.get('/:id', simulationController.getSimulationById);
+
+// Supprimer une simulation
+router.delete('/:id', authenticate, simulationController.deleteSimulation);
 
 router.get('/html/:simulationId', (req, res) => {
   const buildDir = path.join(__dirname, '..', 'uploads', 'extracted', req.params.simulationId);

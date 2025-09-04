@@ -33,8 +33,7 @@ function Posts() {
       display="flex"
       flexDirection="column"
       width="100%"
-      height="100vh"
-      overflow="hidden"
+      // ❌ on enlève height="100vh" et overflow="hidden"
       position="relative"
     >
       {/* En-tête de la simulation */}
@@ -47,19 +46,18 @@ function Posts() {
         </MKTypography>
       </MKBox>
 
-      {/* Iframe qui prend tout le reste de l'espace */}
-      <MKBox flexGrow={1} height="100vh" overflow="hidden">
+      {/* Iframe sans contrainte de viewport */}
+      <MKBox width="100%">
         {simulation.iframeUrl && (
-          <Grid container sx={{ height: "100%" }}>
-            <Grid item xs={12} sx={{ height: "100%" }}>
+          <Grid container>
+            <Grid item xs={12}>
               <iframe
                 src={`http://localhost:5000${simulation.iframeUrl}`}
                 title={simulation.titre}
                 style={{
                   width: "100%",
-                  height: "100%",
+                  minHeight: "1000px", // 👈 mettre une hauteur minimum au lieu de "100vh"
                   border: "none",
-                  overflow: "hidden",
                 }}
                 allowFullScreen
               />

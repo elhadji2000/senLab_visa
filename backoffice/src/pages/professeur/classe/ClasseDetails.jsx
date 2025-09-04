@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Spinner, Alert, ButtonGroup } from "react-bootstrap";
@@ -37,7 +38,7 @@ const ClasseDetails = () => {
 
   const handleDeleteClass = async () => {
     try {
-      await deleteClass(classe._id);
+      await deleteClass(classe.classe?._id);
       toast.success("Classe supprimée avec succès !");
       setShowDeleteModal(false);
       // Redirection après suppression
@@ -68,10 +69,10 @@ const ClasseDetails = () => {
           {/* En-tête de la classe */}
           <Card className="mb-4 shadow-sm">
             <Card.Body>
-              <h4 className="text-primary mb-2">{classe.nom_classe}</h4>
+              <h4 className="text-primary mb-2">{classe.classe?.nom_classe}</h4>
               <p className="text-muted mb-1">
-                <strong>Niveau :</strong> {classe.niveau} |{" "}
-                <strong>Année :</strong> {classe.annee_scolaire}
+                <strong>Niveau :</strong> {classe.classe?.niveau} |{" "}
+                <strong>Année :</strong> {classe.classe?.annee_scolaire}
               </p>
               
               <div className="d-flex flex-wrap gap-2 mt-3">
@@ -118,7 +119,7 @@ const ClasseDetails = () => {
         {/* Colonne latérale */}
         <Col lg={3}>
           <ClassInfoSidebar 
-            classData={classe} 
+            classData={classe.classe} 
             studentCount={classe.eleves?.length || 0} 
           />
         </Col>
@@ -128,7 +129,7 @@ const ClasseDetails = () => {
       <DeleteClassModal
         show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
-        className={classe.nom_classe}
+        className={classe.classe?.nom_classe}
         onDelete={handleDeleteClass}
       />
     </Container>

@@ -7,13 +7,20 @@ app = Flask(__name__)
 CORS(app)
 
 # Précharger le modèle une fois
-print("⏳ Chargement du modèle llama3 ...")
+system_prompt = (
+    "Tu es un assistant spécialisé uniquement dans les sciences STEM "
+    "(Mathématiques, Physique, Chimie, Informatique, Biologie). "
+    "Ne réponds jamais à des questions hors STEM. "
+    "Donne des explications claires adaptées à des élèves de niveau secondaire, "
+    "avec des exemples simples et pédagogiques si nécessaire."
+)
+
+print("⏳ Chargement du modèle llama3 avec spécialisation STEM ...")
 ollama.chat(
     model="llama3",
-    messages=[{"role": "system", "content": "Initialisation du modèle..."}]
+    messages=[{"role": "system", "content": system_prompt}]
 )
-print("✅ Modèle prêt en mémoire")
-
+print("✅ Modèle prêt et spécialisé STEM")
 
 # ==============================
 # Endpoint /chat (streaming)
@@ -25,10 +32,19 @@ def chat_stream():
 
     def generate():
         try:
+            # Prompt system amélioré pour spécialisation STEM
+            system_prompt = (
+                "Tu es un assistant spécialisé uniquement dans les sciences STEM "
+                "(Mathématiques, Physique, Chimie, Informatique, Biologie). "
+                "Ne réponds jamais à des questions hors STEM. "
+                "Donne des explications claires, adaptées à des élèves de niveau secondaire, "
+                "avec des exemples simples et pédagogiques si nécessaire."
+            )
+
             stream = ollama.chat(
                 model="llama3",
                 messages=[
-                    {"role": "system", "content": "Tu es un assistant spécialisé uniquement dans les sciences STEM."},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": question}
                 ],
                 stream=True  # ⚡ active le streaming
@@ -37,7 +53,6 @@ def chat_stream():
             for chunk in stream:
                 if "message" in chunk and "content" in chunk["message"]:
                     token = chunk["message"]["content"]
-                    # on envoie un JSON ligne par ligne
                     yield f"data: {json.dumps({'token': token})}\n\n"
 
             # fin du stream

@@ -28,7 +28,7 @@ import {
 import { fetchDashboard } from "../../api/student.api";
 import { fetchDashboardResultats } from "../../api/student.api";
 
-const TeacherDashboard = () => {
+const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -319,4 +319,4 @@ const TeacherDashboard = () => {
   );
 };
 
-export default TeacherDashboard;
+export default AdminDashboard;

@@ -22,20 +22,25 @@ exports.getSimulationsByUser = async (req, res) => {
       return res.status(401).json({ message: "Non autorisé" });
     }
 
-    const filter = req.user.role === "admin"
-      ? {} // admin voit tout
-      : { user: req.user._id }; // autres ne voient que leurs propres simulations
+    let filter = {};
+
+    // Vérifier le rôle
+    if (req.user.role !== "admin") {
+      // Pour les non-admins : voir uniquement leurs propres simulations
+      filter = { user: req.user._id };
+    }
 
     const simulations = await Simulation.find(filter)
       .sort({ createdAt: -1 })
       .populate("user", "prenom nom email");
 
-    res.status(200).json(simulations);
+    return res.status(200).json(simulations);
   } catch (error) {
     console.error("Erreur getSimulationsByUser:", error);
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
+
 
 
 // Ajouter une simulation avec extraction du zip
@@ -49,14 +54,15 @@ exports.createSimulation = async (req, res) => {
       return res.status(400).json({ error: 'Fichiers manquants (photo ou simulation)' });
     }
 
-    // Création de la simulation (préliminaire)
+    // Création de la simulation (avec lien vers l'utilisateur connecté)
     const simulation = new Simulation({
       titre,
       description,
       categorie,
       niveau,
       photo: `/uploads/${photoFile.filename}`,
-      simulation: simFile.filename
+      simulation: simFile.filename,
+      user: req.user._id   // 🔥 Ajout de l’ID utilisateur
     });
 
     await simulation.save();
@@ -92,6 +98,7 @@ exports.createSimulation = async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
+
 
 // Obtenir une simulation par ID
 exports.getSimulationById = async (req, res) => {

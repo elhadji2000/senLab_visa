@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Spinner, Alert, Button, Modal, Card, Badge, Form } from 'react-bootstrap';
 import { EyeFill, PencilFill, TrashFill, PlusCircleFill, LockFill, UnlockFill } from 'react-bootstrap-icons';
@@ -189,7 +190,7 @@ const ListQuizz = () => {
                     <th style={{width: '12%'}}>Dicipline</th>
                     <th style={{width: '10%'}}>Questions</th>
                     <th style={{width: '10%'}}>Visibilité</th>
-                    <th style={{width: '10%'}}>Créé par</th>
+                    {/* <th style={{width: '10%'}}>Créé par</th> */}
                     <th style={{width: '13%'}} className="text-end">Actions</th>
                   </tr>
                 </thead>
@@ -224,9 +225,9 @@ const ListQuizz = () => {
                           {quiz.isPublic ? 'Public' : 'Privé'}
                         </Button>
                       </td>
-                      <td className="align-middle">
+                      {/* <td className="align-middle">
                         {quiz.user?.prenom} {quiz.user?.nom}
-                      </td>
+                      </td> */}
                       <td className="align-middle text-end">
                         <Button 
                           variant="outline-primary" 

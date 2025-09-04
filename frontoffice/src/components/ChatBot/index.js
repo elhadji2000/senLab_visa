@@ -1,96 +1,135 @@
-import React from "react";
-import ChatBot from "react-chatbotify";
+import React, { useState, useRef, useEffect } from "react";
+import { MessageCircle, X } from "lucide-react";
+import "./styles.css";
 
-const API_BASE = "http://localhost:5050";
+const API_BASE = "http://127.0.0.1:5050";
 
 export default function ChatbotWidget() {
-  // --- Flow chatbot ---
-  const flow = {
-    start: {
-      message: "👋 Bonjour ! Posez-moi une question (STEM uniquement).",
-      path: "user_input",
-    },
-    user_input: {
-      message: "Écrivez votre question ci-dessous 👇",
-      user: true,
-      async: true,
-      function: async ({ userInput }) => {
-        try {
-          const response = await fetch(`${API_BASE}/chat`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: userInput }),
-          });
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: "bot", content: "👋 Bonjour ! Posez-moi une question (STEM uniquement)." },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const chatEndRef = useRef(null);
 
-          if (!response.body) {
-            return "⚠️ Pas de flux reçu du serveur.";
-          }
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder("utf-8");
-          let botAnswer = "";
-          let done = false;
+  const sendMessage = async () => {
+    if (!input.trim()) return;
 
-          while (!done) {
-            const { value, done: streamDone } = await reader.read();
-            done = streamDone;
+    const userMessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
 
-            if (value) {
-              const text = decoder.decode(value, { stream: true });
-              const lines = text.split("\n\n");
+    try {
+      const response = await fetch(`${API_BASE}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: input }),
+      });
 
-              for (const line of lines) {
-                if (line.startsWith("data:")) {
-                  const payload = line.replace("data: ", "").trim();
-                  if (payload === "[DONE]") {
-                    return botAnswer; // fin du flux
-                  }
+      if (!response.body) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "bot", content: "⚠️ Pas de flux reçu du serveur." },
+        ]);
+        return;
+      }
 
-                  try {
-                    const json = JSON.parse(payload);
-                    if (json.token) {
-                      botAnswer += json.token;
-                    }
-                  } catch (err) {
-                    console.error("Erreur JSON SSE:", err);
-                  }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let botAnswer = "";
+      let done = false;
+
+      setMessages((prev) => [...prev, { role: "bot", content: "" }]);
+
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        done = streamDone;
+
+        if (value) {
+          const text = decoder.decode(value, { stream: true });
+          const lines = text.split("\n\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data:")) {
+              const payload = line.replace("data: ", "").trim();
+              if (payload === "[DONE]") {
+                setIsLoading(false);
+                return;
+              }
+
+              try {
+                const json = JSON.parse(payload);
+                if (json.token) {
+                  botAnswer += json.token;
+                  setMessages((prev) => {
+                    const updated = [...prev];
+                    updated[updated.length - 1].content = botAnswer;
+                    return updated;
+                  });
                 }
+              } catch (err) {
+                console.error("Erreur JSON SSE:", err);
               }
             }
           }
-
-          return botAnswer || "⚠️ Réponse vide du serveur.";
-        } catch (err) {
-          console.error(err);
-          return (
-            "⚠️ Impossible de contacter le serveur. Vérifie que le backend tourne sur : " + API_BASE
-          );
         }
-      },
-      path: "user_input",
-    },
-  };
-
-  // --- Settings chatbot ---
-  const settings = {
-    showHeader: true,
-    headerTitle: "Assistant IA STEM",
-    hideBranding: true,
-    floating: true,
-    width: "380px",
-    height: "520px",
-    autoFocus: true,
-    placeholder: "Tapez votre question (maths, physique, info, etc.)…",
-  };
-
-  const containerStyle = {
-    zIndex: 2000,
-    position: "relative",
+      }
+    } catch (err) {
+      console.error(err);
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", content: "⚠️ Impossible de contacter le serveur." },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div style={containerStyle}>
-      <ChatBot flow={flow} settings={settings} />
-    </div>
+    <>
+      <button onClick={() => setIsOpen(!isOpen)} className="chatbot-button">
+        {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
+      </button>
+
+      {isOpen && (
+        <div className="chatbot-window">
+          <div className="chatbot-header">
+            <h2>Assistant IA STEM</h2>
+            <button onClick={() => setIsOpen(false)}>
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="chatbot-messages">
+            {messages.map((msg, i) => (
+              <div key={i} className={`chatbot-message ${msg.role === "user" ? "user" : "bot"}`}>
+                {msg.content}
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+
+          <div className="chatbot-input">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              placeholder="Écrivez votre question…"
+              disabled={isLoading}
+            />
+            <button onClick={sendMessage} disabled={isLoading}>
+              Envoyer
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

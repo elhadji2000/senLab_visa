@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
 import { FaAsterisk, FaUserPlus, FaCheck } from 'react-icons/fa';
@@ -171,10 +172,8 @@ function AddUsers() {
                 required
               >
                 <option value="">Sélectionnez un rôle</option>
-                <option value="admin">Administrateur</option>
-                <option value="enseignant">enseignant</option>
-                <option value="etudiant">etudiant</option>
-                <option value="responsable">responsable</option>
+                <option value="admin">Admin</option>
+                <option value="professeur">Professeur</option>
               </Form.Select>
             </Form.Group>
           </Col>

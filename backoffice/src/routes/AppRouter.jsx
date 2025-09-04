@@ -97,7 +97,7 @@ function AppRouter() {
               <Route path="/utilisateur/lister" element={<ListUsers />} />
             </Route>
 
-            <Route element={<RoleGuard allowedRoles={["admin", "enseignant"]} />}>
+            <Route element={<RoleGuard allowedRoles={["admin", "professeur"]} />}>
               <Route path="/quizz/lister" element={<ListQuizz />} />
               <Route path="/quizz/ajouter" element={<AddQuizz />} />
               <Route path="/quizz/edit/:id" element={<AddQuizz />} />
@@ -153,7 +153,7 @@ const DashboardByRole = () => {
   switch (user.role) {
     case "admin":
       return <AdminDashboard />;
-    case "enseignant":
+    case "professeur":
       return <TeacherDashboard />;
     case "etudiant":
       return <StudentDashboard />;
@@ -165,7 +165,7 @@ const DashboardByRole = () => {
 const getDefaultRoute = (role) => {
   switch (role) {
     case "admin":
-    case "enseignant":
+    case "professeur":
     case "etudiant":
       return "/dashboard";
     default:

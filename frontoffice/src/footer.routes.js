@@ -8,84 +8,72 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import MKTypography from "components/MKTypography";
 
 // Images
-import logoCT from "assets/images/logo-ct-dark.png";
+import logoCT from "assets/logoLab.jpg";
 
 const date = new Date().getFullYear();
 
 export default {
   brand: {
-    name: "Material Kit 2",
+    name: "SENLAB_VISA",
     image: logoCT,
     route: "/",
   },
   socials: [
     {
       icon: <FacebookIcon />,
-      link: "https://www.facebook.com/CreativeTim/",
+      link: "#",
     },
     {
       icon: <TwitterIcon />,
-      link: "https://twitter.com/creativetim",
+      link: "#",
     },
     {
       icon: <GitHubIcon />,
-      link: "https://github.com/creativetimofficial",
+      link: "#",
     },
     {
       icon: <YouTubeIcon />,
-      link: "https://www.youtube.com/channel/UCVyTG4sCw-rOvB9oHkzZD1w",
+      link: "#",
     },
   ],
   menus: [
     {
-      name: "company",
+      name: "À propos",
       items: [
-        { name: "about us", href: "https://www.creative-tim.com/presentation" },
-        { name: "freebies", href: "https://www.creative-tim.com/templates/free" },
-        { name: "premium tools", href: "https://www.creative-tim.com/templates/premium" },
-        { name: "blog", href: "https://www.creative-tim.com/blog" },
+        { name: "Qui sommes-nous ?", href: "#" },
+        { name: "Notre mission", href: "#" },
+        { name: "Équipe de recherche", href: "#" },
+        { name: "Actualités", href: "#" },
       ],
     },
     {
-      name: "resources",
+      name: "Ressources",
       items: [
-        { name: "illustrations", href: "https://iradesign.io/" },
-        { name: "bits & snippets", href: "https://www.creative-tim.com/bits" },
-        { name: "affiliate program", href: "https://www.creative-tim.com/affiliates/new" },
+        { name: "Documentation", href: "#" },
+        { name: "Tutoriels", href: "#" },
+        { name: "Guides pratiques", href: "#" },
       ],
     },
     {
-      name: "help & support",
+      name: "Aide & Support",
       items: [
-        { name: "contact us", href: "https://www.creative-tim.com/contact-us" },
-        { name: "knowledge center", href: "https://www.creative-tim.com/knowledge-center" },
-        { name: "custom development", href: "https://services.creative-tim.com/" },
-        { name: "sponsorships", href: "https://www.creative-tim.com/sponsorships" },
+        { name: "Contact", href: "#" },
+        { name: "FAQ", href: "#" },
+        { name: "Centre d’assistance", href: "#" },
       ],
     },
     {
-      name: "legal",
+      name: "Légal",
       items: [
-        { name: "terms & conditions", href: "https://www.creative-tim.com/terms" },
-        { name: "privacy policy", href: "https://www.creative-tim.com/privacy" },
-        { name: "licenses (EULA)", href: "https://www.creative-tim.com/license" },
+        { name: "Conditions d’utilisation", href: "#" },
+        { name: "Politique de confidentialité", href: "#" },
+        { name: "Mentions légales", href: "#" },
       ],
     },
   ],
   copyright: (
     <MKTypography variant="button" fontWeight="regular">
-      All rights reserved. Copyright &copy; {date} Material Kit by{" "}
-      <MKTypography
-        component="a"
-        href="https://www.creative-tim.com"
-        target="_blank"
-        rel="noreferrer"
-        variant="button"
-        fontWeight="regular"
-      >
-        Creative Tim
-      </MKTypography>
-      .
+      © {date} SENLAB_VISA — Laboratoire Virtuel. Tous droits réservés.
     </MKTypography>
   ),
 };

@@ -156,8 +156,8 @@ function AdminDashboard() {
       </Box>
 
       {/* Statistiques principales */}
-      <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid container spacing={3} mb={5}>
+        <Grid item xs={12} sm={6} md={5}>
           <Card sx={{ boxShadow: 3, borderRadius: 3, p: 2, height: "100%" }}>
             <CardContent>
               <Box display="flex" alignItems="center" mb={2}>

@@ -9,10 +9,10 @@ import MKTypography from "components/MKTypography";
 import HorizontalTeamCard from "examples/Cards/TeamCards/HorizontalTeamCard";
 
 // Images
-import team1 from "assets/masse.jpg";
-import team2 from "assets/mum.jpg";
-import team3 from "assets/thio.jpg";
-import team4 from "assets/sylla.jpg";
+import team1 from "assets/ass.jpg";
+import team2 from "assets/basse.jpg";
+import team3 from "assets/kasse.jpg";
+import team4 from "assets/ousmane.jpg";
 
 function Team() {
   return (
@@ -43,9 +43,9 @@ function Team() {
             <MKBox mb={1}>
               <HorizontalTeamCard
                 image={team1}
-                name="Pr. [Nom de l’encadrant]"
-                position={{ color: "info", label: "Encadrant principal" }}
-                description="Professeur en informatique, "
+                name="Mr Elhadji Madiop DIOP"
+                position={{ color: "info", label: "Ingenieur" }}
+                description="Spécialiste en systèmes informatiques, "
               />
             </MKBox>
           </Grid>
@@ -53,9 +53,9 @@ function Team() {
             <MKBox mb={1}>
               <HorizontalTeamCard
                 image={team2}
-                name="Dr. [Nom]"
-                position={{ color: "info", label: "Enseignant-chercheur" }}
-                description="Spécialiste en systèmes informatiques, "
+                name="Pr Basse"
+                position={{ color: "info", label: "Professeur & Enseignant-chercheur" }}
+                description="Spécialiste en systèmes informatiques"
               />
             </MKBox>
           </Grid>
@@ -63,9 +63,9 @@ function Team() {
             <MKBox mb={{ xs: 1, lg: 0 }}>
               <HorizontalTeamCard
                 image={team3}
-                name="Ing. [Nom]"
-                position={{ color: "info", label: "Ingénieur en informatique" }}
-                description="Responsable de la conception"
+                name="Dr Mme Kassé"
+                position={{ color: "info", label: "Docteur" }}
+                description="Responsable de la conception et du Projet"
               />
             </MKBox>
           </Grid>
@@ -73,9 +73,9 @@ function Team() {
             <MKBox mb={{ xs: 1, lg: 0 }}>
               <HorizontalTeamCard
                 image={team4}
-                name="[Nom]"
+                name="Mr Ousmane Ndiaye"
                 position={{ color: "info", label: "Collaborateur" }}
-                description="Participe activement au développement,"
+                description="Participe activement au développement"
               />
             </MKBox>
           </Grid>

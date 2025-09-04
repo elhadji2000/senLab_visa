@@ -14,6 +14,7 @@ import ResponsePage from "layouts/pages/landing-pages/quizzes";
 import Quizzes from "layouts/pages/landing-pages/quizz-all";
 import ViewSimulation from "layouts/pages/landing-pages/view-simu";
 import ChatbotWidget from "components/ChatBot";
+import EvaluationQuizzCode from "pages/LandingPages/EvaluationQuizz";
 
 // Material Kit 2 React routes
 import routes from "routes";
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/quizz/:id" element={<ResponsePage />} />
         <Route path="/quizz/public" element={<Quizzes />} />
         <Route path="/simulations/:id" element={<ViewSimulation />} />
+        <Route path="/quizz/access/:code" element={<EvaluationQuizzCode />} />
       </Routes>
       <ChatbotWidget></ChatbotWidget>
     </ThemeProvider>

@@ -1,5 +1,5 @@
 const Classe = require("../models/Classe.model");
-
+const Eleve = require("../models/Eleve.model");
 
 exports.ajouterClasse = async (req, res) => {
   try {
@@ -50,21 +50,30 @@ exports.getClasseById = async (req, res) => {
 
     if (req.user.role === 'admin') {
       // Admin peut accéder à toutes les classes
-      classe = await Classe.findById(classeId).populate("user", "nom email");
+      classe = await Classe.findById(classeId)
+        .populate("user", "nom email");
     } else {
       // Les autres utilisateurs ne peuvent voir que leurs propres classes
-      classe = await Classe.findOne({ _id: classeId, user: req.user._id }).populate("user", "nom email");
+      classe = await Classe.findOne({ _id: classeId, user: req.user._id })
+        .populate("user", "nom email");
     }
 
     if (!classe) {
       return res.status(404).json({ error: "Classe introuvable ou accès non autorisé" });
     }
 
-    res.json(classe);
+    // Récupérer les élèves de cette classe
+    const eleves = await Eleve.find({ classe: classeId })
+      .select('nom prenom email date_naissance telephone')
+      .sort({ nom: 1 });
+
+    // Retourner la classe + ses élèves
+    res.json({ classe, eleves });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.updateClasse = async (req, res) => {
   try {

@@ -8,8 +8,8 @@ import MKBox from "components/MKBox";
 import DefaultNavbar from "examples/Navbars/DefaultNavbar";
 
 // Author page sections
-import Posts from "pages/LandingPages/Author/sections/Posts";
-import Footer from "pages/LandingPages/Author/sections/Footer";
+import Posts from "pages/LandingPages/Simulation/sections/Posts";
+import Footer from "pages/LandingPages/Simulation/sections/Footer";
 
 // Routes
 import routes from "routes";

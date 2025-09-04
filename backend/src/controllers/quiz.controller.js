@@ -4,6 +4,7 @@ const Option = require("../models/Option.model");
 const CodeClasses = require("../models/codeClasse.model");
 const Eleves = require("../models/Eleve.model");
 const Resultats = require("../models/Resultat.model");
+const mongoose = require('mongoose');
 
 // Ajouter un quiz complet avec questions et options
 exports.addQuiz = async (req, res) => {
@@ -52,11 +53,22 @@ exports.addQuiz = async (req, res) => {
 //Lister les quiz de l'utilisateur (ou tous si admin)
 exports.listQuizzes = async (req, res) => {
   try {
-    const condition = req.user.role === "admin" ? {} : { user: req.user.id };
+    const isAdmin = req.user?.role === 'admin';
+    const userId = req.user?._id || req.user?.id;
+
+    if (!isAdmin) {
+      if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ success: false, message: "Utilisateur invalide." });
+      }
+    }
+
+    // Admin voit tout, sinon uniquement les quizz de l'utilisateur
+    const condition = isAdmin ? {} : { user: new mongoose.Types.ObjectId(userId) };
 
     const quizzes = await Quiz.aggregate([
       { $match: condition },
-      { $sort: { createdAt: -1 } },
+      { $sort: { createdAt: -1, _id: -1 } }, // tri robuste même si createdAt manque
+
       // Joindre les questions liées au quiz
       {
         $lookup: {
@@ -74,15 +86,15 @@ exports.listQuizzes = async (req, res) => {
         },
       },
 
-      // Supprimer le tableau des questions pour ne pas alourdir la réponse
+      // Supprimer le tableau des questions pour alléger la réponse
       {
         $project: {
-          questions: 0,
+          questions: 0, // on conserve "user" pour pouvoir populate ensuite
         },
       },
     ]);
 
-    // Pour compléter avec les infos utilisateur (prenom, nom)
+    // Compléter avec les infos utilisateur (prenom, nom, email)
     const quizzesWithUser = await Quiz.populate(quizzes, {
       path: "user",
       select: "prenom nom email",
@@ -90,11 +102,10 @@ exports.listQuizzes = async (req, res) => {
 
     res.json({ success: true, quizzes: quizzesWithUser });
   } catch (error) {
-    console.error("Erreur lors du chargement des quiz :", error);
+    console.error("Erreur lors du chargement des quizz :", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
 // Récupérer un quiz avec ses questions/options
 // controllers/quizController.js
 exports.getQuizWithQuestionsAndOptions = async (req, res) => {
@@ -144,7 +155,7 @@ exports.updateQuiz = async (req, res) => {
     }
 
     // Vérification de permission
-    if (req.user.role !== "admin" && quiz.user.toString() !== req.user.id) {
+    if (req.user.role !== "professeur" && quiz.user.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: "Accès refusé" });
     }
 
@@ -201,7 +212,7 @@ exports.deleteQuiz = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Quiz non trouvé" });
 
-    if (req.user.role !== "admin" && quiz.user.toString() !== req.user.id) {
+    if (req.user.role !== "professeur" && quiz.user.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: "Accès refusé" });
     }
 
@@ -219,7 +230,7 @@ exports.deleteQuiz = async (req, res) => {
 // Compter les quiz visibles par l'utilisateur
 exports.countQuizzes = async (req, res) => {
   try {
-    const filter = req.user.role === "admin" ? {} : { user: req.user.id };
+    const filter = req.user.role === "professeur" ? {} : { user: req.user.id };
     const count = await Quiz.countDocuments(filter);
     res.json({ success: true, count });
   } catch (error) {

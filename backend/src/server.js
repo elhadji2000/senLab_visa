@@ -24,6 +24,23 @@ app.use(express.json());
 /* 📁 Gestion des fichiers statiques (uploads) */
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+const { migrate } = require("../backup");
+
+app.get("/api/backup/:sens", async (req, res) => {
+  const { sens } = req.params; // "toLocal" ou "toAtlas"
+
+  if (!["toLocal", "toAtlas"].includes(sens)) {
+    return res.status(400).json({ success: false, message: "Paramètre invalide (toLocal/toAtlas)" });
+  }
+
+  try {
+    await migrate(sens);
+    res.json({ success: true, message: `Migration ${sens} terminée` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 /* 🔀 Définition des routes principales */
 app.use('/api/auth', require('./routes/auth.route'));
 app.use('/api/users', require('./routes/user.route'));

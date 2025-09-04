@@ -5,12 +5,15 @@ const Eleve = require("../models/Eleve.model");
 
 exports.getResultatsDashboard = async (req, res) => {
   try {
-    // ⚡ Charger tous les résultats de l'utilisateur connecté
-    const resultats = await Resultat.find()
+    // ⚡ Récupérer l'utilisateur connecté (middleware d'auth doit injecter req.user)
+    const userId = req.user._id;
+
+    // ⚡ Charger les résultats SEULEMENT de l'élève connecté
+    const resultats = await Resultat.find({ eleve: userId })
       .populate({
         path: "eleve",
         select: "nom prenom classe",
-        populate: { path: "classe", select: "nom_classe" }, // ✅ bien peupler la classe
+        populate: { path: "classe", select: "nom_classe" },
       })
       .populate("quiz", "titre");
 
@@ -88,6 +91,7 @@ exports.getResultatsDashboard = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // ➕ Ajouter un résultat
 exports.ajouterResultat = async (req, res) => {
