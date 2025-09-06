@@ -101,35 +101,43 @@ const ExplorerBackoffice = () => {
           </Col>
         </Row>
       ) : (
-        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-          {simulations.map((sim) => (
+        <Row xs={1} sm={2} md={3} lg={5} className="g-3">
+          {simulations.map((sim, index) => (
             <Col key={sim._id}>
               <Card className="sim-card h-100 border-0">
-                <Card.Header className="sim-card-header bg-warning text-white text-center">
-                  {sim.titre}
+                {/* Header */}
+                <Card.Header className="sim-card-header text-center">
+                  #{index + 1}
                 </Card.Header>
-                <Card.Body className="d-flex flex-column text-center">
-                  <div className="image-container-zoom mb-3">
+
+                {/* Contenu */}
+                <Card.Body className="d-flex flex-column text-center p-2">
+                  {/* Image */}
+                  <div className="mb-2">
                     <Card.Img
                       src={`http://localhost:5000${sim.photo}`}
                       alt={sim.titre}
                       onError={(e) => {
                         e.target.src =
-                          "https://via.placeholder.com/400x200?text=Image+non+disponible";
+                          "https://via.placeholder.com/300x150?text=Image+non+disponible";
                       }}
-                      className="sim-image img-fluid"
+                      className="sim-image"
                     />
                   </div>
+
+                  {/* Description */}
                   <Card.Text className="flex-grow-1 sim-description">
-                    {sim.description?.substring(0, 100)}...
+                    {sim.titre || "Pas de titre disponible"}
                   </Card.Text>
+
+                  {/* Badges */}
                   <div className="mb-2">
-                    <span className="badge bg-secondary me-1">
-                      {sim.categorie}
-                    </span>
-                    <span className="badge bg-info">{sim.niveau}</span>
+                    <span className="sim-badge">{sim.categorie}</span>
+                    <span className="sim-badge">{sim.niveau}</span>
                   </div>
-                  <div className="d-flex justify-content-center gap-2 mt-3">
+
+                  {/* Actions */}
+                  <div className="sim-actions d-flex justify-content-center gap-2 mt-2">
                     <Button
                       variant="outline-primary"
                       size="sm"

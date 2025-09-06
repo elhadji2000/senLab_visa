@@ -1,61 +1,78 @@
-/* Container principal */
+/* Explorer.css */
+
+/* --- Cards --- */
 .sim-card {
   border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease-in-out;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: #fdfdfd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease-in-out;
 }
 
 .sim-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  transform: scale(1.02);
 }
 
-/* Header stylé */
+/* --- Header --- */
 .sim-card-header {
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 12px;
-  /* background-color: #ffa726 !important; */
-  background: linear-gradient(to right, #3fa2bd, #e7c593) !important;
-  color: white !important;
-  border-bottom: none;
-}
-
-/* Image avec effet zoom */
-.image-container-zoom {
-  overflow: hidden;
-  border-radius: 8px;
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f8f9fa;
-}
-
-.sim-image {
-  transition: transform 0.4s ease;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.image-container-zoom:hover .sim-image {
-  transform: scale(1.08);
-}
-
-/* Description */
-.sim-description {
-  color: #555;
+  background: #e9f5ff !important;
+  color: #0d6efd !important;
   font-size: 0.9rem;
-  line-height: 1.4;
-  margin-bottom: 0.75rem;
+  font-weight: 600;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+  border-bottom: none !important;
 }
 
-/* Boutons d'action */
-button.btn-sm {
-  transition: all 0.25s ease;
+/* --- Image container --- */
+.sim-image {
+  height: 150px;
+  width: 100%;
+  object-fit: contain; /* ✅ pas de rognage */
+  background-color: #f8f9fa; /* petite couleur douce derrière */
+  border-radius: 8px;
+  padding: 5px; /* pour éviter que l’image colle aux bords */
 }
 
-button.btn-sm:hover {
-  transform: scale(1.05);
+/* --- Description --- */
+.sim-description {
+  font-size: 0.8rem;
+  line-height: 1.2rem;
+  color: #6c757d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* ✅ max 3 lignes */
+  -webkit-box-orient: vertical;
+}
+
+/* --- Badges --- */
+.sim-badge {
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: #f1f3f5;
+  color: #495057;
+  margin-right: 5px;
+}
+
+/* --- Actions buttons --- */
+.sim-actions .btn {
+  font-size: 0.75rem; /* ✅ texte plus petit */
+  padding: 3px 8px; /* ✅ moins haut/large */
+  border-radius: 6px; /* ✅ arrondi doux */
+}
+
+.sim-actions .btn-outline-primary {
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.sim-actions .btn-outline-success {
+  border-color: #198754;
+  color: #198754;
+}
+
+.sim-actions .btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
 }

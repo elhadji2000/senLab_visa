@@ -122,7 +122,7 @@ const FolderClasses = () => {
       ) : (
         <Row>
           <Col md={9}>
-            <Row xs={2} sm={3} md={4} lg={5} xl={6} className="g-4">
+            <Row xs={2} sm={3} md={4} lg={5} xl={4} className="g-4">
               {classes.map((classe) => (
                 <Col key={classe._id}>
                   <div

@@ -1,13 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { fetchUsers, toggleUserStatus } from '../../api/users.api'; // ➕ API update
-import { useNavigate } from 'react-router-dom';
-import { FaUserEdit, FaPowerOff, FaToggleOn, FaToggleOff, FaUserPlus, FaUserCircle } from 'react-icons/fa';
-import { Button, Spinner } from 'react-bootstrap';
-import './ListUsers.css'; // ➕ Ajoute une feuille de style personnalisée
+import React, { useEffect, useState } from "react";
+import { fetchUsers, toggleUserStatus } from "../../api/users.api";
+import { useNavigate } from "react-router-dom";
+import { Table, Button, Spinner } from "react-bootstrap";
+import {
+  FaUserEdit,
+  FaToggleOn,
+  FaToggleOff,
+  FaUserPlus,
+} from "react-icons/fa";
+import "./ListUsers.css";
 
 const ListUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null); // 🔄 Pour montrer un spinner par utilisateur
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,9 +23,15 @@ const ListUsers = () => {
   const loadUsers = async () => {
     try {
       const res = await fetchUsers();
-      setUsers(res.data);
+      const usersWithId = res.data.map((u) => ({ ...u, id: u._id }));
+      // 🔹 Tri côté frontend par nom puis prénom (au cas où l'API ne le fait pas déjà)
+      usersWithId.sort((a, b) => {
+        if (a.nom === b.nom) return a.prenom.localeCompare(b.prenom);
+        return a.nom.localeCompare(b.nom);
+      });
+      setUsers(usersWithId);
     } catch (error) {
-      console.error('Erreur chargement utilisateurs', error);
+      console.error("Erreur chargement utilisateurs", error);
     } finally {
       setLoading(false);
     }
@@ -27,12 +39,15 @@ const ListUsers = () => {
 
   const handleToggleStatus = async (id, currentStatus) => {
     try {
+      setUpdatingId(id); // 🟡 Indique qu’on est en train de modifier ce user
       await toggleUserStatus(id, !currentStatus);
       setUsers((prev) =>
-        prev.map((u) => (u._id === id ? { ...u, status: !currentStatus } : u))
+        prev.map((u) => (u.id === id ? { ...u, status: !currentStatus } : u))
       );
     } catch (err) {
-      console.error('Erreur lors du changement de statut', err);
+      console.error("Erreur lors du changement de statut", err);
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -41,55 +56,108 @@ const ListUsers = () => {
   };
 
   const handleAdd = () => {
-    navigate('/utilisateur/ajouter');
+    navigate("/utilisateur/ajouter");
   };
 
   return (
-    <div className="user-container container">
-      <div className="user-header">
-        <h2>👥 Gestion des Utilisateurs</h2>
+    <div className="p-4">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4>👥 Gestion des Utilisateurs</h4>
         <Button variant="success" onClick={handleAdd}>
-          <FaUserPlus className="me-2" /> Ajouter
+          <FaUserPlus className="me-2" />
+          Ajouter
         </Button>
       </div>
 
+      {/* Tableau */}
       {loading ? (
-        <Spinner animation="border" />
-      ) : users.length === 0 ? (
-        <p>Aucun utilisateur trouvé.</p>
-      ) : (
-        <div className="user-grid">
-          {users.map((u) => (
-            <div key={u._id} className={`user-card ${u.status ? 'active' : 'inactive'}`}>
-              <div className="user-icon">
-                <FaUserCircle size={40} />
-              </div>
-              <div className="user-info">
-                <h5>{u.nom} {u.prenom}</h5>
-                <p>{u.email}</p>
-                <p>Tél: {u.telephone}</p>
-                <span className={`badge ${u.status ? 'bg-success' : 'bg-secondary'}`}>
-                  {u.status ? 'Actif' : 'Inactif'}
-                </span>
-                <span className="badge bg-info ms-2">{u.role}</span>
-              </div>
-              <div className="user-actions">
-                <Button variant="outline-warning" size="sm" onClick={() => handleEdit(u._id)}>
-                  <FaUserEdit /> Modifier
-                </Button>
-                <Button
-                  variant={u.status ? 'outline-danger' : 'outline-success'}
-                  size="sm"
-                  onClick={() => handleToggleStatus(u._id, u.status)}
-                  className="ms-2"
-                >
-                  {u.status ? <FaToggleOff /> : <FaToggleOn />} {u.status ? 'Désactiver' : 'Activer'}
-                </Button>
-
-              </div>
-            </div>
-          ))}
+        <div className="text-center mt-5">
+          <Spinner animation="border" />
         </div>
+      ) : (
+        <Table
+          bordered
+          hover
+          responsive
+          className="align-middle text-center shadow-sm"
+        >
+          <thead className="table-light">
+            <tr>
+              <th>Prénom</th>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Rôle</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.length > 0 ? (
+              users.map((user) => (
+                <tr key={user.id}>
+                  <td>
+                    {user.prenom.charAt(0).toUpperCase() +
+                      user.prenom.slice(1).toLowerCase()}
+                  </td>
+                  <td>{user.nom.toLowerCase()}</td>
+                  <td>{user.email}</td>
+                  <td>{user.telephone}</td>
+                  <td>
+                    <strong>{user.role}</strong>
+                  </td>
+                  <td
+                    className={
+                      user.status
+                        ? "text-success fw-bold"
+                        : "text-muted fw-bold"
+                    }
+                  >
+                    {user.status ? "✅ Actif" : "❌ Inactif"}
+                  </td>
+                  <td className="d-flex justify-content-center gap-2">
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="action-btn"
+                      onClick={() => handleEdit(user.id)}
+                    >
+                      <FaUserEdit className="me-1" /> Modifier
+                    </Button>
+                    <Button
+                      variant={
+                        user.status ? "outline-danger" : "outline-success"
+                      }
+                      size="sm"
+                      className="action-btn"
+                      disabled={updatingId === user.id} // 🔄 Désactive pendant la requête
+                      onClick={() => handleToggleStatus(user.id, user.status)}
+                    >
+                      {updatingId === user.id ? (
+                        <Spinner animation="border" size="sm" />
+                      ) : user.status ? (
+                        <>
+                          <FaToggleOff className="me-1" /> Désactiver
+                        </>
+                      ) : (
+                        <>
+                          <FaToggleOn className="me-1" /> Activer
+                        </>
+                      )}
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center text-muted">
+                  Aucun utilisateur trouvé
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
       )}
     </div>
   );

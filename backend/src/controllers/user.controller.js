@@ -1,19 +1,19 @@
-const dotenv = require('dotenv');
-dotenv.config({ path: require('path').resolve(__dirname, '../.env') });
+const dotenv = require("dotenv");
+dotenv.config({ path: require("path").resolve(__dirname, "../.env") });
 
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../models/User.model');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const User = require("../models/User.model");
 
 // ✅ Ajouter un utilisateur
 exports.addUser = async (req, res) => {
   try {
-    const { prenom, nom, email, password, telephone, role } = req.body;
+    const { prenom, nom, email, password, telephone, role, status } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email et mot de passe requis'
+        message: "Email et mot de passe requis",
       });
     }
 
@@ -23,7 +23,8 @@ exports.addUser = async (req, res) => {
       email,
       password,
       telephone,
-      role
+      role,
+      status,
     });
 
     await user.save();
@@ -33,38 +34,44 @@ exports.addUser = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      user: userWithoutPassword
+      user: userWithoutPassword,
     });
   } catch (error) {
-    console.error('Erreur d\'inscription:', error);
+    console.error("Erreur d'inscription:", error);
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: 'Cet email ou téléphone est déjà utilisé'
+        message: "Cet email ou téléphone est déjà utilisé",
       });
     }
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
+    res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 };
 
 // ✅ Lister tous les utilisateurs
 exports.listerUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    // Trier par ordre croissant sur le champ "nom"
+    const users = await User.find()
+      .select("-password")
+      .sort({ nom: 1, prenom: 1 }); // 1 = croissant, -1 = décroissant
+
     res.json(users);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    console.error("Erreur lors de la récupération des utilisateurs :", error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
 // ✅ Obtenir un utilisateur par ID
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
-    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user)
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
@@ -74,7 +81,8 @@ exports.updateUser = async (req, res) => {
     const { prenom, nom, email, password, telephone, role } = req.body;
 
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    if (!user)
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
 
     // Mise à jour des champs
     user.prenom = prenom || user.prenom;
@@ -94,8 +102,8 @@ exports.updateUser = async (req, res) => {
 
     res.json({ success: true, user: userWithoutPassword });
   } catch (error) {
-    console.error('Erreur de mise à jour:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    console.error("Erreur de mise à jour:", error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
@@ -103,10 +111,40 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const deleted = await User.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    if (!deleted)
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
 
-    res.json({ success: true, message: 'Utilisateur supprimé' });
+    res.json({ success: true, message: "Utilisateur supprimé" });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur' });
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+exports.toggleUserStatus = async (req, res) => {
+  try {
+    const { userId } = req.params; // ID de l'utilisateur passé dans l'URL
+    const { status } = req.body;   // true = activer, false = désactiver
+
+    // Vérifier que status est bien un booléen
+    if (typeof status !== "boolean") {
+      return res.status(400).json({ message: "Le champ 'status' doit être true ou false" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { status }, // Met à jour le champ status
+      { new: true, select: "-password" } // Retourne l’utilisateur mis à jour sans le mot de passe
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    res.json({
+      message: status ? "Utilisateur activé avec succès" : "Utilisateur désactivé avec succès",
+      user,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du statut :", error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };

@@ -1,16 +1,17 @@
-import axiosInstance from './axiosInstance';
+import axiosInstance from "./axiosInstance";
 
 // Ajouter un utilisateur
 export const addUser = (userData) => {
-  return axiosInstance.post('/api/users/add', userData);
+  return axiosInstance.post("/api/users/add", userData);
 };
 
 // Récupérer tous les utilisateurs
 export const fetchUsers = () => {
-  return axiosInstance.get('/api/users/all');
+  return axiosInstance.get("/api/users/all");
 };
-export const toggleUserStatus = (id, status) =>
-  axios.patch(`/api/users/${id}/status`, { status });
+export const toggleUserStatus = (id, status) => {
+  axiosInstance.patch(`/api/users/${id}/status`, { status });
+};
 
 // Récupérer un utilisateur par ID
 export const fetchUserById = (id) => {

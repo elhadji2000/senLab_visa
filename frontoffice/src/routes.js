@@ -9,6 +9,7 @@ import AboutUs from "layouts/pages/landing-pages/about-us";
 import Quizzes from "layouts/pages/landing-pages/quizz-all";
 import SimuPage from "layouts/pages/landing-pages/simulation";
 import SignIn from "layouts/pages/authentication/sign-in";
+import ContactUsPage from "layouts/pages/landing-pages/contact-us";
 // Sections
 
 const routes = [
@@ -29,7 +30,7 @@ const routes = [
           {
             name: "contactez nous",
             route: "/pages/landing-pages/contact-us",
-            component: <Quizzes />,
+            component: <ContactUsPage />,
           },
         ],
       },

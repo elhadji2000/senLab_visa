@@ -12,7 +12,7 @@ function AddUsers() {
     email: '',
     telephone: '',
     password: 'Default@123', // Mot de passe plus sécurisé par défaut
-    status: 'true',
+    status: 'false',
     role: '',
   });
 
@@ -32,8 +32,8 @@ function AddUsers() {
     setIsSubmitting(true);
     setSubmitStatus({ success: null, message: '' });
 
-    const { prenom, nom, email, telephone, role } = formData;
-    if (!prenom || !nom || !email || !telephone || !role) {
+    const { prenom, nom, email, telephone, role, status } = formData;
+    if (!prenom || !nom || !email || !telephone || !role || !status) {
       setSubmitStatus({ success: false, message: 'Veuillez remplir tous les champs obligatoires.' });
       setIsSubmitting(false);
       return;
@@ -55,7 +55,7 @@ function AddUsers() {
           email: '',
           telephone: '',
           password: 'Default@123',
-          status: 'true',
+          status: 'false',
           role: '',
         });
         setIsSubmitting(false);
@@ -97,7 +97,7 @@ function AddUsers() {
                 value={formData.prenom}
                 onChange={handleChange}
                 type="text"
-                placeholder="Jean"
+                placeholder="Modou"
                 className="form-input"
                 required
               />
@@ -133,7 +133,7 @@ function AddUsers() {
                 value={formData.email}
                 onChange={handleChange}
                 type="email"
-                placeholder="jean.dupont@exemple.com"
+                placeholder="jean.dupont@senlab.edu.sn"
                 className="form-input"
                 required
               />

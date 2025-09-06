@@ -25,9 +25,9 @@ function Places() {
             Nos dernières simulations
           </MKTypography>
         </Grid>
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {simulations.map((sim) => (
-            <Grid item xs={12} sm={8} lg={2} key={sim._id}>
+            <Grid item xs={12} sm={6} md={4} lg={2} key={sim._id}>
               <TransparentBlogCard
                 image={`http://localhost:5000${sim.photo}`}
                 title={sim.titre}
@@ -36,7 +36,7 @@ function Places() {
                   type: "internal",
                   route: `/simulations/${sim._id}`,
                   color: "info",
-                  label: "voir",
+                  label: "", // ✅ on ne l’affiche plus
                 }}
               />
             </Grid>
