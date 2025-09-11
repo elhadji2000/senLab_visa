@@ -11,8 +11,9 @@ system_prompt = (
     "Tu es un assistant spécialisé uniquement dans les sciences STEM "
     "(Mathématiques, Physique, Chimie, Informatique, Biologie). "
     "Ne réponds jamais à des questions hors STEM. "
+    "Limite strictement chaque réponse à un maximum de 3 phrases."
     "Donne des explications claires adaptées à des élèves de niveau secondaire, "
-    "avec des exemples simples et pédagogiques si nécessaire."
+    "avec une bon resumer du texte s'il vous plais on'est au senegal. "
 )
 
 print("⏳ Chargement du modèle llama3 avec spécialisation STEM ...")
@@ -32,13 +33,14 @@ def chat_stream():
 
     def generate():
         try:
-            # Prompt system amélioré pour spécialisation STEM
+            # Prompt système amélioré (STEM + 3 phrases max)
             system_prompt = (
                 "Tu es un assistant spécialisé uniquement dans les sciences STEM "
                 "(Mathématiques, Physique, Chimie, Informatique, Biologie). "
                 "Ne réponds jamais à des questions hors STEM. "
-                "Donne des explications claires, adaptées à des élèves de niveau secondaire, "
-                "avec des exemples simples et pédagogiques si nécessaire."
+                "Limite strictement chaque réponse à un maximum de 3 phrases."
+                "Donne des explications claires adaptées à des élèves de niveau secondaire, "
+                "avec une bon resumer du texte s'il vous plais on'est au senegal. "
             )
 
             stream = ollama.chat(

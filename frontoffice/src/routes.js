@@ -10,6 +10,7 @@ import Quizzes from "layouts/pages/landing-pages/quizz-all";
 import SimuPage from "layouts/pages/landing-pages/simulation";
 import SignIn from "layouts/pages/authentication/sign-in";
 import ContactUsPage from "layouts/pages/landing-pages/contact-us";
+import SimuAll from "layouts/pages/landing-pages/simulation-all";
 // Sections
 
 const routes = [
@@ -62,8 +63,8 @@ const routes = [
           },
           {
             name: "Tous les Simulations",
-            route: "/sections/page-sections/simu",
-            component: <SimuPage />,
+            route: "/sections/page-sections/simuAll",
+            component: <SimuAll />,
           },
         ],
       },

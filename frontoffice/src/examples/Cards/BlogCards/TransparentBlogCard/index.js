@@ -14,63 +14,63 @@ import MKTypography from "components/MKTypography";
 // TransparentBlogCard.jsx
 
 function TransparentBlogCard({ image, title, description, action }) {
-  const imageTemplate = (
-    <MKBox position="relative" borderRadius="lg" mb={2}>
-      <MKBox
-        component="img"
-        src={image}
-        alt={title}
-        borderRadius="lg"
-        shadow="md"
-        sx={{
-          width: "100%",
-          height: "120px", // ✅ taille plus fine
-          objectFit: "cover",
-          display: "block",
-          margin: "0 auto",
-        }}
-      />
-    </MKBox>
-  );
-
   return (
     <Card
       sx={{
         background: "#fff",
         borderRadius: "12px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        p: 1,
+        p: 1.5,
         textAlign: "center",
+        height: "260px",
+        maxWidth: "300px", // ↑ largeur augmentée
+        width: "100%", // occupe tout l'espace disponible
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        transition: "transform 0.2s ease-in-out",
+        "&:hover": { transform: "translateY(-4px)" },
       }}
     >
-      {/* Image cliquable */}
       <Link to={action.route} style={{ textDecoration: "none" }}>
-        {imageTemplate}
+        <MKBox position="relative" borderRadius="lg" mb={1} width="100%">
+          <MKBox
+            component="img"
+            src={image}
+            alt={title}
+            borderRadius="lg"
+            shadow="sm"
+            sx={{
+              width: "100%",
+              height: "180px", // ✅ hauteur augmentée (au lieu de 130px)
+              objectFit: "cover", // ✅ garde le remplissage
+              display: "block",
+            }}
+          />
+        </MKBox>
       </Link>
 
-      {/* Titre */}
       <MKTypography
         variant="h6"
         gutterBottom
         sx={{
-          fontSize: "0.9rem",
+          fontSize: "0.85rem",
           fontWeight: 600,
           overflow: "hidden",
           textOverflow: "ellipsis",
           display: "-webkit-box",
-          WebkitLineClamp: 1,
+          WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical",
         }}
       >
         {title}
       </MKTypography>
 
-      {/* Catégorie */}
       <MKTypography
         variant="body2"
         color="text.secondary"
         sx={{
-          fontSize: "0.75rem",
+          fontSize: "0.7rem",
           overflow: "hidden",
           textOverflow: "ellipsis",
           display: "-webkit-box",

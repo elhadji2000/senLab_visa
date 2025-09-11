@@ -8,7 +8,7 @@ import "./styles.css";
 const Cube = ({ position, rotation, scale = [1, 1, 1], handleClick }) => (
   <group position={position} rotation={rotation} scale={scale}>
     <Box args={[1, 1, 1]} onClick={handleClick}>
-      <meshStandardMaterial attach="material" color="white" />
+      <meshStandardMaterial attach="material" color="yellow" />
     </Box>
   </group>
 );
@@ -76,11 +76,11 @@ export default function App() {
           <OrbitControls />
           <directionalLight intensity={0.5} position={[6, 2, 1]} />
           {/* <ambientLight intensity={0.1} /> */}
-          <Grid size={10} />
+          <Grid size={15} />
           <Light position={[3, 0, 2]} color="red" intensity={2} offset={200} />
           <Light
             position={[2, 2, -2]}
-            color="blue"
+            color="pink"
             intensity={2}
             distance={10}
             orbitalSpeed={2}

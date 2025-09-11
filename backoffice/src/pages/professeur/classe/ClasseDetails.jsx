@@ -1,9 +1,24 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Row, Col, Card, Button, Spinner, Alert, ButtonGroup } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Spinner,
+  Alert,
+  ButtonGroup,
+} from "react-bootstrap";
 import { fetchClasseById, deleteClass } from "../../../api/classes";
-import { FaEdit, FaTrash, FaUsers, FaClipboardList, FaCode } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaUsers,
+  FaClipboardList,
+  FaCode,
+} from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ClassStudentsSection from "../../../components/classes/ClassStudentsSection";
@@ -11,6 +26,7 @@ import ClassEvaluationSection from "../../../components/classes/ClassEvaluationS
 import ClassCodeSection from "../../../components/classes/ClassCodeSection";
 import ClassInfoSidebar from "../../../components/classes/ClassInfoSidebar";
 import DeleteClassModal from "../../../components/classes/DeleteClassModal";
+import { useNavigate } from "react-router-dom";
 
 const ClasseDetails = () => {
   const { id } = useParams();
@@ -19,6 +35,7 @@ const ClasseDetails = () => {
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState("eleves");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const navigate = useNavigate();
 
   const loadClassData = async () => {
     try {
@@ -34,18 +51,24 @@ const ClasseDetails = () => {
 
   useEffect(() => {
     loadClassData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const handleDeleteClass = async () => {
-    try {
-      await deleteClass(classe.classe?._id);
-      toast.success("Classe supprimée avec succès !");
-      setShowDeleteModal(false);
-      // Redirection après suppression
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Erreur lors de la suppression");
-    }
-  };
+ const handleDeleteClass = async () => {
+  try {
+    await deleteClass(classe.classe?._id);
+    toast.success("Classe supprimée avec succès !");
+    setShowDeleteModal(false);
+
+    // attendre un peu avant de rediriger (1.5s)
+    setTimeout(() => {
+      navigate("/classe/folder");
+    }, 2000);
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Erreur lors de la suppression");
+  }
+};
+
 
   if (loading) {
     return (
@@ -60,9 +83,9 @@ const ClasseDetails = () => {
   }
 
   return (
-    <Container fluid  className="py-4">
+    <Container fluid className="py-4">
       <ToastContainer position="top-right" autoClose={3000} />
-      
+
       <Row>
         {/* Colonne principale */}
         <Col lg={9}>
@@ -74,23 +97,31 @@ const ClasseDetails = () => {
                 <strong>Niveau :</strong> {classe.classe?.niveau} |{" "}
                 <strong>Année :</strong> {classe.classe?.annee_scolaire}
               </p>
-              
+
               <div className="d-flex flex-wrap gap-2 mt-3">
                 <ButtonGroup>
                   <Button
-                    variant={activeSection === "eleves" ? "primary" : "outline-primary"}
+                    variant={
+                      activeSection === "eleves" ? "primary" : "outline-primary"
+                    }
                     onClick={() => setActiveSection("eleves")}
                   >
                     <FaUsers className="me-1" /> Élèves
                   </Button>
                   <Button
-                    variant={activeSection === "evaluations" ? "primary" : "outline-primary"}
+                    variant={
+                      activeSection === "evaluations"
+                        ? "primary"
+                        : "outline-primary"
+                    }
                     onClick={() => setActiveSection("evaluations")}
                   >
                     <FaClipboardList className="me-1" /> Évaluations
                   </Button>
                   <Button
-                    variant={activeSection === "code" ? "primary" : "outline-primary"}
+                    variant={
+                      activeSection === "code" ? "primary" : "outline-primary"
+                    }
                     onClick={() => setActiveSection("code")}
                   >
                     <FaCode className="me-1" /> Codes
@@ -100,7 +131,7 @@ const ClasseDetails = () => {
                 <Button variant="outline-warning">
                   <FaEdit /> Modifier
                 </Button>
-                <Button 
+                <Button
                   variant="outline-danger"
                   onClick={() => setShowDeleteModal(true)}
                 >
@@ -112,15 +143,17 @@ const ClasseDetails = () => {
 
           {/* Contenu dynamique */}
           {activeSection === "eleves" && <ClassStudentsSection classId={id} />}
-          {activeSection === "evaluations" && <ClassEvaluationSection classId={id} />}
+          {activeSection === "evaluations" && (
+            <ClassEvaluationSection classId={id} />
+          )}
           {activeSection === "code" && <ClassCodeSection classId={id} />}
         </Col>
 
         {/* Colonne latérale */}
         <Col lg={3}>
-          <ClassInfoSidebar 
-            classData={classe.classe} 
-            studentCount={classe.eleves?.length || 0} 
+          <ClassInfoSidebar
+            classData={classe.classe}
+            studentCount={classe.eleves?.length || 0}
           />
         </Col>
       </Row>

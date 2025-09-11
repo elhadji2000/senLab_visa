@@ -1,5 +1,0 @@
-flask
-flask-cors  # Pour gérer les requêtes CORS
-transformers  # Pour utiliser un modèle comme GPT-2 ou BERT
-torch
-numpy

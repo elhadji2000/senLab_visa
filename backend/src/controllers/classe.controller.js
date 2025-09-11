@@ -1,5 +1,7 @@
+// controllers/classesController.js
 const Classe = require("../models/Classe.model");
 const Eleve = require("../models/Eleve.model");
+const Resultat = require("../models/Resultat.model");
 
 exports.ajouterClasse = async (req, res) => {
   try {
@@ -99,24 +101,43 @@ exports.updateClasse = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 exports.deleteClasse = async (req, res) => {
   try {
     const { id } = req.params;
 
     const classe = await Classe.findById(id);
-    if (!classe) return res.status(404).json({ message: "Classe non trouvée" });
+    if (!classe) {
+      return res.status(404).json({ message: "Classe non trouvée" });
+    }
 
-    if (req.user.role !== 'admin' && classe.user.toString() !== req.user._id.toString()) {
+    // sécurité : seul admin ou proprio
+    if (req.user.role !== "admin" && classe.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Non autorisé" });
     }
 
-    await Classe.findByIdAndDelete(id);
-    res.json({ message: "Classe supprimée avec succès" });
+    // 1) récupérer tous les élèves de la classe
+    const eleves = await Eleve.find({ classe: id }).select("_id");
 
+    // 2) supprimer tous les résultats de ces élèves
+    if (eleves.length > 0) {
+      const eleveIds = eleves.map((e) => e._id);
+      await Resultat.deleteMany({ eleve: { $in: eleveIds } });
+    }
+
+    // 3) supprimer les élèves
+    await Eleve.deleteMany({ classe: id });
+
+    // 4) supprimer la classe
+    await Classe.findByIdAndDelete(id);
+
+    return res.json({ message: "Classe + élèves + résultats supprimés avec succès" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("deleteClasse error:", error);
+    return res.status(500).json({ error: error.message });
   }
 };
+
 exports.countClasses = async (req, res) => {
   try {
     let count;

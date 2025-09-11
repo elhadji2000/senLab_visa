@@ -12,7 +12,7 @@ const simulationSchema = new mongoose.Schema({
   categorie: { 
     type: String, 
     required: [true, 'La catégorie est obligatoire'],
-    enum: ['Mathematique', 'Physique', 'Chimie', 'Biologie']
+    enum: ['Mathematique', 'Physique', 'Chimie', 'Biologie', 'SVT', 'Science de la terre']
   },
   niveau: { 
     type: String, 

@@ -7,13 +7,13 @@
   body,
   #root {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     margin: 0;
     padding: 0;
   }
   
   body {
-    background: white;
+    background: rgba(106, 118, 118, 0.731);
     font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir,
       helvetica neue, helvetica, ubuntu, roboto, noto, segoe ui, arial, sans-serif;
   }

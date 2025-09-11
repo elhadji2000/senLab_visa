@@ -101,7 +101,8 @@ function AppRouter() {
               <Route path="/quizz/lister" element={<ListQuizz />} />
               <Route path="/quizz/ajouter" element={<AddQuizz />} />
               <Route path="/quizz/edit/:id" element={<AddQuizz />} />
-              <Route path="/simulations/ajouter" element={<Ajouter />} />
+              <Route path="/simulations/ajouter" element={<Ajouter  mode="add"/>} />
+              <Route path="/simulations/edit/:id" element={<Ajouter mode="edit" />} />
               <Route path="/classe/gerer" element={<ListeClasse />} />
               <Route path="/classe/creer" element={<CreerClasse />} />
               <Route path="/classe/folder" element={<FolderClasses />} />

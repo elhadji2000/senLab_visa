@@ -185,3 +185,92 @@ function findIndexHtml(dir) {
   }
   return null;
 }
+// Modifier une simulation
+exports.updateSimulation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titre, description, categorie, niveau } = req.body;
+
+    let simulation = await Simulation.findById(id);
+    if (!simulation) {
+      return res.status(404).json({ error: "Simulation introuvable" });
+    }
+
+    // Mise à jour des champs texte
+    simulation.titre = titre || simulation.titre;
+    simulation.description = description || simulation.description;
+    simulation.categorie = categorie || simulation.categorie;
+    simulation.niveau = niveau || simulation.niveau;
+
+    // Vérifier si une nouvelle photo est envoyée
+    if (req.files && req.files["photo"]) {
+      const newPhoto = req.files["photo"][0];
+      const oldPhotoPath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        path.basename(simulation.photo)
+      );
+
+      // Supprimer l’ancienne photo si elle existe
+      if (fs.existsSync(oldPhotoPath)) {
+        fs.rmSync(oldPhotoPath, { force: true });
+      }
+
+      simulation.photo = `/uploads/${newPhoto.filename}`;
+    }
+
+    // Vérifier si un nouveau fichier zip est envoyé
+    if (req.files && req.files["simulation"]) {
+      const newZip = req.files["simulation"][0];
+
+      // Supprimer ancien zip + dossier extrait
+      const oldZipPath = path.join(__dirname, "..", "uploads", simulation.simulation);
+      const oldExtractPath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        "extracted",
+        simulation._id.toString()
+      );
+
+      [oldZipPath, oldExtractPath].forEach((p) => {
+        if (fs.existsSync(p)) {
+          fs.rmSync(p, { recursive: true, force: true });
+        }
+      });
+
+      // Enregistrer nouveau zip
+      simulation.simulation = newZip.filename;
+
+      // Extraire dans dossier unique
+      const extractDir = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        "extracted",
+        simulation._id.toString()
+      );
+      fs.mkdirSync(extractDir, { recursive: true });
+
+      await new Promise((resolve, reject) => {
+        fs.createReadStream(newZip.path)
+          .pipe(unzipper.Extract({ path: extractDir }))
+          .on("close", () => resolve())
+          .on("error", (err) => reject(err));
+      });
+    }
+
+    await simulation.save();
+
+    const iframeUrl = `/uploads/extracted/${simulation._id}/index.html`;
+
+    res.status(200).json({
+      message: "Simulation mise à jour avec succès",
+      simulation: { ...simulation.toObject(), iframeUrl },
+    });
+  } catch (error) {
+    console.error("Erreur updateSimulation:", error);
+    res.status(500).json({ error: "Erreur lors de la mise à jour" });
+  }
+};

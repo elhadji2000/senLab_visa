@@ -116,7 +116,7 @@ const ClassStudentsSection = ({ classId }) => {
                   <td>{e.email}</td>
                   <td>{e.telephone || "N/A"}</td>
                   <td>
-                    <Button size="sm" variant="outline-warning" className="me-2"><FaEdit /></Button>
+                    {/* <Button size="sm" variant="outline-warning" className="me-2"><FaEdit /></Button> */}
                     <Button size="sm" variant="outline-danger" onClick={() => handleDelete(e._id)}><FaTrash /></Button>
                   </td>
                 </tr>

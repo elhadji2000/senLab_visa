@@ -3,6 +3,7 @@ const Classe = require('../models/Classe.model');
 const CodeClasse = require('../models/codeClasse.model');
 const User = require("../models/User.model"); // adapte le chemin
 const Quiz = require("../models/Quiz.model");
+const Simulation = require("../models/Simulation.model");
 
 
 // Récupérer les élèves d'une classe spécifique
@@ -55,7 +56,7 @@ exports.importElevesFromExcel = async (req, res) => {
       prenom: row.Prénom || row.prenom,
       email: row.Email || row.email || "",
       telephone: row.telephone || row.Téléphone ||row.téléphone || "",
-      date_naissance: row.DateNaissance ? new Date(row.DateNaissance) : null,
+      date_naissance: row.DateNaissance ? new Date(row.DateNaissance) : new Date(),
       classe: classId,
     }));
 
@@ -280,16 +281,13 @@ exports.deleteEleve = async (req, res) => {
   try {
     const eleveId = req.params.id;
 
-    // Récupérer l'élève
-    const eleve = await Eleve.findById(eleveId);
-    if (!eleve) return res.status(404).json({ success: false, message: "Élève non trouvé" });
-
-    // Vérifier les droits si pas admin
-    if (req.user.role !== 'admin') {
-      const classeExists = await Classe.findOne({ _id: eleve.classe, user: req.user.id });
-      if (!classeExists) {
-        return res.status(403).json({ success: false, message: "Vous n'êtes pas autorisé à supprimer cet élève" });
-      }
+    // Vérifier si l'élève existe et appartient à cet utilisateur
+    const eleve = await Eleve.findOne({ _id: eleveId, user: req.user.id });
+    if (!eleve) {
+      return res.status(403).json({
+        success: false,
+        message: "Vous n'êtes pas autorisé à supprimer cet élève ou il n'existe pas",
+      });
     }
 
     // Suppression
@@ -300,6 +298,8 @@ exports.deleteEleve = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+
 // Obtenir le nombre d'élèves par classe (groupé)
 exports.countElevesParClasse = async (req, res) => {
   try {
@@ -332,7 +332,7 @@ exports.countElevesParClasse = async (req, res) => {
 // Dashboard utilisateur : infos globales
 exports.getUserDashboard = async (req, res) => {
   try {
-    let eleves, classes, codeClasses, totalQuizzes, totalUsers;
+    let eleves, classes, codeClasses, totalQuizzes, totalUsers, totalSimulation;
 
     if (req.user.role === "admin") {
       // Admin -> toutes les infos
@@ -354,6 +354,7 @@ exports.getUserDashboard = async (req, res) => {
 
       // Quizzes créés par cet utilisateur
       totalQuizzes = await Quiz.countDocuments({ user: req.user._id });
+      totalSimulation = await Simulation.countDocuments({ user: req.user._id });
 
       // Pas logique de donner tous les users à un prof -> on renvoie que lui-même
       totalUsers = 1;
@@ -390,6 +391,7 @@ exports.getUserDashboard = async (req, res) => {
         totalEleves,
         totalClasses,
         totalCodeClasses,
+        totalSimulation,
         totalQuizzes,  // ✅ ajouté
         totalUsers,    // ✅ ajouté
         elevesParClasse: countsByClasse,

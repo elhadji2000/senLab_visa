@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  addSimulation,
+  updateSimulation,
+  getSimulationById,
+} from "../../api/simulationAPI";
 import {
   Box,
   Button,
@@ -13,55 +19,56 @@ import {
   Alert,
   MenuItem,
   Card,
-  CardContent
-} from '@mui/material';
+} from "@mui/material";
 import {
   AddPhotoAlternate as AddPhotoIcon,
   AttachFile as AttachFileIcon,
   Close as CloseIcon,
   CloudUpload as UploadIcon,
-  CheckCircle as SuccessIcon
-} from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
+  CheckCircle as SuccessIcon,
+} from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
+import { useParams, useNavigate } from "react-router-dom";
 
-const niveaux = ['6e', '5e', '4e', '3e', '2nde', '1ère', 'Terminale'];
-const categories = ['Mathematique', 'Physique', 'Chimie', 'Biologie'];
+const niveaux = ["6e", "5e", "4e", "3e", "2nde", "1ère", "Terminale"];
+const categories = [
+  "Mathematique",
+  "Physique",
+  "Chimie",
+  "Biologie",
+  "SVT",
+  "Science de la terre",
+];
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
+const VisuallyHiddenInput = styled("input")({
+  display: "none",
 });
 
 const FileUploadCard = styled(Card)(({ theme }) => ({
   border: `2px dashed ${theme.palette.divider}`,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
   padding: theme.spacing(4),
-  cursor: 'pointer',
-  transition: 'all 0.3s ease',
-  '&:hover': {
+  cursor: "pointer",
+  "&:hover": {
     borderColor: theme.palette.primary.main,
-    backgroundColor: theme.palette.action.hover
-  }
+    backgroundColor: theme.palette.action.hover,
+  },
 }));
 
-function Ajouter() {
+function AjouterOuModifier({ mode = "add" }) {
+  const { id } = useParams(); // pour édition
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     photo: null,
-    titre: '',
-    description: '',
-    niveau: '',
-    categorie: '',
-    simulation: null
+    titre: "",
+    description: "",
+    niveau: "",
+    categorie: "",
+    simulation: null,
   });
 
   const [preview, setPreview] = useState(null);
@@ -70,13 +77,35 @@ function Ajouter() {
   const [error, setError] = useState(null);
   const [errors, setErrors] = useState({});
 
+  // 🔹 Charger les données existantes en mode édition
+  useEffect(() => {
+    if (mode === "edit" && id) {
+      const loadSimulation = async () => {
+        try {
+          const res = await getSimulationById(id);
+          const data = res.data;
+          setFormData({
+            titre: data.titre,
+            description: data.description,
+            niveau: data.niveau,
+            categorie: data.categorie,
+            photo: null,
+            simulation: null,
+          });
+          setPreview(data.photoUrl || null);
+        } catch (err) {
+          setError("Impossible de charger la simulation");
+        }
+      };
+      loadSimulation();
+    }
+  }, [mode, id]);
+
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
+      reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(file);
       setFormData({ ...formData, photo: file });
     }
@@ -84,43 +113,39 @@ function Ajouter() {
 
   const handleSimulationChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.name.endsWith('.zip')) {
+    if (file && file.name.endsWith(".zip")) {
       setFormData({ ...formData, simulation: file });
-      if (errors.simulation) {
-        setErrors({ ...errors, simulation: null });
-      }
+      setErrors({ ...errors, simulation: null });
     } else {
-      setErrors({ ...errors, simulation: 'Veuillez sélectionner un fichier ZIP valide' });
+      setErrors({
+        ...errors,
+        simulation: "Veuillez sélectionner un fichier ZIP valide",
+      });
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: null });
-    }
-  };
-
-  const handleSelectChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: null });
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.titre) newErrors.titre = 'Ce champ est requis';
-    if (!formData.description) newErrors.description = 'Ce champ est requis';
-    if (!formData.niveau) newErrors.niveau = 'Ce champ est requis';
-    if (!formData.categorie) newErrors.categorie = 'Ce champ est requis';
-    if (!formData.photo) newErrors.photo = 'Une image est requise';
-    if (!formData.simulation) newErrors.simulation = 'Un fichier ZIP est requis';
-
+    if (!formData.titre) newErrors.titre = "Ce champ est requis";
+    if (!formData.description) newErrors.description = "Ce champ est requis";
+    if (!formData.niveau) newErrors.niveau = "Ce champ est requis";
+    if (!formData.categorie) newErrors.categorie = "Ce champ est requis";
+    if (mode === "add" && !formData.photo)
+      newErrors.photo = "Une image est requise";
+    if (mode === "add" && !formData.simulation)
+      newErrors.simulation = "Un fichier ZIP est requis";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
+    // ⚡ async ajouté ici
     e.preventDefault();
     if (!validateForm()) return;
 
@@ -128,135 +153,98 @@ function Ajouter() {
     setError(null);
 
     try {
-      // Création d'un FormData pour envoyer les fichiers
-      const data = new FormData();
-      data.append('titre', formData.titre);
-      data.append('description', formData.description);
-      data.append('niveau', formData.niveau);
-      data.append('categorie', formData.categorie);
-      if (formData.photo) data.append('photo', formData.photo);
-      if (formData.simulation) data.append('simulation', formData.simulation);
+      const formPayload = new FormData();
+      formPayload.append("titre", formData.titre);
+      formPayload.append("description", formData.description);
+      formPayload.append("niveau", formData.niveau);
+      formPayload.append("categorie", formData.categorie);
+      if (formData.photo) formPayload.append("photo", formData.photo);
+      if (formData.simulation)
+        formPayload.append("simulation", formData.simulation);
 
-      // Envoi des données au backend
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/api/simulations/add', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `${token}`
-        }
-      });
+      let response;
+      if (mode === "edit" && id) {
+        response = await updateSimulation(id, formPayload); // ✅ await valide
+      } else {
+        response = await addSimulation(formPayload); // ✅ await valide
+      }
 
-      console.log('Réponse du serveur:', response.data);
       setSuccess(true);
-
-      // Réinitialisation du formulaire après succès
       setTimeout(() => {
-        setFormData({
-          photo: null,
-          titre: '',
-          description: '',
-          niveau: '',
-          categorie: '',
-          simulation: null
-        });
-        setPreview(null);
-        setSuccess(false);
-      }, 3000);
+        navigate("/simulations/explorer");
+      }, 2000);
     } catch (err) {
-      console.error('Erreur lors de l\'envoi:', err);
-      setError(err.response?.data?.message || 'Une erreur est survenue lors de l\'envoi');
+      setError(err.response?.data?.message || "Une erreur est survenue");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRemoveFile = (type) => {
-    if (type === 'photo') {
-      setFormData({ ...formData, photo: null });
-      setPreview(null);
-    } else {
-      setFormData({ ...formData, simulation: null });
-    }
-  };
-
   return (
-    <Box sx={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      bgcolor: 'background.default',
-      p: 3
-    }}>
-      <Paper elevation={3} sx={{
-        width: '100%',
-        maxWidth: 800,
-        p: 4,
-        borderRadius: 2
-      }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{
-          fontWeight: 600,
-          color: 'primary.main',
-          mb: 4
-        }}>
-          Ajouter une Simulation
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        p: 3,
+      }}
+    >
+      <Paper sx={{ width: "100%", maxWidth: 800, p: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          {mode === "edit"
+            ? "Modifier la Simulation"
+            : "Ajouter une Simulation"}
         </Typography>
 
-        {loading && <LinearProgress sx={{ mb: 3 }} />}
+        {loading && <LinearProgress sx={{ mb: 2 }} />}
 
         <Snackbar
           open={success}
           autoHideDuration={3000}
           onClose={() => setSuccess(false)}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          <Alert
-            icon={<SuccessIcon fontSize="inherit" />}
-            severity="success"
-            variant="filled"
-            sx={{ width: '100%' }}
-          >
-            Simulation ajoutée avec succès!
+          <Alert icon={<SuccessIcon />} severity="success" variant="filled">
+            {mode === "edit"
+              ? "Simulation modifiée avec succès !"
+              : "Simulation ajoutée avec succès !"}
           </Alert>
         </Snackbar>
 
         {error && (
           <Snackbar
             open={!!error}
-            autoHideDuration={6000}
+            autoHideDuration={4000}
             onClose={() => setError(null)}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
           >
-            <Alert severity="error" variant="filled" sx={{ width: '100%' }}>
+            <Alert severity="error" variant="filled">
               {error}
             </Alert>
           </Snackbar>
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Section Photo */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
-              Photo de la simulation
-            </Typography>
-
+          {/* Image */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1">Photo de la simulation</Typography>
             {preview ? (
-              <Box sx={{ position: 'relative', width: 150 }}>
+              <Box sx={{ position: "relative", width: 150 }}>
                 <Avatar
                   src={preview}
-                  alt="Preview"
                   sx={{ width: 150, height: 150, borderRadius: 2 }}
                   variant="rounded"
                 />
                 <IconButton
-                  onClick={() => handleRemoveFile('photo')}
+                  onClick={() => {
+                    setFormData({ ...formData, photo: null });
+                    setPreview(null);
+                  }}
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: -10,
                     right: -10,
-                    bgcolor: 'error.main',
-                    color: 'white',
-                    '&:hover': { bgcolor: 'error.dark' }
+                    bgcolor: "error.main",
+                    color: "white",
                   }}
                 >
                   <CloseIcon />
@@ -265,8 +253,8 @@ function Ajouter() {
             ) : (
               <FileUploadCard component="label">
                 <AddPhotoIcon color="primary" sx={{ fontSize: 50, mb: 1 }} />
-                <Typography variant="body2" color="text.secondary" align="center">
-                  Cliquez pour télécharger ou glisser-déposer
+                <Typography variant="body2" color="text.secondary">
+                  Cliquez pour télécharger
                 </Typography>
                 <VisuallyHiddenInput
                   type="file"
@@ -276,36 +264,33 @@ function Ajouter() {
               </FileUploadCard>
             )}
             {errors.photo && (
-              <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+              <Typography color="error" variant="caption">
                 {errors.photo}
               </Typography>
             )}
           </Box>
 
-          {/* Champ Titre */}
+          {/* Champs texte */}
           <TextField
             fullWidth
-            label="Titre de la simulation"
+            label="Titre"
             name="titre"
             value={formData.titre}
             onChange={handleInputChange}
             error={!!errors.titre}
             helperText={errors.titre}
-            sx={{ mb: 3 }}
-            variant="outlined"
+            sx={{ mb: 2 }}
           />
-
-          {/* Champ Catégorie */}
           <TextField
-            select
             fullWidth
             label="Catégorie"
             name="categorie"
+            select
             value={formData.categorie}
-            onChange={handleSelectChange}
+            onChange={handleInputChange}
             error={!!errors.categorie}
             helperText={errors.categorie}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
           >
             {categories.map((cat) => (
               <MenuItem key={cat} value={cat}>
@@ -313,18 +298,16 @@ function Ajouter() {
               </MenuItem>
             ))}
           </TextField>
-
-          {/* Champ Niveau */}
           <TextField
-            select
             fullWidth
             label="Niveau"
             name="niveau"
+            select
             value={formData.niveau}
-            onChange={handleSelectChange}
+            onChange={handleInputChange}
             error={!!errors.niveau}
             helperText={errors.niveau}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
           >
             {niveaux.map((niv) => (
               <MenuItem key={niv} value={niv}>
@@ -332,8 +315,6 @@ function Ajouter() {
               </MenuItem>
             ))}
           </TextField>
-
-          {/* Champ Description */}
           <TextField
             fullWidth
             label="Description"
@@ -345,63 +326,54 @@ function Ajouter() {
             multiline
             rows={4}
             sx={{ mb: 3 }}
-            variant="outlined"
           />
 
-          {/* Section Fichier Simulation */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
-              Fichier de simulation (ZIP)
-            </Typography>
-
+          {/* ZIP */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1">Fichier ZIP</Typography>
             {formData.simulation ? (
-              <Card variant="outlined" sx={{ p: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <AttachFileIcon color="primary" sx={{ mr: 2 }} />
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography>{formData.simulation.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {(formData.simulation.size / 1024).toFixed(2)} KB
-                    </Typography>
-                  </Box>
-                  <IconButton onClick={() => handleRemoveFile('simulation')}>
-                    <CloseIcon />
-                  </IconButton>
-                </Box>
+              <Card
+                variant="outlined"
+                sx={{ p: 2, display: "flex", alignItems: "center" }}
+              >
+                <AttachFileIcon color="primary" sx={{ mr: 1 }} />
+                <Typography sx={{ flexGrow: 1 }}>
+                  {formData.simulation.name}
+                </Typography>
+                <IconButton
+                  onClick={() => setFormData({ ...formData, simulation: null })}
+                >
+                  <CloseIcon />
+                </IconButton>
               </Card>
             ) : (
-              <FileUploadCard component="label" sx={{ cursor: 'pointer' }}>
+              <FileUploadCard component="label">
                 <UploadIcon color="primary" sx={{ fontSize: 50, mb: 1 }} />
-                <Typography variant="body2" color="text.secondary" align="center">
-                  Cliquez pour télécharger un fichier ZIP
+                <Typography variant="body2" color="text.secondary">
+                  Cliquez pour télécharger un ZIP
                 </Typography>
                 <VisuallyHiddenInput
                   type="file"
                   accept=".zip"
                   onChange={handleSimulationChange}
-                  style={{ display: 'none' }}
                 />
               </FileUploadCard>
             )}
             {errors.simulation && (
-              <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+              <Typography color="error" variant="caption">
                 {errors.simulation}
               </Typography>
             )}
           </Box>
 
-
-          {/* Bouton de soumission */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ textAlign: "right" }}>
             <Button
               type="submit"
               variant="contained"
-              size="large"
               startIcon={<UploadIcon />}
               disabled={loading}
-              sx={{ px: 4, py: 1.5 }}
             >
-              {loading ? 'Envoi en cours...' : 'Publier la Simulation'}
+              {mode === "edit" ? "Modifier" : "Publier"}
             </Button>
           </Box>
         </form>
@@ -410,4 +382,4 @@ function Ajouter() {
   );
 }
 
-export default Ajouter;
+export default AjouterOuModifier;

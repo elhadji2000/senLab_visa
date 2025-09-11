@@ -107,7 +107,7 @@ const TeacherDashboard = () => {
 
       {/* Stats Cards */}
       <Row className="mb-4 g-2">
-        <Col xl={3} lg={6}>
+        <Col xl={2} lg={6}>
           <Card className="h-100 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
@@ -140,6 +140,21 @@ const TeacherDashboard = () => {
             </Card.Body>
           </Card>
         </Col>
+        <Col xl={2} lg={6}>
+          <Card className="h-100 shadow-sm">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 className="text-muted mb-2">Simulations</h6>
+                  <h3 className="mb-0">{stats?.totalSimulation ?? 0}</h3>
+                </div>
+                <div className="bg-warning bg-opacity-10 p-3 rounded">
+                  <ClipboardData size={24} className="text-warning" />
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
 
         <Col xl={2} lg={6}>
           <Card className="h-100 shadow-sm">
@@ -157,7 +172,7 @@ const TeacherDashboard = () => {
           </Card>
         </Col>
 
-        <Col xl={3} lg={6}>
+        <Col xl={2} lg={6}>
           <Card className="h-100 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
@@ -209,38 +224,41 @@ const TeacherDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {classes.map((cls) => {
-                    const elevesCount = stats.elevesParClasse?.[cls._id] || 0;
-                    const progress = Math.min(
-                      Math.round((elevesCount / 50) * 100),
-                      100
-                    );
+                  {classes
+                    .slice()
+                    .reverse()
+                    .map((cls) => {
+                      const elevesCount = stats.elevesParClasse?.[cls._id] || 0;
+                      const progress = Math.min(
+                        Math.round((elevesCount / 30) * 100),
+                        100
+                      );
 
-                    return (
-                      <tr key={cls._id}>
-                        <td>{cls.nom_classe}</td>
-                        <td>{elevesCount}</td>
-                        <td>
-                          <ProgressBar
-                            now={progress}
-                            label={`${progress}%`}
-                            variant={
-                              progress > 80
-                                ? "success"
-                                : progress > 50
-                                ? "warning"
-                                : "danger"
-                            }
-                          />
-                        </td>
-                        <td>
-                          <Button variant="outline-primary" size="sm">
-                            Détails
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      return (
+                        <tr key={cls._id}>
+                          <td>{cls.nom_classe}</td>
+                          <td>{elevesCount}</td>
+                          <td>
+                            <ProgressBar
+                              now={progress}
+                              label={`${progress}%`}
+                              variant={
+                                progress > 80
+                                  ? "success"
+                                  : progress > 50
+                                  ? "warning"
+                                  : "danger"
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Button variant="outline-primary" size="sm">
+                              Détails
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </Table>
             </Card.Body>

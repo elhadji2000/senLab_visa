@@ -2,20 +2,29 @@ const Resultat = require("../models/Resultat.model");
 const Quiz = require("../models/Quiz.model");
 const Classe = require("../models/Classe.model");
 const Eleve = require("../models/Eleve.model");
+const mongoose = require("mongoose");
 
 exports.getResultatsDashboard = async (req, res) => {
   try {
-    // ⚡ Récupérer l'utilisateur connecté (middleware d'auth doit injecter req.user)
+    // id du User connecté (prof/admin)
     const userId = req.user._id;
 
-    // ⚡ Charger les résultats SEULEMENT de l'élève connecté
-    const resultats = await Resultat.find({ eleve: userId })
+    // 1️⃣ Récupérer toutes les classes de ce user
+    const classes = await Classe.find({ user: userId }).select('_id');
+    const classeIds = classes.map((c) => c._id);
+
+    // 2️⃣ Récupérer les élèves de ces classes
+    const eleves = await Eleve.find({ classe: { $in: classeIds } }).select('_id');
+    const eleveIds = eleves.map((e) => e._id);
+
+    // 3️⃣ Récupérer tous les résultats des élèves
+    const resultats = await Resultat.find({ eleve: { $in: eleveIds } })
       .populate({
-        path: "eleve",
-        select: "nom prenom classe",
-        populate: { path: "classe", select: "nom_classe" },
+        path: 'eleve',
+        select: 'nom prenom classe',
+        populate: { path: 'classe', select: 'nom_classe' },
       })
-      .populate("quiz", "titre");
+      .populate('quiz', 'titre');
 
     if (resultats.length === 0) {
       return res.json({
@@ -25,13 +34,16 @@ exports.getResultatsDashboard = async (req, res) => {
       });
     }
 
-    // ➗ Calcul taux de réussite global
+    // 4️⃣ Calcul taux de réussite global
     let totalPourcentages = 0;
     let countValides = 0;
 
     resultats.forEach((r) => {
       if (r.note) {
-        const [numerateur, denominateur] = r.note.split("/").map(Number);
+        // "2 / 2" → [2,2]
+        const [numerateur, denominateur] = r.note
+          .split('/')
+          .map((x) => parseFloat(x.trim()));
         if (denominateur > 0) {
           const pourcentage = (numerateur / denominateur) * 100;
           totalPourcentages += pourcentage;
@@ -41,9 +53,9 @@ exports.getResultatsDashboard = async (req, res) => {
     });
 
     const tauxReussite =
-      countValides > 0 ? (totalPourcentages / countValides).toFixed(2) : 0;
+      countValides > 0 ? parseFloat((totalPourcentages / countValides).toFixed(2)) : 0;
 
-    // 📋 Evaluations récentes (par quiz)
+    // 5️⃣ Calcul par quiz
     const evaluationsMap = {};
 
     resultats.forEach((r) => {
@@ -54,7 +66,7 @@ exports.getResultatsDashboard = async (req, res) => {
         evaluationsMap[quizId] = {
           id: quizId,
           title: r.quiz.titre,
-          class: r.eleve?.classe?.nom_classe || "N/A",
+          class: r.eleve?.classe?.nom_classe || 'N/A',
           submissions: 0,
           totalPourcentages: 0,
           countNotes: 0,
@@ -63,7 +75,9 @@ exports.getResultatsDashboard = async (req, res) => {
 
       evaluationsMap[quizId].submissions++;
       if (r.note) {
-        const [num, den] = r.note.split("/").map(Number);
+        const [num, den] = r.note
+          .split('/')
+          .map((x) => parseFloat(x.trim()));
         if (den > 0) {
           evaluationsMap[quizId].totalPourcentages += (num / den) * 100;
           evaluationsMap[quizId].countNotes++;
@@ -78,10 +92,11 @@ exports.getResultatsDashboard = async (req, res) => {
       submissions: e.submissions,
       average:
         e.countNotes > 0
-          ? (e.totalPourcentages / e.countNotes).toFixed(2)
+          ? parseFloat((e.totalPourcentages / e.countNotes).toFixed(2))
           : null,
     }));
 
+    // 6️⃣ Réponse
     res.json({
       success: true,
       tauxReussite,
@@ -91,6 +106,7 @@ exports.getResultatsDashboard = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 // ➕ Ajouter un résultat
@@ -119,31 +135,75 @@ exports.listResultats = async (req, res) => {
   }
 };
 
+
 exports.listResultatsParClasse = async (req, res) => {
   const { classeId } = req.params;
 
+  // Validation rapide de l'ID
+  if (!mongoose.Types.ObjectId.isValid(classeId)) {
+    return res.status(400).json({ error: "classeId invalide" });
+  }
+
   try {
-    const resultats = await Resultat.find()
+    // 1) Récupérer les élèves de la classe (on ne récupère que leurs _id)
+    const eleves = await Eleve.find({ classe: classeId }).select("_id").lean();
+    if (!eleves || eleves.length === 0) {
+      return res.json([]); // pas d'élèves => pas de résultats
+    }
+    const eleveIds = eleves.map((e) => e._id);
+
+    // 2) Récupérer les résultats qui correspondent à ces élèves
+    const resultats = await Resultat.find({ eleve: { $in: eleveIds } })
       .populate({
         path: "eleve",
-        select: "nom prenom email classe", // on récupère la classe de l'élève
-        populate: {
-          path: "classe",
-          select: "nom", // optionnel : récupérer aussi le nom de la classe
-        },
+        select: "nom prenom email classe",
+        populate: { path: "classe", select: "nom" },
       })
-      .populate("quiz", "titre categorie");
+      .populate({ path: "quiz", select: "titre categorie" })
+      .sort({ createdAt: -1 }) // optionnel : tri par date décroissante
+      .lean();
 
-    // Filtrer les résultats appartenant à la classe demandée
-    const filtres = resultats.filter(
-      (r) => r.eleve?.classe?._id.toString() === classeId
-    );
+    // 3) Sanitization : s'assurer que quiz/eleve/classe existent et normaliser la note
+    const sanitized = resultats.map((r) => {
+      // eleve supprimé ?
+      if (!r.eleve) {
+        r.eleve = { _id: null, nom: "Élève supprimé", prenom: "", email: "", classe: null };
+      } else {
+        // classe manquante ?
+        if (!r.eleve.classe) {
+          r.eleve.classe = { _id: null, nom: "N/A" };
+        }
+      }
 
-    res.json(filtres);
+      // quiz supprimé ?
+      if (!r.quiz) {
+        r.quiz = { _id: null, titre: "Quiz supprimé", categorie: null };
+      }
+
+      // normaliser la note (ex: "2 / 2" ou "2/2" -> "2 / 2")
+      if (typeof r.note === "string") {
+        const parts = r.note.split("/").map((p) => (p ? p.trim() : ""));
+        r.note = `${parts[0] || ""} / ${parts[1] || ""}`;
+      } else {
+        // si note absent, garder null ou "N/A"
+        r.note = r.note ?? null;
+      }
+
+      // s'assurer que score est une string (ou formattée)
+      if (r.score != null && typeof r.score !== "string") {
+        r.score = String(r.score);
+      }
+
+      return r;
+    });
+
+    return res.json(sanitized);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("listResultatsParClasse error:", error);
+    return res.status(500).json({ error: error.message });
   }
 };
+
 
 // 🔍 Obtenir un résultat par ID
 exports.getResultatById = async (req, res) => {

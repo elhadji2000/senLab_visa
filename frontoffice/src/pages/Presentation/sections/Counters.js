@@ -1,19 +1,3 @@
-/*
-=========================================================
-* Material Kit 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-kit-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-// @mui material components
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
@@ -40,7 +24,7 @@ function Counters() {
           <Grid item xs={12} md={4} display="flex">
             <Divider orientation="vertical" sx={{ display: { xs: "none", md: "block" }, mx: 0 }} />
             <DefaultCounterCard
-              count={15}
+              count={95}
               suffix="+"
               title="Quizz et évaluations"
               description="Des tests variés pour pratiquer, vérifier vos acquis et progresser efficacement."
@@ -49,7 +33,7 @@ function Counters() {
           </Grid>
           <Grid item xs={12} md={4}>
             <DefaultCounterCard
-              count={4}
+              count={5}
               title="Pages principales"
               description="Une structure claire pour explorer, apprendre et accéder aux ressources du laboratoire."
             />

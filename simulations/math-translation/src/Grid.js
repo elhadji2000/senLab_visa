@@ -6,7 +6,13 @@ const XZPlane = ({ size }) => (
     rotation={[1.5 * Math.PI, 0, 0]}
     position={[0, 0, 0]}
   >
-    <meshStandardMaterial attach="material" color="#f9c74f" wireframe />
+    <meshStandardMaterial
+      attach="material"
+      color="yellow" // gris neutre
+      wireframe
+      opacity={0.6}
+      transparent
+    />
   </Plane>
 );
 
@@ -16,7 +22,13 @@ const XYPlane = ({ size }) => (
     rotation={[0, 0, 0]}
     position={[0, 0, 0]}
   >
-    <meshStandardMaterial attach="material" color="pink" wireframe />
+    <meshStandardMaterial
+      attach="material"
+      color="blue" // gris plus foncé
+      wireframe
+      opacity={0.6}
+      transparent
+    />
   </Plane>
 );
 
@@ -26,67 +38,38 @@ const YZPlane = ({ size }) => (
     rotation={[0, Math.PI / 2, 0]}
     position={[0, 0, 0]}
   >
-    <meshStandardMaterial attach="material" color="#80ffdb" wireframe />
+    <meshStandardMaterial
+      attach="material"
+      color="red" // gris encore plus sombre
+      wireframe
+      opacity={0.6}
+      transparent
+    />
   </Plane>
 );
 
 export default function Grid({ size }) {
   return (
     <group>
-      <Text
-        color="white" // default
-        anchorX="center" // default
-        anchorY="middle" // default
-        position={[size / 2 + 1, 0, 0]}
-        scale={[4, 4, 4]}
-      >
-        X+
+      <Text color="white" anchorX="center" anchorY="middle" position={[size / 2 + 1, 0, 0]} scale={[4, 4, 4]}>
+        x+
       </Text>
-      <Text
-        color="white" // default
-        anchorX="center" // default
-        anchorY="middle" // default
-        position={[-size / 2 - 1, 0, 0]}
-        scale={[4, 4, 4]}
-      >
-        X-
+      <Text color="white" anchorX="center" anchorY="middle" position={[-size / 2 - 1, 0, 0]} scale={[4, 4, 4]}>
+        x-
       </Text>
-      <Text
-        color="white" // default
-        anchorX="center" // default
-        anchorY="middle" // default
-        position={[0, size / 2 + 1, 0]}
-        scale={[4, 4, 4]}
-      >
-        Y+
+      <Text color="blue" anchorX="center" anchorY="middle" position={[0, size / 2 + 1, 0]} scale={[4, 4, 4]}>
+        y+
       </Text>
-      <Text
-        color="white" // default
-        anchorX="center" // default
-        anchorY="middle" // default
-        position={[0, -size / 2 - 1, 0]}
-        scale={[4, 4, 4]}
-      >
-        Y-
+      <Text color="blue" anchorX="center" anchorY="middle" position={[0, -size / 2 - 1, 0]} scale={[4, 4, 4]}>
+        y-
       </Text>
-      <Text
-        color="white" // default
-        anchorX="center" // default
-        anchorY="middle" // default
-        position={[0, 0, size / 2 + 1]}
-        scale={[4, 4, 4]}
-      >
-        Z+
+      <Text color="red" anchorX="center" anchorY="middle" position={[0, 0, size / 2 + 1]} scale={[4, 4, 4]}>
+        z+
       </Text>
-      <Text
-        color="white" // default
-        anchorX="center" // default
-        anchorY="middle" // default
-        position={[0, 0, -size / 2 - 1]}
-        scale={[4, 4, 4]}
-      >
-        Z-
+      <Text color="red" anchorX="center" anchorY="middle" position={[0, 0, -size / 2 - 1]} scale={[4, 4, 4]}>
+        z-
       </Text>
+
       <XZPlane size={size} />
       <XYPlane size={size} />
       <YZPlane size={size} />

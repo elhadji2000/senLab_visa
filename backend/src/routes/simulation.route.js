@@ -36,6 +36,7 @@ router.post(
   ]),
   simulationController.createSimulation
 );
+
 // Récupérer toutes les simulations
 router.get('/', simulationController.getAllSimulations);
 
@@ -48,9 +49,21 @@ router.get('/count', simulationController.countByCategory);
 // Récupérer une simulation par ID (⚠️ doit être après /count et /byuser)
 router.get('/:id', simulationController.getSimulationById);
 
+// ➕ Modifier une simulation (PUT)
+router.put(
+  '/:id',
+  authenticate,
+  upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'simulation', maxCount: 1 },
+  ]),
+  simulationController.updateSimulation
+);
+
 // Supprimer une simulation
 router.delete('/:id', authenticate, simulationController.deleteSimulation);
 
+// Servir le fichier HTML extrait d'une simulation
 router.get('/html/:simulationId', (req, res) => {
   const buildDir = path.join(__dirname, '..', 'uploads', 'extracted', req.params.simulationId);
 
@@ -63,5 +76,6 @@ router.get('/html/:simulationId', (req, res) => {
   const htmlPath = path.join(buildDir, htmlFile);
   res.sendFile(htmlPath);
 });
+
 
 module.exports = router;

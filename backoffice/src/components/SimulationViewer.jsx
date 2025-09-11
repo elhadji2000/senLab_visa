@@ -48,7 +48,7 @@ function SimulationViewer() {
     }
 
     return (
-        <Box sx={{ height: '100vh', width: '100%', overflow: 'hidden', position: 'relative' }}>
+        <Box sx={{ maxHeight: '300vh', height: '150vh', width: '100%', overflow: 'hidden', position: 'relative' }}>
             <iframe
                 src={iframeSrc}
                 title="Simulation interactive"

@@ -1,21 +1,13 @@
-// @mui material components
+/* eslint-disable no-unused-vars */
+// SimuUs.js
 import Card from "@mui/material/Card";
-
-// Material Kit 2 React components
+import Grid from "@mui/material/Grid";
 import MKBox from "components/MKBox";
-
-// Material Kit 2 React examples
 import DefaultNavbar from "examples/Navbars/DefaultNavbar";
-
-// Author page sections
-import Posts from "pages/LandingPages/Simulation/sections/Posts";
 import Footer from "pages/LandingPages/Simulation/sections/Footer";
-
-// Routes
 import routes from "routes";
-
-// Images
 import bgImage from "assets/img3.avif";
+import Posts from "./sections/Posts";
 
 function SimuUs() {
   return (
@@ -49,7 +41,7 @@ function SimuUs() {
         />
         <Card
           sx={{
-            p: 2,
+            p: 3,
             mx: { xs: 2, lg: 3 },
             mt: -8,
             mb: 4,

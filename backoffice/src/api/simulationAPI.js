@@ -9,7 +9,7 @@ export const addSimulation = (simData) => {
   });
 };
 
-// 📋 Lister toutes les simulations
+// 📋 Lister toutes les simulations (utilisateur connecté ou tout si admin)
 export const fetchSimulations = () => {
   return axiosInstance.get('/api/simulations/byuser');
 };
@@ -26,15 +26,21 @@ export const fetchSimulationHTML = (simulationId) => {
   });
 };
 
-// 🟡 À implémenter côté backend si nécessaire :
+// 🔎 Obtenir une simulation par ID
 export const getSimulationById = (id) => {
   return axiosInstance.get(`/api/simulations/${id}`);
 };
 
+// ✏️ Mettre à jour une simulation (FormData avec fichier ZIP + image si besoin)
 export const updateSimulation = (id, updatedData) => {
-  return axiosInstance.put(`/api/simulations/update/${id}`, updatedData);
+  return axiosInstance.put(`/api/simulations/${id}`, updatedData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 };
 
+// 🗑️ Supprimer une simulation
 export const deleteSimulation = (id) => {
-  return axiosInstance.delete(`/api/simulations/delete/${id}`);
+  return axiosInstance.delete(`/api/simulations/${id}`);
 };

@@ -8,6 +8,8 @@ import {
   Button,
   Spinner,
   Alert,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { fetchSimulations, deleteSimulation } from "../../api/simulationAPI";
@@ -17,6 +19,12 @@ const ExplorerBackoffice = () => {
   const [simulations, setSimulations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // ✅ États pour le toast
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState("success");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,22 +42,27 @@ const ExplorerBackoffice = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Voulez-vous vraiment supprimer cette simulation ?"))
-      return;
+    if (!window.confirm("Voulez-vous vraiment supprimer cette simulation ?")) return;
+
     try {
       await deleteSimulation(id);
       setSimulations(simulations.filter((sim) => sim._id !== id));
+
+      // ✅ Toast succès
+      setToastMessage("Simulation supprimée avec succès ✅");
+      setToastVariant("success");
+      setShowToast(true);
     } catch {
-      alert("Erreur lors de la suppression.");
+      // ❌ Toast erreur
+      setToastMessage("Erreur lors de la suppression ❌");
+      setToastVariant("danger");
+      setShowToast(true);
     }
   };
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "80vh" }}
-      >
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "80vh" }}>
         <Spinner animation="border" variant="warning" />
       </div>
     );
@@ -58,9 +71,7 @@ const ExplorerBackoffice = () => {
   if (error) {
     return (
       <Container className="py-5">
-        <Alert variant="danger" className="text-center">
-          {error}
-        </Alert>
+        <Alert variant="danger" className="text-center">{error}</Alert>
       </Container>
     );
   }
@@ -69,10 +80,7 @@ const ExplorerBackoffice = () => {
     <Container className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3 className="fw-bold text-primary">📁 Gestion des Simulations</h3>
-        <Button
-          variant="warning"
-          onClick={() => navigate("/simulations/ajouter")}
-        >
+        <Button variant="warning" onClick={() => navigate("/simulations/ajouter")}>
           + Ajouter une Simulation
         </Button>
       </div>
@@ -87,13 +95,9 @@ const ExplorerBackoffice = () => {
                   😕 Aucune simulation ajoutée pour le moment
                 </Card.Title>
                 <Card.Text>
-                  Cliquez sur <strong>+ Ajouter une Simulation</strong> pour en
-                  créer une.
+                  Cliquez sur <strong>+ Ajouter une Simulation</strong> pour en créer une.
                 </Card.Text>
-                <Button
-                  variant="warning"
-                  onClick={() => navigate("/simulations/ajouter")}
-                >
+                <Button variant="warning" onClick={() => navigate("/simulations/ajouter")}>
                   Ajouter une Simulation
                 </Button>
               </Card.Body>
@@ -106,9 +110,7 @@ const ExplorerBackoffice = () => {
             <Col key={sim._id}>
               <Card className="sim-card h-100 border-0">
                 {/* Header */}
-                <Card.Header className="sim-card-header text-center">
-                  #{index + 1}
-                </Card.Header>
+                <Card.Header className="sim-card-header text-center">#{index + 1}</Card.Header>
 
                 {/* Contenu */}
                 <Card.Body className="d-flex flex-column text-center p-2">
@@ -118,14 +120,13 @@ const ExplorerBackoffice = () => {
                       src={`http://localhost:5000${sim.photo}`}
                       alt={sim.titre}
                       onError={(e) => {
-                        e.target.src =
-                          "https://via.placeholder.com/300x150?text=Image+non+disponible";
+                        e.target.src = "https://via.placeholder.com/300x150?text=Image+non+disponible";
                       }}
                       className="sim-image"
                     />
                   </div>
 
-                  {/* Description */}
+                  {/* Titre */}
                   <Card.Text className="flex-grow-1 sim-description">
                     {sim.titre || "Pas de titre disponible"}
                   </Card.Text>
@@ -166,6 +167,13 @@ const ExplorerBackoffice = () => {
           ))}
         </Row>
       )}
+
+      {/* ✅ Toast notifications */}
+      <ToastContainer position="bottom-end" className="p-3">
+        <Toast bg={toastVariant} onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>
+          <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Container>
   );
 };
