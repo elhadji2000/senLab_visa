@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Cartes des Acides Aminés</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+    <div id="custom-alert">
+        <h2>Bienvenue dans le Jeu de Cartes des Acides Aminés!</h2>
+        <p>
+            Objectif : Ce jeu vous permet de tester vos connaissances sur les acides aminés en les classant correctement selon leur catégorie.
+        </p>
+        <button id="close-alert-btn">Compris</button>
+    </div>
+
+    <div id="interface">
+        <h1>Jeu de Cartes des Acides Aminés</h1>
+        <div id="categories-container">
+            <div class="category-section">
+                <h2>Non Polaires</h2>
+                <div class="category" id="non-polaire"></div>
+            </div>
+            <div class="category-section">
+                <h2>Polaires</h2>
+                <div class="category" id="polaire"></div>
+            </div>
+            <div class="category-section">
+                <h2>Acides</h2>
+                <div class="category" id="acide"></div>
+            </div>
+            <div class="category-section">
+                <h2>Basiques</h2>
+                <div class="category" id="basique"></div>
+            </div>
+        </div>
+        <div id="cards"></div>
+        <button id="check-results">Vérifier les résultats</button>
+        <div id="results">
+            <p id="score">Score: 0 / 7</p>
+            <span id="emoji">😊</span>
+        </div>
+        <div id="popup" class="popup"></div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

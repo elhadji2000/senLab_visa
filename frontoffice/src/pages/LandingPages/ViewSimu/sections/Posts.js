@@ -42,7 +42,7 @@ function Posts() {
           {simulation.titre}
         </MKTypography>
         <MKTypography variant="body2" color="text.secondary">
-          Catégorie : {simulation.categorie}
+          Catégorie : {simulation.categorie} | {simulation.description}
         </MKTypography>
       </MKBox>
 
