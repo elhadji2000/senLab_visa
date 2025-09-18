@@ -107,7 +107,7 @@ const TeacherDashboard = () => {
 
       {/* Stats Cards */}
       <Row className="mb-4 g-2">
-        <Col xl={2} lg={6}>
+        <Col xl={3} lg={6}>
           <Card className="h-100 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
@@ -125,7 +125,7 @@ const TeacherDashboard = () => {
           </Card>
         </Col>
 
-        <Col xl={2} lg={6}>
+        <Col xl={3} lg={6}>
           <Card className="h-100 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
@@ -140,7 +140,7 @@ const TeacherDashboard = () => {
             </Card.Body>
           </Card>
         </Col>
-        <Col xl={2} lg={6}>
+        <Col xl={3} lg={6}>
           <Card className="h-100 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
@@ -155,8 +155,22 @@ const TeacherDashboard = () => {
             </Card.Body>
           </Card>
         </Col>
-
-        <Col xl={2} lg={6}>
+        <Col xl={3} lg={6}>
+          <Card className="h-100 shadow-sm">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 className="text-muted mb-2">Quizzes Disponibles</h6>
+                  <h3 className="mb-0">{stats?.totalQuizzes ?? 0}</h3>
+                </div>
+                <div className="bg-success bg-opacity-10 p-3 rounded">
+                  <ClipboardData size={24} className="text-success" />
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xl={3} lg={6}>
           <Card className="h-100 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
@@ -172,7 +186,7 @@ const TeacherDashboard = () => {
           </Card>
         </Col>
 
-        <Col xl={2} lg={6}>
+        <Col xl={3} lg={6}>
           <Card className="h-100 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
@@ -184,21 +198,6 @@ const TeacherDashboard = () => {
                 </div>
                 <div className="bg-info bg-opacity-10 p-3 rounded">
                   <GraphUp size={24} className="text-info" />
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xl={2} lg={6}>
-          <Card className="h-100 shadow-sm">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-muted mb-2">Quizzes Disponibles</h6>
-                  <h3 className="mb-0">{stats?.totalQuizzes ?? 0}</h3>
-                </div>
-                <div className="bg-success bg-opacity-10 p-3 rounded">
-                  <ClipboardData size={24} className="text-success" />
                 </div>
               </div>
             </Card.Body>

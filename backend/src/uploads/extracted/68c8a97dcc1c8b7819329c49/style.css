@@ -1,0 +1,328 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+/* Container for the entire setup */
+.container {
+    position: relative;
+    width: 80vw;  /* Utilisation d'unités relatives */
+    height: 60vh; /* Utilisation d'unités relatives */
+    border: 1px solid #ccc;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 1000px; /* Limite de la largeur maximale */
+    max-height: 600px; /* Limite de la hauteur maximale */
+}
+/* Ajout de media queries pour différentes tailles d'écran */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column; /* Disposition en colonne sur les petits écrans */
+        height: auto;
+    }
+    .ph-meter, .burette-container, .water-tap, .drain-tap, .pipette, .dropdown-container, .reset-container {
+        margin-bottom: 20px; /* Espacement entre les éléments */
+    }
+}
+
+/* PH Metre */
+.ph-meter {
+    position: relative;
+    width: 80px;
+    height: 300px;
+    left: 100px;
+    top: 26px;
+}
+
+.ph-scale {
+    position: relative;
+    width: 50px;
+    height: 100%;
+    background: linear-gradient(to bottom, blue, purple, red);
+    border: 1px solid black;
+}
+
+.ph-graduation {
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    padding-right: 5px;
+    color: rgb(37, 197, 72);
+    font-size: 12px;
+}
+
+/* Burette Container */
+.burette-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    border: 2px solid black;
+    display: flex;
+    align-items: flex-end;
+    margin-top: 80px;
+    top: 132px;
+}
+
+.burette {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: lightblue;
+}
+
+.graduation-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.graduation-line {
+    width: 100%;
+    height: 1px;
+    background-color: rgb(129, 122, 122);
+}
+
+.graduation-label {
+    position: absolute;
+    left: 105%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: black;
+}
+
+.water-level {
+    width: 100%;
+    background-color: rgb(29, 29, 243);
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    bottom: 0; /* Start at the bottom */
+    left: 0;
+    height: 0%; /* Initial height is 0% */
+    transition: height 0.5s ease, background-color 0.5s ease; /* Ajout des transitions */
+}
+/* Water Tap */
+.water-tap {
+    position: absolute;
+    left: 700px;
+    top: 2px;
+}
+
+.water-tap img {
+    width: 250px;
+    height: auto;
+}
+
+/* Drain Tap */
+.drain-tap {
+    position: absolute;
+    left: 326px;
+    top: 303px;
+}
+
+.drain-tap img {
+    width: 300px;
+    height: auto;
+}
+
+/* Pipette */
+.pipette {
+    position: absolute;
+    left: 600px;
+    top: 30px;
+}
+
+.pipette img {
+    width: 80px;  /* Adjust the width according to your needs */
+    height: 100px; /* Adjust the height according to your needs */
+    display: block;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+/* Pipette Liquid */
+.pipette-liquid {
+    position: absolute;
+    width: 5px;  /* Adjust the width as needed */
+    height: 0%; /* Start at 0% */
+    background-color: rgb(218, 208, 208); /* Default color, will change dynamically */
+    bottom: 0; /* Start at the bottom */
+    left: 81px; /* Centered within the pipette */
+    transform: translateX(-50%); /* Centrer parfaitement */
+    display: none; /* Initially hidden */
+    top: 90px ;
+    transition: height 0.5s ease, background-color 0.5s ease; /* Ajout des transitions */
+}
+/* Liquide de la Pipette */
+.liquid-jet {
+    position: absolute;
+    width: 5px;
+    height: 100px; /* Adjust as needed */
+    background-color: transparent; /* Default, will change dynamically */
+    top: 100px; /* Adjust to be below the pipette */
+    left: 50%;
+    transform: translateX(-50%);
+    display: none; /* Initially hidden */
+    transition: height 0.5s ease, background-color 0.5s ease; /* Smooth transition for height and color */
+}
+
+/* Dropdown Menu */
+.dropdown-container {
+    position: absolute;
+    left: 800px; /* Adjust as needed to align with the pipette */
+    top: 35px;    /* Adjust as needed to align with the pipette */
+}
+
+#acid-base-select {
+    padding: 5px;
+    font-size: 14px;
+}
+
+/* Reset Button */
+.reset-container {
+    position: absolute;
+    left: 800px; /* Adjust as needed */
+    top: 550px;   /* Adjust as needed */
+}
+
+#reset-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #f2a408;
+    border: 1px solid #d69813;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#reset-button:hover {
+    background-color: #e0e0e0;
+}
+
+.fill-container {
+    position: absolute;
+    left: 400px; /* Adjust as needed */
+    top: 550px;   /* Adjust as needed */
+}
+.drain-liquid {
+    position: absolute;
+    width: 50px;  /* Ajustez la largeur selon vos besoins */
+    height: 100px; /* Hauteur pour simuler l'écoulement du liquide */
+    background-color: transparent; /* Couleur transparente par défaut */
+    bottom: 65px; /* Positionnez juste sous le robinet */
+    left: 42%; /* Centrer sous le robinet */
+    transform: translateX(-50%); /* Centrage parfait */
+    display: none; /* Caché initialement */
+}
+.water-jet {
+    position: absolute;
+    top: 220px; /* Ajustez cette valeur pour que le jet commence sous le robinet */
+    left: 42%; /* Centrer sous le robinet */
+    transform: translateX(-50%);
+    width: 45px; /* Largeur du jet d'eau */
+    height: 280px; /* Hauteur du jet, ajustez selon vos besoins */
+    background-color: rgb(132, 203, 226); /* Couleur de l'eau */
+    display: none; /* Commencez caché, sera montré par JavaScript */
+}
+.draggable {
+    cursor: pointer; /* Change le curseur pour indiquer qu'il peut être déplacé */
+}
+
+.sonde-container {
+    position: absolute;
+    left: 350px; /* Adjust as needed */
+    top: 16px; /* Adjust as needed */
+    width: 150px;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#sonde-img {
+    width: auto; /* Maintain aspect ratio */
+    height: 97%; /* Start with full height, will be updated by JS */
+    position: absolute;
+    bottom: 0; /* Align the bottom of the sonde with the bottom of the container */
+}
+
+#left-plug, #right-plug {
+    cursor: pointer;
+}
+
+#ph-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 20px solid black;
+    left: 120%; /* Adjust left position to avoid overlap with the pH display */
+}
+
+.ph-display {
+    position: absolute;
+    background-color: grey;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 16px;
+    transform: translateY(-50%);
+    left: 130%; /* Adjust left position to avoid overlap with the arrow */
+}
+#explanatory-text {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px; /* Ensure there's space between elements */
+}
+
+#solution-info {
+    font-size: 14px;
+    color: #333;
+}
+.water-label {
+position: absolute;
+top: 160px; /* Ajustez selon vos besoins */
+left: 180px; /* Ajustez selon vos besoins */
+font-size: 14px;
+color: black;
+font-weight: bold;
+}
+#custom-alert {
+position: fixed;
+top: 50%; /* Adjust this value to move the alert box lower */
+left: 50%;
+transform: translate(-50%, -50%);
+background-color: #fff;
+color: #000;
+padding: 20px;
+border: 2px solid #ccc;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+z-index: 1000;
+display: none;
+width: 80%;
+max-width: 600px;
+}
+#custom-alert h2 {
+margin-top: 0;
+}
+#custom-alert button {
+margin-top: 20px;
+padding: 10px 20px;
+background-color: #4CAF50;
+color: white;
+border: none;
+cursor: pointer;
+border-radius: 5px;
+}
+#custom-alert button:hover {
+background-color: #45a049;
+}
+

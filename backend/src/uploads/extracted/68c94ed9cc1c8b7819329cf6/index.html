@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation de Dosage</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div id="interface">
+        <h1>Simulation de Dosage</h1>
+        <div id="selection-container">
+            <div class="selection-item">
+                <label for="acid-select">Acide:</label>
+                <select id="acid-select">
+                    <option value="HCl">Acide Chlorhydrique (HCl)</option>
+                    <option value="H2SO4">Acide Sulfurique (H2SO4)</option>
+                </select>
+            </div>
+            <div class="selection-item">
+                <label for="base-select">Base:</label>
+                <select id="base-select">
+                    <option value="NaOH">Hydroxyde de Sodium (NaOH)</option>
+                    <option value="KOH">Hydroxyde de Potassium (KOH)</option>
+                </select>
+            </div>
+        </div>
+        <div class="input-container">
+            <label for="volume-acid">Volume de l'acide (mL):</label>
+            <input type="number" id="volume-acid" value="50" min="0">
+        </div>
+        <div class="input-container">
+            <label for="concentration-acid">Concentration de l'acide (M):</label>
+            <input type="number" id="concentration-acid" value="0.1" min="0" step="0.01">
+        </div>
+        <div class="input-container">
+            <label for="concentration-base">Concentration de la base (M):</label>
+            <input type="number" id="concentration-base" value="0.1" min="0" step="0.01">
+        </div>
+        <div id="button-container">
+            <button id="start-agitator">Allumer l'agitateur</button>
+            <button id="stop-agitator">Éteindre l'agitateur</button>
+            <button id="start-dosage">Commencer le Dosage</button>
+            <button id="add-indicator">Ajouter de la phénolphtaléine</button>
+        </div>
+        <div id="info"></div>
+    </div>
+    <div id="chart-container">
+        <canvas id="titration-chart"></canvas>
+    </div>
+    <div id="three-canvas"></div>
+    <script src="main.js"></script>
+</body>
+
+</html>

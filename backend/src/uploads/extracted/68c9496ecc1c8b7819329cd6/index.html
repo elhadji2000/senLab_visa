@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation des Acides Aminés</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/renderers/CSS2DRenderer.js"></script>
+</head>
+<body>
+    <!-- Custom Alert Box -->
+    <div id="custom-alert">
+        <h2>Bienvenue dans l'interface de visualisation des acides aminés!</h2>
+        <p>Objectif : Cette interface vous permet de visualiser des modèles 3D d'acides aminés.</p>
+        <ul>
+            <li>Sélectionnez un acide aminé dans le menu déroulant.</li>
+            <li>Utilisez la souris pour zoomer et faire tourner la molécule.</li>
+            <li>Référez-vous à la description et à la légende pour plus de détails.</li>
+        </ul>
+        <button onclick="closeCustomAlert()">Compris</button>
+    </div>
+
+    <div id="controls">
+        <select id="amino-acid-select">
+            <option value="glycine">Glycine</option>
+            <option value="alanine">Alanine</option>
+            <option value="isoleucine">Isoleucine</option>
+            <option value="leucine">Leucine</option>
+            <option value="phenylalanine">Phénylalanine</option>
+            <option value="serine">Serine</option>
+            <option value="valine">Valine</option>
+        </select>
+        <div id="legend">
+            <h2>Légende</h2>
+            <div class="legend-item"><div class="legend-color" style="background-color: red;"></div>: Oxygène (O)</div>
+            <div class="legend-item"><div class="legend-color" style="background-color: white; border: 1px solid #000;"></div>: Hydrogène (H)</div>
+            <div class="legend-item"><div class="legend-color" style="background-color: blue;"></div>: Azote (N)</div>
+            <div class="legend-item"><div class="legend-color" style="background-color: grey;"></div>: Carbone (C)</div>
+        </div>
+        <div id="description">
+            <h2>Description</h2>
+            <p id="description-text">Sélectionnez un acide aminé pour voir sa description.</p>
+        </div>
+        <div id="amino-acid-image">
+            <img id="amino-acid-2d" src="" alt="Représentation 2D de l'acide aminé" style="display: none;">
+        </div>
+    </div>
+    <div id="three-canvas"></div>
+
+    <script src="scripts/main.js"></script>
+</body>
+</html>

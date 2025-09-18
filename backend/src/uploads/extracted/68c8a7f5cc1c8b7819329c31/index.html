@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de réactions chimiques</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Modal de bienvenue -->
+    <div id="welcome-modal" class="welcome-modal">
+        <h2>Bienvenue dans le Générateur de réactions chimiques</h2>
+        <p>Cette application vous permet de :</p>
+        <ul>
+            <li>Générer des équations bilan pour des réactions acide-base</li>
+            <li>Visualiser les molécules en 3D</li>
+            <li>Comprendre les mécanismes de réaction</li>
+        </ul>
+        <button class="close-modal" onclick="closeModal()">Commencer</button>
+    </div>
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Générateur de réactions chimiques</h1>
+        </header>
+
+        <div class="selection-container">
+            <div class="selection-box">
+                <label for="acide-faible">Acide faible</label>
+                <select id="acide-faible">
+                    <option value="acide-ethanoique">Acide éthanoïque</option>
+                    <option value="acide-methanoique">Acide méthanoïque</option>
+                    <option value="acide-benzoique">Acide benzoïque</option>
+                    <option value="acide-propanoique">Acide propanoïque</option>
+                    <option value="acide-butanoique">Acide butanoïque</option>
+                </select>
+            </div>
+
+            <div class="selection-box">
+                <label for="base-faible">Base faible</label>
+                <select id="base-faible">
+                    <option value="ammoniac">Ammoniac</option>
+                    <option value="aniline">Aniline</option>
+                    <option value="acetate-ammonium">Acétate d'ammonium</option>
+                    <option value="ethanoate-sodium">Éthanoate de sodium</option>
+                    <option value="carbonate-sodium">Carbonate de sodium</option>
+                </select>
+            </div>
+        </div>
+
+        <button onclick="genererEquation()" class="button">Générer l'équation</button>
+
+        <div class="results">
+            <div id="equation-bilan" class="equation"></div>
+            <div id="explication" class="explanation"></div>
+        </div>
+
+        <a href="visualisation.html" class="visualization-link">
+            Visualiser les molécules en 3D →
+        </a>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -8,8 +8,7 @@ import Footer from "pages/LandingPages/SimulationAll/sections/Footer";
 // Routes
 import routes from "routes";
 
-// Images
-import bgImage from "assets/ban2.jpg";
+import bgImage from "assets/images/logos/physique1.svg";
 
 function SimuTous() {
   return (

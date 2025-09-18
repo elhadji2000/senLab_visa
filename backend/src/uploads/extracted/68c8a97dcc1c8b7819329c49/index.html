@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation pH-mètre</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="custom-alert">
+        <h2>Bienvenue dans la Simulation de pH-mètre!</h2>
+        <p>
+            Objectif : Cette simulation vous permet de mesurer et de comprendre le pH des solutions en utilisant des
+            outils virtuels comme une burette, une pipette et un pH-mètre.
+        </p>
+        <p>
+            Étapes pour utiliser la simulation :
+        </p>
+        <ul style="text-align: left;">
+            <li>Sélectionnez une solution dans le menu déroulant.</li>
+            <li>Utilisez la pipette pour ajouter la solution sélectionnée dans la burette.</li>
+            <li>Utilisez le robinet d'eau pour ajouter de l'eau à la solution dans la burette.</li>
+            <li>Utilisez le pH-mètre pour mesurer le pH de la solution.</li>
+            <li>Cliquez sur le robinet de vidange pour vider la burette si nécessaire.</li>
+            <li>Réinitialisez l'expérience en cliquant sur le bouton de réinitialisation.</li>
+        </ul>
+        <p>
+            Utilité :
+        </p>
+        <ul style="text-align: left;">
+            <li>Cette simulation interactive aide à renforcer vos connaissances sur les concepts de pH et de titration.
+            </li>
+            <li>En manipulant virtuellement les outils de laboratoire, vous pouvez observer comment les changements de
+                concentration affectent le pH d'une solution.</li>
+        </ul>
+        <button onclick="closeCustomAlert()">Compris</button>
+    </div>
+
+    <div class="container">
+        <!-- pH Meter -->
+        <div class="ph-meter" aria-labelledby="ph-display">
+            <div class="ph-scale">
+                <div class="ph-graduation" style="top: 0%;">14-</div>
+                <div class="ph-graduation" style="top: 7.14%;">13-</div>
+                <div class="ph-graduation" style="top: 14.28%;">12-</div>
+                <div class="ph-graduation" style="top: 21.42%;">11-</div>
+                <div class="ph-graduation" style="top: 28.56%;">10-</div>
+                <div class="ph-graduation" style="top: 35.7%;">9-</div>
+                <div class="ph-graduation" style="top: 42.84%;">8-</div>
+                <div class="ph-graduation" style="top: 50%;">7-</div>
+                <div class="ph-graduation" style="top: 57.14%;">6-</div>
+                <div class="ph-graduation" style="top: 64.28%;">5-</div>
+                <div class="ph-graduation" style="top: 71.42%;">4-</div>
+                <div class="ph-graduation" style="top: 78.56%;">3-</div>
+                <div class="ph-graduation" style="top: 85.7%;">2-</div>
+                <div class="ph-graduation" style="top: 92.84%;">1-</div>
+                <div class="ph-graduation" style="top: 100%;">0-</div>
+                <div id="ph-arrow"></div>
+                <div id="ph-display" class="ph-display" role="status">pH -</div>
+            </div>
+        </div>
+
+        <!-- Burette Container -->
+        <div class="burette-container">
+            <div class="burette" aria-label="Burette">
+                <div class="graduation-container">
+                    <div class="graduation-line" style="top: 0%;"></div>
+                    <div class="graduation-label" style="top: 0%;">1 L</div>
+                    <div class="graduation-line" style="top: 25%;"></div>
+                    <div class="graduation-label" style="top: 25%;">0.75 L</div>
+                    <div class="graduation-line" style="top: 50%;"></div>
+                    <div class="graduation-label" style="top: 50%;">0.5 L</div>
+                    <div class="graduation-line" style="top: 75%;"></div>
+                    <div class="graduation-label" style="top: 75%;">0.25 L</div>
+                    <div class="graduation-line" style="top: 100%;"></div>
+                    <div class="graduation-label" style="top: 100%;">0 L</div>
+                </div>
+                <div id="liquid-level" class="water-level" style="height: 0%;">0 L</div>
+            </div>
+        </div>
+
+        <!-- Sonde for pH measurement -->
+        <div class="sonde-container">
+            <img src="images/sonde.png" id="sonde-img" alt="Sonde pH" class="draggable">
+        </div>
+
+        <div class="water-tap" role="button" aria-label="Increase water level">
+            <img src="images/tab1.svg" alt="Water Tap" onclick="increaseWaterLevel()">
+            <div class="water-jet"></div> <!-- Élément pour le jet d'eau -->
+            <div class="water-label">eau</div> <!-- Ajout du texte "eau" -->
+        </div>
+
+        <!-- Drain Tap -->
+        <div class="drain-tap" onclick="drainBurette()">
+            <img src="images/tab1.svg" alt="Drain Tap">
+            <div id="drain-liquid" class="drain-liquid"></div> <!-- Rectangle pour simuler l'écoulement -->
+        </div>
+
+        <!-- Pipette -->
+        <div class="pipette" role="button" aria-label="Pour liquid from pipette">
+            <img id="pipette-img" src="images/pipette_blue.svg" alt="Pipette" onclick="pourLiquid()">
+            <div id="pipette-liquid" class="pipette-liquid"></div>
+            <div class="liquid-jet"></div> <!-- Rectangle pour le liquide sortant -->
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div class="dropdown-container" aria-label="Select substance">
+            <select id="acid-base-select" onchange="changePipetteColor()">
+                <option value="CH3COOH">CH3COOH</option>
+                <option value="HCOOH">HCOOH</option>
+                <option value="C6H5COOH">C6H5COOH</option>
+                <option value="CH3CH2COOH">CH3CH2COOH</option>
+                <option value="CH3(CH2)2COOH">CH3(CH2)2COOH</option>
+                <option value="NH3">NH3</option>
+                <option value="C6H5NH2">C6H5NH2</option>
+                <option value="CH3COONH4">CH3COONH4</option>
+                <option value="CH3COONa">CH3COONa</option>
+                <option value="Na2CO3">Na2CO3</option>
+            </select>
+        </div>
+
+        <!-- Reset Button -->
+        <div class="reset-container">
+            <button id="reset-button" onclick="resetBurette()">Réinitialiser</button>
+        </div>
+    </div>
+    <div id="explanatory-text" class="mt-3">
+        <h5>Information sur la solution</h5>
+        <p id="solution-info">Sélectionnez une solution pour afficher les informations.</p>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

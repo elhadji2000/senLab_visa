@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation des Molécules</title>
+    <link rel="stylesheet" href="css/visualisation.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <!-- Modal de bienvenue -->
+    <div id="welcome-modal" class="welcome-modal">
+        <h2>Visualisation des Molécules 3D</h2>
+        <p>Bienvenue dans l'interface de visualisation moléculaire !</p>
+        <div class="modal-content">
+            <h3>Comment utiliser :</h3>
+            <ul>
+                <li>Sélectionnez une molécule dans le tableau</li>
+                <li>Utilisez la souris pour manipuler la vue 3D :
+                    <ul>
+                        <li>Clic gauche + déplacer : Rotation</li>
+                        <li>Molette : Zoom</li>
+                        <li>Clic droit + déplacer : Translation</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <button class="close-modal" onclick="closeModal()">Commencer</button>
+    </div>
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Visualisation des Molécules</h1>
+            <a href="index.html" class="nav-link">← Retour au générateur</a>
+        </header>
+
+        <div class="content-wrapper">
+            <!-- Légende -->
+            <aside class="legend-panel">
+                <h3>Légende des Atomes</h3>
+                <div class="legend-list">
+                    <div class="legend-item">
+                        <div class="color-box carbon"></div>
+                        <span>Carbone (C)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box hydrogen"></div>
+                        <span>Hydrogène (H)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box oxygen"></div>
+                        <span>Oxygène (O)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box nitrogen"></div>
+                        <span>Azote (N)</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Contenu principal -->
+            <main class="main-content">
+                <div class="table-container">
+                    <table id="molecules-table">
+                        <thead>
+                            <tr>
+                                <th>Nom de la molécule</th>
+                                <th>Type</th>
+                                <th>Visualisation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Le JavaScript remplira ce tableau -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="viewer-container">
+                    <div id="molecule-viewer"></div>
+                    <div id="molecule-description">
+                        Sélectionnez une molécule pour afficher sa description
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/molecules-data.js"></script>
+    <script src="js/visualisation.js"></script>
+</body>
+</html>

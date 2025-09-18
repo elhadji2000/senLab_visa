@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP Diabétique - SUNU_LAB</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar legend-sidebar">
+            <h3>Légendes</h3>
+            <ul>
+                <li><div class="red-molecule"></div>Molécule Rouge (Glucose)</li>
+                <li><div class="blue-molecule"></div>Molécule Bleue (Insuline)</li>
+                <li><div class="hyperglycemia"></div>Hyperglycémie</li>
+            </ul>
+        </div>
+        <div class="organism-frame" id="organismFrame">
+            <div class="organism-title">Organisme</div>
+        </div>
+        <div class="sidebar control-sidebar">
+            <h3>Contrôles</h3>
+            <ul>
+                <li><button id="type1Button">Diabète Type 1</button></li>
+                <li><button id="type2Button">Diabète Type 2</button></li>
+            </ul>
+            <label for="glucoseSlider">Niveau de Glucose:</label>
+            <input type="range" id="glucoseSlider" min="20" max="150" step="10" value="20" style="width: 100%;">
+            <div class="reset-icon" onclick="resetSimulation()">🔄</div>
+        </div>
+    </div>
+    <div id="message-box"></div>
+    <button id="insulin-button" onclick="injectInsulin()">Injection d'insuline</button>
+    <div class="intervention-buttons">
+        <button id="exercise-button" onclick="exercise()">Faire du sport</button>
+        <button id="medication-button" onclick="takeMedication()">Prendre un médicament</button>
+    </div>
+    <div class="canvas-container">
+        <canvas id="canvas"></canvas>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="./app.js"></script>
+</body>
+</html>

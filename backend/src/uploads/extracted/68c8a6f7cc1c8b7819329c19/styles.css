@@ -1,0 +1,129 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #9fbcd8;
+}
+
+.container {
+    width: 80%;
+    max-width: 1200px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: grid;
+    grid-template-areas:
+        "form graph"
+        "text text";
+    grid-gap: 20px;
+}
+
+.form-container {
+    grid-area: form;
+}
+
+.graph-container {
+    grid-area: graph;
+}
+
+.text-container {
+    grid-area: text;
+}
+
+h1,
+h2 {
+    text-align: center;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#results {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 15px;
+    background-color: #e7f3fe;
+    border: 1px solid #b3d7ff;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.graph-container {
+    text-align: center;
+}
+
+canvas {
+    max-width: 100%;
+}
+
+/* Styles for the modals */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto; /* Centre la modale horizontalement */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%; /* Diminue la largeur de la modale */
+    max-width: 600px; /* Largeur maximale pour les écrans plus larges */
+    border-radius: 10px; /* Coins arrondis pour un style plus agréable */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ajoute une ombre */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

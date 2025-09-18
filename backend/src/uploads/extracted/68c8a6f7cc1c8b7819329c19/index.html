@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcul du pKa d'un Acide Faible</title>
+    <!-- Lien vers le fichier CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
+</head>
+
+<body>
+    <!-- Modale d'explication du TP -->
+    <div id="explanationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Explication du TP</h2>
+            <p>Bienvenue dans cette simulation pour calculer le pKa d'un acide faible !</p>
+            <p><strong>Formule utilisée :</strong> pKa = -log10([H<sub>3</sub>O<sup>+</sup>] / [Acide<sub>initial</sub>])</p>
+            <p>Le pKa est un indicateur clé de la force d'un acide.</p>
+            <ul>
+                <li>1. Entrez la concentration initiale de l'acide.</li>
+                <li>2. Entrez la concentration des ions hydrogène à l'équilibre.</li>
+                <li>3. Appuyez sur "Calculer" pour obtenir le pKa.</li>
+            </ul>
+            <button onclick="closeModal()">Compris</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <h1>Calcul du pKa d'un Acide Faible</h1>
+            <form id="pKaForm">
+                <label for="initialConcentration">Concentration initiale de l'acide (mol/L):</label>
+                <input type="number" id="initialConcentration" name="initialConcentration" required min="0" step="0.001">
+
+                <label for="hydrogenConcentration">Concentration des ions hydrogène (mol/L):</label>
+                <input type="number" id="hydrogenConcentration" name="hydrogenConcentration" required min="0" step="0.001">
+
+                <button type="submit">Calculer le pKa</button>
+            </form>
+
+            <div id="results"></div>
+        </div>
+
+        <div class="graph-container">
+            <h2>Graphique pH vs Concentration</h2>
+            <canvas id="phChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Lien vers le fichier JS principal -->
+    <script src="scripts/main.js"></script>
+</body>
+
+</html>
