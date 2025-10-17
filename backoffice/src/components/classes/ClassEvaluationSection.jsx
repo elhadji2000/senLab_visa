@@ -9,7 +9,7 @@ import {
   Col,
   ListGroup,
 } from "react-bootstrap";
-import { fetchResultatsParClasse } from "../../api/evaluations"; // à adapter selon ton arborescence
+import { fetchResultatsParClasse } from "../../api/evaluations";
 import moment from "moment";
 import { FaChartBar } from "react-icons/fa";
 import { Chart, registerables } from "chart.js";
@@ -26,7 +26,7 @@ const ClassQuizResultsSection = ({ classId }) => {
     try {
       setLoading(true);
       const res = await fetchResultatsParClasse(classId);
-      setResultats(res.data || []); // 👈 protection ici
+      setResultats(res.data || []);
     } catch (err) {
       console.error(err);
       setError("Erreur lors du chargement des résultats.");
@@ -39,14 +39,26 @@ const ClassQuizResultsSection = ({ classId }) => {
     loadResultats();
   }, [classId]);
 
+  // 🔹 Parse une note "7/10" en nombre sur 20
+  const parseNote = (note) => {
+    if (typeof note !== "string") return null;
+    const [obt, tot] = note.split("/").map(Number);
+    return tot && !isNaN(obt) && !isNaN(tot) ? (obt / tot) * 20 : null;
+  };
+
   const getChartData = () => {
     if (resultats.length === 0) return null;
 
     const quizLabels = [...new Set(resultats.map((r) => r.quiz.titre))];
     const quizAverages = quizLabels.map((label) => {
       const quizResults = resultats.filter((r) => r.quiz.titre === label);
+      const notes = quizResults
+        .map((r) => parseNote(r.note))
+        .filter((n) => n !== null);
       const avg =
-        quizResults.reduce((acc, r) => acc + r.note, 0) / quizResults.length;
+        notes.length > 0
+          ? notes.reduce((sum, n) => sum + n, 0) / notes.length
+          : 0;
       return avg.toFixed(2);
     });
 
@@ -54,7 +66,7 @@ const ClassQuizResultsSection = ({ classId }) => {
       labels: quizLabels,
       datasets: [
         {
-          label: "Moyenne par quizz",
+          label: "Moyenne par quiz (/20)",
           data: quizAverages,
           backgroundColor: "rgba(75, 192, 192, 0.5)",
           borderColor: "rgba(75, 192, 192, 1)",
@@ -63,6 +75,8 @@ const ClassQuizResultsSection = ({ classId }) => {
       ],
     };
   };
+
+  const chartData = getChartData();
 
   return (
     <Card className="shadow-sm mb-4">
@@ -77,7 +91,7 @@ const ClassQuizResultsSection = ({ classId }) => {
           </div>
         ) : error ? (
           <Alert variant="danger">{error}</Alert>
-        ) : resultats && resultats.length === 0 ? ( // 👈 sécurité ici aussi
+        ) : resultats.length === 0 ? (
           <div className="text-center p-4 text-muted">
             Aucun résultat disponible
           </div>
@@ -90,19 +104,21 @@ const ClassQuizResultsSection = ({ classId }) => {
                   Moyennes par quiz
                 </h5>
                 <div style={{ height: "300px" }}>
-                  <Bar
-                    data={getChartData()}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      scales: {
-                        y: {
-                          beginAtZero: true,
-                          max: 20,
+                  {chartData && (
+                    <Bar
+                      data={chartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            max: 20,
+                          },
                         },
-                      },
-                    }}
-                  />
+                      }}
+                    />
+                  )}
                 </div>
               </Col>
 
@@ -112,40 +128,25 @@ const ClassQuizResultsSection = ({ classId }) => {
                   {Array.from(
                     new Map(
                       resultats
-                        .filter((r) => r.eleve && typeof r.note === "string") // On ne garde que ceux avec une note texte comme "7/10"
+                        .filter((r) => r.eleve)
                         .map((r) => {
                           const eleveId = r.eleve._id;
-                          const eleveNom = r.eleve.nom;
-                          const elevePrenom = r.eleve.prenom;
-
-                          // Extraire les notes de cet élève
                           const notes = resultats
-                            .filter(
-                              (rr) =>
-                                rr.eleve?._id === eleveId &&
-                                typeof rr.note === "string"
-                            )
-                            .map((rr) => {
-                              const [obt, tot] = rr.note.split("/").map(Number);
-                              return tot && !isNaN(obt) && !isNaN(tot)
-                                ? obt / tot
-                                : null;
-                            })
-                            .filter((v) => v !== null);
-
+                            .filter((rr) => rr.eleve?._id === eleveId)
+                            .map((rr) => parseNote(rr.note))
+                            .filter((n) => n !== null);
                           const moy =
                             notes.length > 0
-                              ? (notes.reduce((sum, n) => sum + n, 0) /
-                                  notes.length) *
-                                20 // Mettre sur 20 si tu veux
+                              ? notes.reduce((sum, n) => sum + n, 0) /
+                                notes.length
                               : 0;
 
                           return [
                             eleveId,
                             {
                               _id: eleveId,
-                              nom: eleveNom,
-                              prenom: elevePrenom,
+                              nom: r.eleve.nom,
+                              prenom: r.eleve.prenom,
                               moy,
                             },
                           ];
@@ -174,7 +175,7 @@ const ClassQuizResultsSection = ({ classId }) => {
                 <tr>
                   <th>Élève</th>
                   <th>Quiz</th>
-                  <th>Matiére</th>
+                  <th>Matière</th>
                   <th>Score</th>
                   <th>Note</th>
                   <th>Date</th>
@@ -192,16 +193,13 @@ const ClassQuizResultsSection = ({ classId }) => {
                     <td>
                       <Badge
                         bg={(() => {
-                          const [obt, tot] = r.note?.split("/").map(Number);
-                          return obt && tot && obt / tot >= 0.5
-                            ? "success"
-                            : "danger";
+                          const val = parseNote(r.note);
+                          return val >= 10 ? "success" : "danger";
                         })()}
                       >
                         {r.note}
                       </Badge>
                     </td>
-
                     <td>{moment(r.createdAt).format("DD/MM/YYYY HH:mm")}</td>
                   </tr>
                 ))}

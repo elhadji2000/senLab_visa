@@ -11,7 +11,7 @@ export const fetchResultats = () => {
 };
 //Lister les résultats par classe
 export const fetchResultatsParClasse = (classeId) => {
-  return axiosInstance.get(`/api/resultats/par-classe/${classeId}`);
+  return axiosInstance.get(`/api/resultats/classe/${classeId}`);
 };
 
 

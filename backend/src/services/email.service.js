@@ -1,7 +1,7 @@
 // services/email.service.js
 const transporter = require("../config/mailer");
 
-async function sendClassCodeToStudents(students, code) {
+async function sendClassCodeToStudents(students, code, lienTP) {
   const frontUrl = process.env.FRONT_BASE_URL || "http://localhost:3000";
 
   await Promise.all(
@@ -11,7 +11,7 @@ async function sendClassCodeToStudents(students, code) {
         to: s.email,
         subject: "Votre code d’accès à la classe",
         template: "classCode",
-        context: { prenom: s.prenom, code, frontUrl },
+        context: { prenom: s.prenom, code, lienTP, frontUrl },
       }),
     ),
   );
