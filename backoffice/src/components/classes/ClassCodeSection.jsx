@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -130,6 +132,24 @@ const ClassCodeSection = ({ classId }) => {
 
   return (
     <>
+      <style>{`
+    .custom-table th,
+    .custom-table td {
+      font-size: 12px;         /* police plus petite */
+      padding: 4px 6px;        /* padding réduit */
+      vertical-align: middle;  /* centre verticalement */
+    }
+
+    .custom-table .badge {
+      font-size: 11px;         /* badge plus petit */
+      padding: 2px 4px;
+    }
+
+    .custom-table .btn-sm {
+      font-size: 11px;         /* boutons plus petits */
+      padding: 2px 6px;
+    }
+  `}</style>
       <Card className="shadow-sm mb-4">
         <Card.Header className="bg-light d-flex justify-content-between align-items-center">
           <strong>Codes d'accès ({codes.length})</strong>
@@ -154,7 +174,7 @@ const ClassCodeSection = ({ classId }) => {
               Aucun code disponible
             </div>
           ) : (
-            <Table responsive hover>
+            <Table responsive hover className="table-sm custom-table">
               <thead className="table-light">
                 <tr>
                   <th>Nom</th>

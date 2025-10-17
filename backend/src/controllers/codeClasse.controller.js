@@ -1,6 +1,7 @@
 const CodeClasse = require("../models/codeClasse.model");
 const { sendClassCodeToStudents } = require("../services/email.service");
-const Student    = require("../models/Eleve.model");      // modèle élève
+const { sendWhatsAppToStudents } = require("../services/whatsapp.service");
+const Student = require("../models/Eleve.model"); // modèle élève
 
 exports.sendCodeToStudents = async (req, res) => {
   console.log("PARAMS REÇUS :", req.params);
@@ -18,27 +19,32 @@ exports.sendCodeToStudents = async (req, res) => {
     }
 
     // 2. Récupération des élèves de la classe liée à ce code
-    const students = await Student.find({ classe: codeDoc.classe._id }).select("email prenom");
+    const students = await Student.find({ classe: codeDoc.classe._id })
+      .select("email prenom telephone");
     if (!students.length) {
       return res.status(404).json({ error: "Aucun élève trouvé pour cette classe" });
     }
 
-    // 3. Envoi des mails
-    const result = await sendClassCodeToStudents(students, codeDoc.code);
+    // 3. Envoi email + WhatsApp en parallèle
+    const [mailResult, waResult] = await Promise.all([
+      sendClassCodeToStudents(students, codeDoc.code, codeDoc.lienTP),
+      sendWhatsAppToStudents(students, codeDoc.code, codeDoc.lienTP),
+    ]);
 
     // 4. Mise à jour du code comme actif
     codeDoc.actif = true;
     await codeDoc.save();
 
     res.json({
-      message: `Code envoyé à ${result.sent}/${result.total} élèves`,
-      sent: result.sent,
-      total: result.total,
+      message: `Code envoyé : ${mailResult.sent}/${mailResult.total} par email et ${waResult.sent}/${waResult.total} via WhatsApp`,
+      emailSent: mailResult.sent,
+      whatsappSent: waResult.sent,
+      total: students.length,
       codeId: codeDoc._id,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erreur lors de l'envoi des e-mails" });
+    res.status(500).json({ error: "Erreur lors de l'envoi du code" });
   }
 };
 

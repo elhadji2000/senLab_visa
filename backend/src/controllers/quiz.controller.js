@@ -4,7 +4,7 @@ const Option = require("../models/Option.model");
 const CodeClasses = require("../models/codeClasse.model");
 const Eleves = require("../models/Eleve.model");
 const Resultats = require("../models/Resultat.model");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Ajouter un quiz complet avec questions et options
 exports.addQuiz = async (req, res) => {
@@ -53,17 +53,21 @@ exports.addQuiz = async (req, res) => {
 //Lister les quiz de l'utilisateur (ou tous si admin)
 exports.listQuizzes = async (req, res) => {
   try {
-    const isAdmin = req.user?.role === 'admin';
+    const isAdmin = req.user?.role === "admin";
     const userId = req.user?._id || req.user?.id;
 
     if (!isAdmin) {
       if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ success: false, message: "Utilisateur invalide." });
+        return res
+          .status(400)
+          .json({ success: false, message: "Utilisateur invalide." });
       }
     }
 
     // Admin voit tout, sinon uniquement les quizz de l'utilisateur
-    const condition = isAdmin ? {} : { user: new mongoose.Types.ObjectId(userId) };
+    const condition = isAdmin
+      ? {}
+      : { user: new mongoose.Types.ObjectId(userId) };
 
     const quizzes = await Quiz.aggregate([
       { $match: condition },
@@ -155,7 +159,10 @@ exports.updateQuiz = async (req, res) => {
     }
 
     // Vérification de permission
-    if (req.user.role !== "professeur" && quiz.user.toString() !== req.user.id) {
+    if (
+      req.user.role !== "professeur" &&
+      quiz.user.toString() !== req.user.id
+    ) {
       return res.status(403).json({ success: false, message: "Accès refusé" });
     }
 
@@ -212,7 +219,10 @@ exports.deleteQuiz = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Quiz non trouvé" });
 
-    if (req.user.role !== "professeur" && quiz.user.toString() !== req.user.id) {
+    if (
+      req.user.role !== "professeur" &&
+      quiz.user.toString() !== req.user.id
+    ) {
       return res.status(403).json({ success: false, message: "Accès refusé" });
     }
 
@@ -254,34 +264,38 @@ exports.getQuizzByCode = async (req, res) => {
   const { code } = req.params;
 
   try {
-    const codeClasse = await CodeClasses.findOne({ code }).populate("quiz");
+    const codeClasse = await CodeClasses.findOne({ code })
+      .populate("classe", "nom")
+      .populate("quiz");
 
     if (!codeClasse) {
       return res.status(404).json({ success: false, message: "Code invalide" });
     }
 
+    // Vérifier dates
     const now = new Date();
     const dateDebut = new Date(codeClasse.date_debut);
     const expiration = new Date(codeClasse.expiration);
 
     if (now < dateDebut) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Le quiz n'est pas encore disponible",
-        });
-    }
-    if (now > expiration) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message:
-            "Ce quiz est expiré. Merci de contacter ton enseignant pour un nouveau lien.",
-        });
+      return res.status(403).json({
+        success: false,
+        status: "notReady", // 🔹 Ajout
+        message: "Le quiz n'est pas encore disponible",
+        startDate: codeClasse.date_debut, // 🔹 pour calculer le compte à rebours
+      });
     }
 
+    if (now > expiration) {
+      return res.status(403).json({
+        success: false,
+        status: "expired", // 🔹 Ajout
+        message:
+          "Ce quiz est expiré. Merci de contacter ton enseignant pour un nouveau lien.",
+      });
+    }
+
+    // Récupérer questions + options du quiz
     const questions = await Question.find({ quiz: codeClasse.quiz._id });
     const questionsWithOptions = await Promise.all(
       questions.map(async (q) => {
@@ -292,28 +306,33 @@ exports.getQuizzByCode = async (req, res) => {
 
     res.json({
       success: true,
+      classeNom: codeClasse.classe.nom,
       quiz: codeClasse.quiz,
       questions: questionsWithOptions,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Erreur serveur",
-        error: error.message,
-      });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur",
+      error: error.message,
+    });
   }
 };
+
 exports.submitQuizzParCode = async (req, res) => {
   const { code, email, answers } = req.body;
 
   try {
-    const codeClasse = await CodeClasses.findOne({ code });
+    // 1) Vérifier le code de la classe
+    const codeClasse = await CodeClasses.findOne({ code }).populate(
+      "classe quiz"
+    );
     if (!codeClasse) {
       return res.status(404).json({ success: false, message: "Code invalide" });
     }
 
+    // 2) Vérifier la période
     const now = new Date();
     const dateDebut = new Date(codeClasse.date_debut);
     const expiration = new Date(codeClasse.expiration);
@@ -323,17 +342,20 @@ exports.submitQuizzParCode = async (req, res) => {
         .json({ success: false, message: "Quiz hors période autorisée" });
     }
 
-    const eleve = await Eleves.findOne({ email });
+    // 3) Rechercher l'élève par email **ET** par classe
+    const eleve = await Eleves.findOne({
+      email: email,
+      classe: codeClasse.classe._id, // sécurise la recherche
+    });
     if (!eleve) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message:
-            "Aucun élève trouvé avec cet email. Vérifie l’orthographe ou contacte ton enseignant.",
-        });
+      return res.status(404).json({
+        success: false,
+        message:
+          "Aucun élève trouvé avec cet email dans cette classe. Vérifie l’orthographe ou contacte ton enseignant.",
+      });
     }
 
+    // 4) Calcul du score
     let correct = 0;
     for (const answer of answers) {
       const correctOption = await Option.findOne({
@@ -348,21 +370,102 @@ exports.submitQuizzParCode = async (req, res) => {
     const score = Math.round((correct / answers.length) * 100);
     const note = `${correct} / ${answers.length}`;
 
+    // 5) Enregistrement du résultat
     const resultat = await Resultats.create({
       score,
       note,
-      quiz: codeClasse.quiz,
+      quiz: codeClasse.quiz._id,
       eleve: eleve._id,
     });
 
     res.json({ success: true, score, note });
   } catch (error) {
-    res
-      .status(500)
-      .json({
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur",
+      error: error.message,
+    });
+  }
+};
+
+// ✅ Vérifier qu'un email est bien dans la classe associée au code
+exports.checkEmailInClassForCode = async (req, res) => {
+  const { code } = req.params;
+  const { email } = req.body;
+
+  try {
+    // 1) Chercher le code de la classe et le quiz associé
+    const codeClasse = await CodeClasses.findOne({ code }).populate(
+      "classe quiz"
+    );
+    if (!codeClasse) {
+      return res.status(404).json({ success: false, message: "Code invalide" });
+    }
+
+    // 2) Vérifier la période
+    const now = new Date();
+    const dateDebut = new Date(codeClasse.date_debut);
+    const expiration = new Date(codeClasse.expiration);
+
+    if (now < dateDebut) {
+      const diffHours = Math.floor((dateDebut - now) / (1000 * 60 * 60));
+      const diffMinutes = Math.floor(((dateDebut - now) / (1000 * 60)) % 60);
+      return res.status(403).json({
         success: false,
-        message: "Erreur serveur",
-        error: error.message,
+        message: `⏳ Quiz pas encore disponible. Temps restant : ${diffHours}h ${diffMinutes}min`,
+        status: "notReady",
+        countdown: `${diffHours}h ${diffMinutes}min`,
       });
+    }
+
+    if (now > expiration) {
+      return res.status(403).json({
+        success: false,
+        message: "❌ Ce quiz est expiré. Merci de contacter votre enseignant.",
+        status: "expired",
+      });
+    }
+
+    // 3) Vérifier que l'email correspond à un élève de cette classe
+    const eleve = await Eleves.findOne({
+      email,
+      classe: codeClasse.classe._id,
+    });
+    if (!eleve) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Aucun élève trouvé avec cet email dans cette classe. Vérifie l’orthographe ou contacte ton enseignant.",
+      });
+    }
+
+    // 4) Vérifier si l'élève a déjà soumis le quiz
+    const existingResult = await Resultats.findOne({
+      eleve: eleve._id,
+      quiz: codeClasse.quiz._id,
+    });
+    if (existingResult) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Vous avez déjà soumis ce quiz. Vous ne pouvez le faire qu’une seule fois.",
+      });
+    }
+
+    // 5) Tout est OK → renvoyer les infos du quiz
+    res.json({
+      success: true,
+      eleveId: eleve._id,
+      quiz: codeClasse.quiz,
+      classeNom: codeClasse.classe.nom,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur",
+      error: error.message,
+    });
   }
 };

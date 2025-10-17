@@ -16,7 +16,12 @@ router.get('/all', authenticate, quizController.listQuizzes);
 router.get('/count', authenticate, quizController.countQuizzes);
 router.get('/public', quizController.getPublicQuizz);
 router.get('/access/:code', quizController.getQuizzByCode);
+
+// nouvelle route : vérifier qu'un email est bien dans la classe pour ce code
+router.post('/access/:code/check-email', quizController.checkEmailInClassForCode);
+
 router.post('/submit/:code', quizController.submitQuizzParCode);
+
 // Obtenir un quiz + questions + options
 router.get('/:id', quizController.getQuizWithQuestionsAndOptions);
 

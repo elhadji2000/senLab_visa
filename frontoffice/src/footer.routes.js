@@ -20,18 +20,22 @@ export default {
   },
   socials: [
     {
+      id: "facebook",
       icon: <FacebookIcon />,
       link: "#",
     },
     {
+      id: "twitter",
       icon: <TwitterIcon />,
       link: "#",
     },
     {
+      id: "github",
       icon: <GitHubIcon />,
       link: "#",
     },
     {
+      id: "youtube",
       icon: <YouTubeIcon />,
       link: "#",
     },
@@ -40,34 +44,34 @@ export default {
     {
       name: "À propos",
       items: [
-        { name: "Qui sommes-nous ?", href: "#" },
-        { name: "Notre mission", href: "#" },
-        { name: "Équipe de recherche", href: "#" },
-        { name: "Actualités", href: "#" },
+        { id: "qui", name: "Qui sommes-nous ?", href: "#" },
+        { id: "mission", name: "Notre mission", href: "#" },
+        { id: "equipe", name: "Équipe de recherche", href: "#" },
+        { id: "actus", name: "Actualités", href: "#" },
       ],
     },
     {
       name: "Ressources",
       items: [
-        { name: "Documentation", href: "#" },
-        { name: "Tutoriels", href: "#" },
-        { name: "Guides pratiques", href: "#" },
+        { id: "doc", name: "Documentation", href: "#" },
+        { id: "tutos", name: "Tutoriels", href: "#" },
+        { id: "guides", name: "Guides pratiques", href: "#" },
       ],
     },
     {
       name: "Aide & Support",
       items: [
-        { name: "Contact", href: "#" },
-        { name: "FAQ", href: "#" },
-        { name: "Centre d’assistance", href: "#" },
+        { id: "contact", name: "Contact", href: "#" },
+        { id: "faq", name: "FAQ", href: "#" },
+        { id: "support", name: "Centre d’assistance", href: "#" },
       ],
     },
     {
       name: "Légal",
       items: [
-        { name: "Conditions d’utilisation", href: "#" },
-        { name: "Politique de confidentialité", href: "#" },
-        { name: "Mentions légales", href: "#" },
+        { id: "cgu", name: "Conditions d’utilisation", href: "#" },
+        { id: "privacy", name: "Politique de confidentialité", href: "#" },
+        { id: "mentions", name: "Mentions légales", href: "#" },
       ],
     },
   ],
