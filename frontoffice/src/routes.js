@@ -42,6 +42,7 @@ const routes = [
             name: "connexion",
             route: "/pages/authentication/sign-in",
             component: <SignIn />,
+            target: "_blank",
           },
         ],
       },
