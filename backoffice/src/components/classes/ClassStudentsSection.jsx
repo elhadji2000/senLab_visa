@@ -1,9 +1,22 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table, Card, Button, Spinner, Alert, Modal, Form } from "react-bootstrap";
+import {
+  Table,
+  Card,
+  Button,
+  Spinner,
+  Alert,
+  Modal,
+  Form,
+} from "react-bootstrap";
 import { FaUserPlus, FaEdit, FaTrash, FaFileExcel } from "react-icons/fa";
-import { fetchElevesByClasse, deleteEleve, importElevesFromExcel } from "../../api/student.api";
+import {
+  fetchElevesByClasse,
+  deleteEleve,
+  importElevesFromExcel,
+} from "../../api/student.api";
 import { toast } from "react-toastify";
 import AjouterElevesTable from "../../pages/professeur/eleves/AjouterElevesTable";
 import moment from "moment";
@@ -73,85 +86,148 @@ const ClassStudentsSection = ({ classId }) => {
   };
 
   return (
-    <Card className="shadow-sm mb-4">
-      <Card.Header className="bg-light d-flex justify-content-between align-items-center">
-        <strong>Liste des élèves ({eleves.length})</strong>
-        <div>
-          <Button size="sm" variant="success" className="me-2" onClick={() => setShowAddModal(true)}>
-            <FaUserPlus className="me-1" /> Ajouter
-          </Button>
-          <Button size="sm" variant="info" onClick={() => setShowExcelModal(true)}>
-            <FaFileExcel className="me-1" /> Importer Excel
-          </Button>
-        </div>
-      </Card.Header>
+    <>
+      <style>
+        {`
+    .custom-table th,
+    .custom-table td {
+      font-size: 14px;         /* police  */
+      padding: 4px 6px;        /* padding */
+      vertical-align: middle;  /* centre verticalement */
+    }
 
-      <Card.Body className="p-0">
-        {loading ? (
-          <div className="text-center p-4"><Spinner animation="border" /></div>
-        ) : error ? (
-          <Alert variant="danger">{error}</Alert>
-        ) : eleves.length === 0 ? (
-          <div className="text-center p-4 text-muted">Aucun élève dans cette classe</div>
-        ) : (
-          <Table responsive hover className="mb-0">
-            <thead className="table-light">
-              <tr>
-                <th>#</th>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Date Naissance</th>
-                <th>Email</th>
-                <th>Telephone</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eleves.map((e, idx) => (
-                <tr key={e._id}>
-                  <td>{idx + 1}</td>
-                  <td>{e.nom}</td>
-                  <td>{e.prenom}</td>
-                  <td>{moment(e.date_naissance).format("DD/MM/YYYY")}</td>
-                  <td>{e.email}</td>
-                  <td>{e.telephone || "N/A"}</td>
-                  <td>
-                    {/* <Button size="sm" variant="outline-warning" className="me-2"><FaEdit /></Button> */}
-                    <Button size="sm" variant="outline-danger" onClick={() => handleDelete(e._id)}><FaTrash /></Button>
-                  </td>
+    .custom-table .badge {
+      font-size: 11px;         /* badge plus petit */
+      padding: 2px 4px;
+    }
+
+    .custom-table .btn-sm {
+      font-size: 12px;         /* boutons plus petits */
+      padding: 2px 6px;
+    }
+  `}
+      </style>
+
+      <Card className="shadow-sm mb-4">
+        <Card.Header className="bg-light d-flex justify-content-between align-items-center">
+          <strong>Liste des élèves ({eleves.length})</strong>
+          <div>
+            <Button
+              size="sm"
+              variant="success"
+              className="me-2"
+              onClick={() => setShowAddModal(true)}
+            >
+              <FaUserPlus className="me-1" /> Ajouter
+            </Button>
+            <Button
+              size="sm"
+              variant="info"
+              onClick={() => setShowExcelModal(true)}
+            >
+              <FaFileExcel className="me-1" /> Importer Excel
+            </Button>
+          </div>
+        </Card.Header>
+
+        <Card.Body className="p-0">
+          {loading ? (
+            <div className="text-center p-4">
+              <Spinner animation="border" />
+            </div>
+          ) : error ? (
+            <Alert variant="danger">{error}</Alert>
+          ) : eleves.length === 0 ? (
+            <div className="text-center p-4 text-muted">
+              Aucun élève dans cette classe
+            </div>
+          ) : (
+            <Table responsive hover className="mb-0 custom-table">
+              <thead className="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Nom</th>
+                  <th>Prénom</th>
+                  <th>Date Naissance</th>
+                  <th>Email</th>
+                  <th>Telephone</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
-      </Card.Body>
+              </thead>
+              <tbody>
+                {eleves.map((e, idx) => (
+                  <tr key={e._id}>
+                    <td>{idx + 1}</td>
+                    <td>{e.nom}</td>
+                    <td>{e.prenom}</td>
+                    <td>{moment(e.date_naissance).format("DD/MM/YYYY")}</td>
+                    <td>{e.email}</td>
+                    <td>{e.telephone || "N/A"}</td>
+                    <td>
+                      {/* <Button size="sm" variant="outline-warning" className="me-2"><FaEdit /></Button> */}
+                      <Button
+                        size="sm"
+                        variant="outline-danger"
+                        onClick={() => handleDelete(e._id)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Card.Body>
 
-      {/* Modal pour l'ajout manuel */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="xl" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Ajouter des élèves</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <AjouterElevesTable classId={classId} onSuccess={handleAddSuccess} onCancel={() => setShowAddModal(false)} />
-        </Modal.Body>
-      </Modal>
+        {/* Modal pour l'ajout manuel */}
+        <Modal
+          show={showAddModal}
+          onHide={() => setShowAddModal(false)}
+          size="xl"
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Ajouter des élèves</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <AjouterElevesTable
+              classId={classId}
+              onSuccess={handleAddSuccess}
+              onCancel={() => setShowAddModal(false)}
+            />
+          </Modal.Body>
+        </Modal>
 
-      {/* Modal pour l'import Excel */}
-      <Modal show={showExcelModal} onHide={() => setShowExcelModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Importer des élèves depuis Excel</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group controlId="formFile" className="mb-3">
-              <Form.Label>Choisir le fichier Excel (.xlsx ou .csv)</Form.Label>
-              <Form.Control type="file" accept=".xlsx,.csv" onChange={handleExcelUpload} />
-            </Form.Group>
-            <Button variant="primary" onClick={handleExcelSubmit}>Importer</Button>
-          </Form>
-        </Modal.Body>
-      </Modal>
-    </Card>
+        {/* Modal pour l'import Excel */}
+        <Modal
+          show={showExcelModal}
+          onHide={() => setShowExcelModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Importer des élèves depuis Excel</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="formFile" className="mb-3">
+                <Form.Label>
+                  Choisir le fichier Excel (.xlsx ou .csv)
+                </Form.Label>
+                <Form.Control
+                  type="file"
+                  accept=".xlsx,.csv"
+                  onChange={handleExcelUpload}
+                />
+              </Form.Group>
+              <Button variant="primary" onClick={handleExcelSubmit}>
+                Importer
+              </Button>
+            </Form>
+          </Modal.Body>
+        </Modal>
+      </Card>
+    </>
   );
 };
 

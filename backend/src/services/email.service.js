@@ -19,4 +19,17 @@ async function sendClassCodeToStudents(students, code, lienTP) {
   return { sent: students.length, total: students.length };
 }
 
-module.exports = { sendClassCodeToStudents };
+async function sendMail(name, email, message) {
+
+  await transporter.sendMail({
+    from:email,
+    to: process.env.SMTP_FROM,
+    subject: `Nouveau message de ${name}`,
+    text: message,
+    html: `<p><strong>Nom:</strong> ${name}</p>
+           <p><strong>Email:</strong> ${email}</p>
+           <p><strong>Message:</strong><br/>${message}</p>`,
+  });
+};
+
+module.exports = { sendClassCodeToStudents, sendMail };

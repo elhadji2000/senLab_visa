@@ -112,7 +112,7 @@ exports.getElevesByClasse = async (req, res) => {
     // Récupération des élèves de cette classe
     const eleves = await Eleve.find({ classe: classeId })
       .select('nom prenom email date_naissance telephone')
-      .sort({ nom: 1 });
+      .sort({ nom: 1 },{ prenom: 1 });
 
     res.json({ success: true, eleves });
   } catch (error) {

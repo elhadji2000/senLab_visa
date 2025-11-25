@@ -1,18 +1,21 @@
-2025/10/13-12:30:55.713 778 Reusing MANIFEST C:\Users\Support\Desktop\elhadji25\memoire25\senLab_visa\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
-2025/10/13-12:30:55.729 778 Recovering log #11
-2025/10/13-12:30:55.730 778 Reusing old log C:\Users\Support\Desktop\elhadji25\memoire25\senLab_visa\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/000011.log 
-2025/10/13-12:33:06.426 4028 Level-0 table #15: started
-2025/10/13-12:33:06.442 4028 Level-0 table #15: 16565 bytes OK
-2025/10/13-12:33:06.445 4028 Delete type=0 #11
-2025/10/17-07:55:07.113 2790 Level-0 table #17: started
-2025/10/17-07:55:07.118 2790 Level-0 table #17: 16915 bytes OK
-2025/10/17-07:55:07.120 2790 Delete type=0 #14
-2025/10/17-07:55:07.121 2790 Compacting 4@0 + 1@1 files
-2025/10/17-07:55:07.126 2790 Generated table #18@0: 81 keys, 5444 bytes
-2025/10/17-07:55:07.126 2790 Compacted 4@0 + 1@1 files => 5444 bytes
-2025/10/17-07:55:07.127 2790 compacted to: files[ 0 1 1 0 0 0 0 ]
-2025/10/17-07:55:07.128 2790 Delete type=2 #8
-2025/10/17-07:55:07.128 2790 Delete type=2 #10
-2025/10/17-07:55:07.129 2790 Delete type=2 #12
-2025/10/17-07:55:07.129 2790 Delete type=2 #15
-2025/10/17-07:55:07.129 2790 Delete type=2 #17
+2025/11/06-12:05:06.582 6fac Reusing MANIFEST C:\Users\Support\Desktop\elhadji25\memoire25\senLab_visa\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/11/06-12:05:06.583 6fac Recovering log #33
+2025/11/06-12:05:06.584 6fac Reusing old log C:\Users\Support\Desktop\elhadji25\memoire25\senLab_visa\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/000033.log 
+2025/11/06-13:38:18.663 7064 Level-0 table #37: started
+2025/11/06-13:38:18.671 7064 Level-0 table #37: 18146 bytes OK
+2025/11/06-13:38:18.673 7064 Delete type=0 #33
+2025/11/07-14:23:54.970 834 Level-0 table #39: started
+2025/11/07-14:23:54.981 834 Level-0 table #39: 17657 bytes OK
+2025/11/07-14:23:54.986 834 Delete type=0 #36
+2025/11/07-14:23:54.987 834 Compacting 4@0 + 1@1 files
+2025/11/07-14:23:54.996 834 Generated table #40@0: 181 keys, 5187 bytes
+2025/11/07-14:23:54.996 834 Compacted 4@0 + 1@1 files => 5187 bytes
+2025/11/07-14:23:54.998 834 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/11/07-14:23:54.999 834 Delete type=2 #28
+2025/11/07-14:23:54.999 834 Delete type=2 #31
+2025/11/07-14:23:55.000 834 Delete type=2 #34
+2025/11/07-14:23:55.000 834 Delete type=2 #37
+2025/11/07-14:23:55.000 834 Delete type=2 #39
+2025/11/09-20:11:44.954 7a64 Level-0 table #42: started
+2025/11/09-20:11:44.966 7a64 Level-0 table #42: 17301 bytes OK
+2025/11/09-20:11:44.969 7a64 Delete type=0 #38
