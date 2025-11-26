@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Grid from "@mui/material/Grid";
 import MKBox from "components/MKBox";
 import MKInput from "components/MKInput";
@@ -5,15 +6,46 @@ import MKButton from "components/MKButton";
 import MKTypography from "components/MKTypography";
 import DefaultNavbar from "examples/Navbars/DefaultNavbar";
 import DefaultFooter from "examples/Footers/DefaultFooter";
+import { useState } from "react";
+import axios from "axios";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
 
-// Routes
 import routes from "routes";
 import footerRoutes from "footer.routes";
-
-// Image
 import bgImage from "assets/sen_visa1.jpg";
 
 function ContactUs() {
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [response, setResponse] = useState({ open: false, message: "", severity: "success" });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/api/contact", formData);
+      setResponse({
+        open: true,
+        message: " Votre message a bien été envoyé. Merci !",
+        severity: "success",
+      });
+      setFormData({ name: "", email: "", message: "" }); //  vider les inputs
+    } catch (error) {
+      setResponse({
+        open: true,
+        message: " Une erreur est survenue. Veuillez réessayer.",
+        severity: "error",
+      });
+    }
+  };
+
+  const handleClose = () => {
+    setResponse({ ...response, open: false });
+  };
+
   return (
     <>
       <MKBox position="fixed" top="0.5rem" width="100%">
@@ -27,6 +59,7 @@ function ContactUs() {
           }}
         />
       </MKBox>
+
       <Grid container spacing={3} alignItems="center">
         <Grid item xs={12} lg={6}>
           <MKBox
@@ -38,12 +71,13 @@ function ContactUs() {
             mt={2}
             sx={{
               backgroundImage: `url(${bgImage})`,
-              backgroundRepeat: "no-repeat", // Empêche le repeat
-              backgroundSize: "cover", // L'image couvre tout le conteneur
-              backgroundPosition: "center", // Centré pour éviter les coupures étranges
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
             }}
           />
         </Grid>
+
         <Grid
           item
           xs={12}
@@ -65,7 +99,7 @@ function ContactUs() {
             mb={{ xs: 20, sm: 18, md: 20 }}
             mx={3}
           >
-            {/* Titre section */}
+            {/* Titre */}
             <MKBox
               variant="gradient"
               bgColor="info"
@@ -80,20 +114,23 @@ function ContactUs() {
               </MKTypography>
             </MKBox>
 
-            {/* Texte + Formulaire */}
+            {/* Formulaire */}
             <MKBox p={3}>
               <MKTypography variant="body2" color="text" mb={3}>
                 Pour toute question supplémentaire, y compris les opportunités de partenariat,
-                veuillez nous écrire à <b>contact@senlab.edu.com</b> ou utiliser le formulaire de
-                contact ci-dessous.
+                veuillez nous écrire à <b>contact@senlab.edu.com</b> ou utiliser le formulaire
+                ci-dessous.
               </MKTypography>
 
-              <MKBox width="100%" component="form" method="post" autoComplete="off">
+              <MKBox component="form" method="post" autoComplete="off" onSubmit={handleSubmit}>
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={6}>
                     <MKInput
                       variant="standard"
                       label="Nom complet"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
                       InputLabelProps={{ shrink: true }}
                       fullWidth
                     />
@@ -103,6 +140,9 @@ function ContactUs() {
                       type="email"
                       variant="standard"
                       label="Adresse e-mail"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
                       InputLabelProps={{ shrink: true }}
                       fullWidth
                     />
@@ -111,11 +151,13 @@ function ContactUs() {
                     <MKInput
                       variant="standard"
                       label="Comment pouvons-nous vous aider ?"
-                      placeholder="Décrivez votre problème en au moins 250 caractères"
-                      InputLabelProps={{ shrink: true }}
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
                       multiline
-                      fullWidth
                       rows={6}
+                      InputLabelProps={{ shrink: true }}
+                      fullWidth
                     />
                   </Grid>
                 </Grid>
@@ -125,10 +167,23 @@ function ContactUs() {
                   </MKButton>
                 </Grid>
               </MKBox>
+
+              {/*  Notification en haut à droite */}
+              <Snackbar
+                open={response.open}
+                autoHideDuration={4000}
+                onClose={handleClose}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+              >
+                <Alert onClose={handleClose} severity={response.severity} sx={{ width: "100%" }}>
+                  {response.message}
+                </Alert>
+              </Snackbar>
             </MKBox>
           </MKBox>
         </Grid>
       </Grid>
+
       <MKBox pt={6} px={1} mt={6}>
         <DefaultFooter content={footerRoutes} />
       </MKBox>
