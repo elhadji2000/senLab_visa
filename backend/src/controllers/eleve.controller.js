@@ -252,7 +252,7 @@ exports.updateEleve = async (req, res) => {
     if (!eleve) return res.status(404).json({ success: false, message: "Élève non trouvé" });
 
     // Vérifier les droits si pas admin
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== 'professeur') {
       const classeExists = await Classe.findOne({ _id: eleve.classe, user: req.user.id });
       if (!classeExists) {
         return res.status(403).json({ success: false, message: "Vous n'êtes pas autorisé à modifier cet élève" });
@@ -260,7 +260,7 @@ exports.updateEleve = async (req, res) => {
     }
 
     // Si la classe est modifiée dans updates, vérifier que l'utilisateur a accès à cette classe
-    if (updates.classe && req.user.role !== 'admin') {
+    if (updates.classe && req.user.role !== 'professeur') {
       const classeExists = await Classe.findOne({ _id: updates.classe, user: req.user.id });
       if (!classeExists) {
         return res.status(403).json({ success: false, message: "Vous ne pouvez pas déplacer cet élève vers cette classe" });
@@ -392,8 +392,8 @@ exports.getUserDashboard = async (req, res) => {
         totalClasses,
         totalCodeClasses,
         totalSimulation,
-        totalQuizzes,  // ✅ ajouté
-        totalUsers,    // ✅ ajouté
+        totalQuizzes,  //  ajouté
+        totalUsers,    //  ajouté
         elevesParClasse: countsByClasse,
       },
       classes,
@@ -405,4 +405,6 @@ exports.getUserDashboard = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+
 

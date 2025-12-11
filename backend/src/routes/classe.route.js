@@ -9,7 +9,7 @@ router.get("/count", authenticate, classeController.countClasses); // (si tu ajo
 router.put("/update/:id", authenticate, classeController.updateClasse);
 router.delete("/delete/:id", authenticate, classeController.deleteClasse);
 
-// ✅ la route dynamique en dernier
+//  la route dynamique en dernier
 router.get('/:id', authenticate, classeController.getClasseById);
 
 

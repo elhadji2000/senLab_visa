@@ -8,8 +8,10 @@ router.use(authenticate); // Toutes les routes sont protégées
 // CRUD complet
 router.post('/add', userController.addUser);
 router.get('/all', userController.listerUsers);
+router.get('/stats', userController.getUsersEvolution);
 router.get('/:id', userController.getUserById);
 router.put('/update/:id', userController.updateUser);
+router.put("/:id/password", userController.updatePassword);
 router.put("/:userId/status", userController.toggleUserStatus);
 router.delete('/delete/:id', userController.deleteUser);
 

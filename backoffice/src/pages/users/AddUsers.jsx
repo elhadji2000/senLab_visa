@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
 import { FaAsterisk, FaUserPlus, FaCheck } from 'react-icons/fa';
-import axios from 'axios';
+import { addUser } from '../../api/users.api';
 import './AddUsers.css';
+import { Import } from 'lucide-react';
 
 function AddUsers() {
   const [formData, setFormData] = useState({
@@ -40,7 +41,8 @@ function AddUsers() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData);
+      //const response = await axios.post('http://localhost:5000/api/auth/register', formData);
+      const response = await addUser(formData);
 
       setSubmitStatus({ 
         success: true, 

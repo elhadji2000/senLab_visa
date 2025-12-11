@@ -95,6 +95,7 @@ const ClassCodeSection = ({ classId }) => {
       });
 
       toast.success("Code ajouté avec succès !");
+      loadCodes();
     } catch (err) {
       console.error("Erreur ajout code :", err);
       toast.error("Erreur lors de l'ajout du code");
@@ -110,6 +111,7 @@ const ClassCodeSection = ({ classId }) => {
 
       setShowDeleteModal(false);
       toast.success("Code supprimé avec succès !");
+      loadCodes();
     } catch (err) {
       console.error("Erreur suppression code :", err);
       toast.error("Erreur lors de la suppression");
@@ -122,7 +124,7 @@ const ClassCodeSection = ({ classId }) => {
       console.log("Envoi du code ID :", code._id);
       const res = await sendClassCode(code._id);
       console.log("Réponse API:", res);
-      toast.success(`Code envoyé à ${res.sent} élèves 🎉`);
+      toast.success(`${res.message}`);
       loadCodes();
     } catch (err) {
       console.error("Erreur lors de l'envoi du code :", err);
