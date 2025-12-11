@@ -1,0 +1,21 @@
+2025/12/09-11:59:22.829 4610 Reusing MANIFEST C:\Users\Support\Desktop\elhadji25\memoire25\senLab_visa\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/12/09-11:59:22.831 4610 Recovering log #97
+2025/12/09-11:59:22.832 4610 Reusing old log C:\Users\Support\Desktop\elhadji25\memoire25\senLab_visa\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/000097.log 
+2025/12/10-10:05:47.399 9008 Level-0 table #101: started
+2025/12/10-10:05:47.412 9008 Level-0 table #101: 14411 bytes OK
+2025/12/10-10:05:47.417 9008 Delete type=0 #97
+2025/12/10-10:05:47.419 9008 Compacting 4@0 + 1@1 files
+2025/12/10-10:05:47.435 9008 Generated table #102@0: 292 keys, 14729 bytes
+2025/12/10-10:05:47.435 9008 Compacted 4@0 + 1@1 files => 14729 bytes
+2025/12/10-10:05:47.437 9008 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/10-10:05:47.438 9008 Delete type=2 #92
+2025/12/10-10:05:47.438 9008 Delete type=2 #94
+2025/12/10-10:05:47.439 9008 Delete type=2 #96
+2025/12/10-10:05:47.439 9008 Delete type=2 #98
+2025/12/10-10:05:47.439 9008 Delete type=2 #101
+2025/12/10-21:05:07.104 828 Level-0 table #104: started
+2025/12/10-21:05:07.225 828 Level-0 table #104: 19165 bytes OK
+2025/12/10-21:05:07.228 828 Delete type=0 #100
+2025/12/11-12:53:40.183 76b8 Level-0 table #106: started
+2025/12/11-12:53:40.190 76b8 Level-0 table #106: 17810 bytes OK
+2025/12/11-12:53:40.192 76b8 Delete type=0 #103

@@ -19,11 +19,6 @@ export const fetchClasseById = (id) => {
   return axiosInstance.get(`/api/classes/${id}`);
 };
 
-
-// Tu peux aussi ajouter updateClass si nécessaire
-// export const updateClass = (id, updatedData) => {
-//   return axiosInstance.put(`/classes/update/${id}`, updatedData);
-// };
 //Ajouter un code de classe
 export const createClassCode = (codeData) => {
   return axiosInstance.post('/api/codes/add', codeData);

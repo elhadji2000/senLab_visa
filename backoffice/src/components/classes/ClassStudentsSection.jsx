@@ -26,6 +26,7 @@ const ClassStudentsSection = ({ classId }) => {
   const [eleves, setEleves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedEleve, setSelectedEleve] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showExcelModal, setShowExcelModal] = useState(false); // modal excel
   const [excelFile, setExcelFile] = useState(null);
@@ -34,7 +35,13 @@ const ClassStudentsSection = ({ classId }) => {
     try {
       setLoading(true);
       const res = await fetchElevesByClasse(classId);
-      setEleves(res.data.eleves);
+
+      const sorted = res.data.eleves.sort((a, b) => {
+        if (a.nom === b.nom) return a.prenom.localeCompare(b.prenom);
+        return a.nom.localeCompare(b.nom);
+      });
+
+      setEleves(sorted);
     } catch (err) {
       setError("Erreur lors du chargement des élèves");
     } finally {
@@ -55,6 +62,10 @@ const ClassStudentsSection = ({ classId }) => {
     } catch (err) {
       toast.error("Erreur lors de la suppression");
     }
+  };
+  const handleEditClick = (eleve) => {
+    setSelectedEleve(eleve); // on remplit avec l'élève sélectionné
+    setShowAddModal(true); // on ouvre le modal
   };
 
   const handleAddSuccess = () => {
@@ -158,7 +169,7 @@ const ClassStudentsSection = ({ classId }) => {
                 {eleves.map((e, idx) => (
                   <tr key={e._id}>
                     <td>{idx + 1}</td>
-                    <td>{e.nom}</td>
+                    <td>{e.nom.toUpperCase()}</td>
                     <td>{e.prenom}</td>
                     <td>{moment(e.date_naissance).format("DD/MM/YYYY")}</td>
                     <td>{e.email}</td>
@@ -171,6 +182,14 @@ const ClassStudentsSection = ({ classId }) => {
                         onClick={() => handleDelete(e._id)}
                       >
                         <FaTrash />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline-warning"
+                        className="m-1"
+                        onClick={() => handleEditClick(e)}
+                      >
+                        <FaEdit />
                       </Button>
                     </td>
                   </tr>
@@ -193,8 +212,16 @@ const ClassStudentsSection = ({ classId }) => {
           <Modal.Body>
             <AjouterElevesTable
               classId={classId}
-              onSuccess={handleAddSuccess}
-              onCancel={() => setShowAddModal(false)}
+              eleveToEdit={selectedEleve} // <- important
+              onSuccess={() => {
+                loadStudents(); // recharge la liste
+                setShowAddModal(false); // ferme modal
+                setSelectedEleve(null); // à la fin on reset
+              }}
+              onCancel={() => {
+                setShowAddModal(false);
+                setSelectedEleve(null);
+              }}
             />
           </Modal.Body>
         </Modal>

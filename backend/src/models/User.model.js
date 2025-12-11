@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
 });
 
 
-// 🔐 Middleware : hash du mot de passe si modifié
+//  Middleware : hash du mot de passe si modifié
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   try {
@@ -52,7 +52,7 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// 🔐 Méthode pour comparer un mot de passe
+//  Méthode pour comparer un mot de passe
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

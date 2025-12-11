@@ -6,22 +6,14 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-# Précharger le modèle une fois
+# Prompt système global
 system_prompt = (
     "Tu es un assistant spécialisé uniquement dans les sciences STEM "
     "(Mathématiques, Physique, Chimie, Informatique, Biologie). "
     "Ne réponds jamais à des questions hors STEM. "
-    "Limite strictement chaque réponse à un maximum de 3 phrases."
-    "Donne des explications claires adaptées à des élèves de niveau secondaire, "
-    "avec une bon resumer du texte s'il vous plais on'est au senegal. "
+    "Limite strictement chaque réponse à un maximum de 3 phrases. "
+    "Donne des explications claires pour élèves du secondaire au Sénégal."
 )
-
-print("⏳ Chargement du modèle llama3 avec spécialisation STEM ...")
-ollama.chat(
-    model="llama3",
-    messages=[{"role": "system", "content": system_prompt}]
-)
-print("✅ Modèle prêt et spécialisé STEM")
 
 # ==============================
 # Endpoint /chat (streaming)
@@ -33,23 +25,13 @@ def chat_stream():
 
     def generate():
         try:
-            # Prompt système amélioré (STEM + 3 phrases max)
-            system_prompt = (
-                "Tu es un assistant spécialisé uniquement dans les sciences STEM "
-                "(Mathématiques, Physique, Chimie, Informatique, Biologie). "
-                "Ne réponds jamais à des questions hors STEM. "
-                "Limite strictement chaque réponse à un maximum de 3 phrases."
-                "Donne des explications claires adaptées à des élèves de niveau secondaire, "
-                "avec une bon resumer du texte s'il vous plais on'est au senegal. "
-            )
-
             stream = ollama.chat(
-                model="llama3",
+                model="llama3.2:3b",  # 🔥 version légère
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": question}
                 ],
-                stream=True  # ⚡ active le streaming
+                stream=True
             )
 
             for chunk in stream:
@@ -57,7 +39,6 @@ def chat_stream():
                     token = chunk["message"]["content"]
                     yield f"data: {json.dumps({'token': token})}\n\n"
 
-            # fin du stream
             yield "data: [DONE]\n\n"
 
         except Exception as e:

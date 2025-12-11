@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { fetchUsers, toggleUserStatus } from "../../api/users.api";
 import { useNavigate } from "react-router-dom";
 import { Table, Button, Spinner } from "react-bootstrap";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import {
   FaUserEdit,
   FaToggleOn,
   FaToggleOff,
   FaUserPlus,
+  FaUsers,
 } from "react-icons/fa";
 import "./ListUsers.css";
 
@@ -24,7 +26,7 @@ const ListUsers = () => {
     try {
       const res = await fetchUsers();
       const usersWithId = res.data.map((u) => ({ ...u, id: u._id }));
-      // 🔹 Tri côté frontend par nom puis prénom (au cas où l'API ne le fait pas déjà)
+      //  Tri côté frontend par nom puis prénom (au cas où l'API ne le fait pas déjà)
       usersWithId.sort((a, b) => {
         if (a.nom === b.nom) return a.prenom.localeCompare(b.prenom);
         return a.nom.localeCompare(b.nom);
@@ -39,7 +41,7 @@ const ListUsers = () => {
 
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      setUpdatingId(id); // 🟡 Indique qu’on est en train de modifier ce user
+      setUpdatingId(id); //  Indique qu’on est en train de modifier ce user
       await toggleUserStatus(id, !currentStatus);
       setUsers((prev) =>
         prev.map((u) => (u.id === id ? { ...u, status: !currentStatus } : u))
@@ -63,7 +65,9 @@ const ListUsers = () => {
     <div className="p-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>👥 Gestion des Utilisateurs</h4>
+        <h4 className="d-flex align-items-center gap-2">
+          <FaUsers /> Gestion des Utilisateurs
+        </h4>
         <Button variant="success" onClick={handleAdd}>
           <FaUserPlus className="me-2" />
           Ajouter
@@ -84,6 +88,7 @@ const ListUsers = () => {
         >
           <thead className="table-light">
             <tr>
+              <th>#</th>
               <th>Prénom</th>
               <th>Nom</th>
               <th>Email</th>
@@ -95,26 +100,37 @@ const ListUsers = () => {
           </thead>
           <tbody>
             {users.length > 0 ? (
-              users.map((user) => (
+              users.map((user, index) => (
                 <tr key={user.id}>
                   <td>
-                    {user.prenom.charAt(0).toUpperCase() +
-                      user.prenom.slice(1).toLowerCase()}
+                    <strong>{index + 1}</strong>
                   </td>
-                  <td>{user.nom.toLowerCase()}</td>
+                  <td>
+                    {user.prenom
+                      .split(" ")
+                      .map(
+                        (w) =>
+                          w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+                      )
+                      .join(" ")}
+                  </td>
+
+                  <td>{user.nom.toUpperCase()}</td>
                   <td>{user.email}</td>
                   <td>{user.telephone}</td>
                   <td>
                     <strong>{user.role}</strong>
                   </td>
-                  <td
-                    className={
-                      user.status
-                        ? "text-success fw-bold"
-                        : "text-muted fw-bold"
-                    }
-                  >
-                    {user.status ? "✅ Actif" : "❌ Inactif"}
+                  <td>
+                    {user.status ? (
+                      <span className="text-success fw-bold d-flex align-items-center gap-1">
+                        <FaCheckCircle /> Actif
+                      </span>
+                    ) : (
+                      <span className="text-danger fw-bold d-flex align-items-center gap-1">
+                        <FaTimesCircle /> Inactif
+                      </span>
+                    )}
                   </td>
                   <td className="d-flex justify-content-center gap-2">
                     <Button

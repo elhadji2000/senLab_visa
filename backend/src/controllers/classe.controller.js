@@ -80,7 +80,7 @@ exports.getClasseById = async (req, res) => {
 exports.updateClasse = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nom_classe, niveau, annee_scolaire } = req.body;
+    const { nom_classe, niveau, annee_scolaire, etablissement } = req.body;
 
     const classe = await Classe.findById(id);
     if (!classe) return res.status(404).json({ message: "Classe non trouvée" });
@@ -93,6 +93,7 @@ exports.updateClasse = async (req, res) => {
     classe.nom_classe = nom_classe || classe.nom_classe;
     classe.niveau = niveau || classe.niveau;
     classe.annee_scolaire = annee_scolaire || classe.annee_scolaire;
+    classe.etablissement = etablissement || classe.etablissement;
 
     const updated = await classe.save();
     res.json({ message: "Classe mise à jour avec succès", classe: updated });

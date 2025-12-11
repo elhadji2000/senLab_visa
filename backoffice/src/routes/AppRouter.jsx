@@ -28,6 +28,8 @@ import Gestion from "../pages/professeur/eleves/Gestion";
 import FolderClasses from "../pages/professeur/classe/FolderClasses";
 import ClasseDetails from "../pages/professeur/classe/ClasseDetails";
 import AjouterElevesTable from "../pages/professeur/eleves/AjouterElevesTable";
+import ViewProfil from "../pages/profile/ViewProfil";
+import EditUser from "../pages/users/EditUser";
 
 import { AuthContext } from "../contexts/AuthContext";
 import "../App.css";
@@ -95,6 +97,7 @@ function AppRouter() {
             <Route element={<RoleGuard allowedRoles={["admin"]} />}>
               <Route path="/utilisateur/ajouter" element={<AddUsers />} />
               <Route path="/utilisateur/lister" element={<ListUsers />} />
+              <Route path="/users/edit/:id" element={<EditUser />} />
             </Route>
 
             <Route element={<RoleGuard allowedRoles={["admin", "professeur"]} />}>
@@ -110,6 +113,8 @@ function AppRouter() {
               <Route path="/codes/lister" element={<Code />} />
               <Route path="/eleves/lister" element={<Gestion />} />
               <Route path="/classes/:id/eleves/ajouter" element={<AjouterElevesTable />} />
+
+              <Route path="/profile" element={<ViewProfil />} />
             </Route>
 
             <Route path="/simulations/all1" element={<Toutes />} />

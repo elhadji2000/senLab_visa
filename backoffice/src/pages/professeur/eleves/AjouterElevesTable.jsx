@@ -1,45 +1,63 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom"; // Importez useParams
+import React, { useState, useEffect } from "react";
 import { Table, Button, Form, Container, Alert } from "react-bootstrap";
-import { addMultipleEleves } from "../../../api/student.api";
+import { addMultipleEleves, updateEleve } from "../../../api/student.api";
+import moment from "moment";
 
-const AjouterElevesTable = ({ classId, onSuccess, onCancel }) => {
+const AjouterElevesTable = ({ classId, eleveToEdit, onSuccess, onCancel }) => {
   const [eleves, setEleves] = useState([
-    { nom: "", prenom: "", email: "", date_naissance: "", telephone: "" },
+    { nom: "", prenom: "", email: "", date_naissance: "", telephone: "" }
   ]);
+
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // 🟦 Si on veut modifier un élève → préremplir le formulaire
+  useEffect(() => {
+    if (eleveToEdit) {
+      setEleves([{
+        nom: eleveToEdit.nom,
+        prenom: eleveToEdit.prenom,
+        email: eleveToEdit.email,
+        date_naissance: moment(eleveToEdit.date_naissance).format("YYYY-MM-DD"),
+        telephone: eleveToEdit.telephone
+      }]);
+    }
+  }, [eleveToEdit]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
 
     try {
-      // Ajoutez l'ID de classe à chaque élève
-      const payload = eleves
-        .filter(el => el.nom && el.prenom && el.email)
-        .map(el => ({
-          ...el,
-          classe: classId // Ici on ajoute l'ID de la classe
-        }));
+      const el = eleves[0];
 
-      if (payload.length === 0) {
-        setError("Veuillez saisir au moins un élève valide");
+      if (!el.nom || !el.prenom || !el.email) {
+        setError("Veuillez remplir tous les champs obligatoires.");
         return;
       }
 
-      const response = await addMultipleEleves(payload);
+      //  MODE MODIFICATION
+      if (eleveToEdit) {
+        await updateEleve(eleveToEdit._id, {
+          ...el,
+          classe: classId
+        });
+
+        setSuccess("Élève modifié avec succès !");
+        setTimeout(onSuccess, 1800);
+        return;
+      }
+
+      //  MODE AJOUT MULTIPLE
+      const payload = eleves.map(e => ({ ...e, classe: classId }));
+      await addMultipleEleves(payload);
+
       setSuccess(`${payload.length} élèves ajoutés avec succès`);
-      setError("");
-      
-      setTimeout(() => {
-        setEleves([{ nom: "", prenom: "", email: "", date_naissance: "", telephone: "" }]);
-        onSuccess();
-      }, 2000);
+      setTimeout(onSuccess, 1800);
+
     } catch (err) {
-      setError(err.response?.data?.message || "Erreur lors de l'ajout des élèves");
-      console.error(err);
+      setError(err.response?.data?.message || "Erreur lors de l'enregistrement");
     } finally {
       setSubmitting(false);
     }
@@ -50,19 +68,6 @@ const AjouterElevesTable = ({ classId, onSuccess, onCancel }) => {
     updated[index][field] = value;
     setEleves(updated);
   };
-
-  const ajouterLigne = () => {
-    setEleves([
-      ...eleves,
-      { nom: "", prenom: "", email: "", date_naissance: "", telephone: "" },
-    ]);
-  };
-
-  const supprimerLigne = (index) => {
-    const updated = eleves.filter((_, i) => i !== index);
-    setEleves(updated);
-  };
-
 
   return (
     <Container className="my-2 p-0">
@@ -78,9 +83,10 @@ const AjouterElevesTable = ({ classId, onSuccess, onCancel }) => {
               <th>Email *</th>
               <th>Date de naissance</th>
               <th>Téléphone</th>
-              <th>Action</th>
+              {!eleveToEdit && <th>Action</th>}
             </tr>
           </thead>
+
           <tbody>
             {eleves.map((eleve, idx) => (
               <tr key={idx}>
@@ -92,6 +98,7 @@ const AjouterElevesTable = ({ classId, onSuccess, onCancel }) => {
                     onChange={(e) => handleChange(idx, "nom", e.target.value)}
                   />
                 </td>
+
                 <td>
                   <Form.Control
                     type="text"
@@ -100,6 +107,7 @@ const AjouterElevesTable = ({ classId, onSuccess, onCancel }) => {
                     onChange={(e) => handleChange(idx, "prenom", e.target.value)}
                   />
                 </td>
+
                 <td>
                   <Form.Control
                     type="email"
@@ -108,6 +116,7 @@ const AjouterElevesTable = ({ classId, onSuccess, onCancel }) => {
                     onChange={(e) => handleChange(idx, "email", e.target.value)}
                   />
                 </td>
+
                 <td>
                   <Form.Control
                     type="date"
@@ -115,6 +124,7 @@ const AjouterElevesTable = ({ classId, onSuccess, onCancel }) => {
                     onChange={(e) => handleChange(idx, "date_naissance", e.target.value)}
                   />
                 </td>
+
                 <td>
                   <Form.Control
                     type="tel"
@@ -122,51 +132,41 @@ const AjouterElevesTable = ({ classId, onSuccess, onCancel }) => {
                     onChange={(e) => handleChange(idx, "telephone", e.target.value)}
                   />
                 </td>
-                <td>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => supprimerLigne(idx)}
-                    disabled={eleves.length === 1}
-                  >
-                    Supprimer
-                  </Button>
-                </td>
+
+                {!eleveToEdit && (
+                  <td>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => setEleves(eleves.filter((_, i) => i !== idx))}
+                      disabled={eleves.length === 1}
+                    >
+                      Supprimer
+                    </Button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </Table>
 
+        {/* Boutons */}
         <div className="d-flex justify-content-between">
-          <Button 
-            variant="secondary" 
-            onClick={ajouterLigne}
-            disabled={submitting}
-          >
-            ➕ Ajouter une ligne
-          </Button>
+          {!eleveToEdit && (
+            <Button variant="secondary" onClick={() =>
+              setEleves([...eleves, { nom: "", prenom: "", email: "", date_naissance: "", telephone: "" }])
+            }>
+              Ajouter une ligne
+            </Button>
+          )}
+
           <div>
-            <Button 
-              variant="outline-secondary" 
-              onClick={onCancel}
-              className="me-2"
-              disabled={submitting}
-            >
+            <Button variant="outline-secondary" onClick={onCancel} className="me-2">
               Annuler
             </Button>
-            <Button 
-              variant="success" 
-              type="submit" 
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Enregistrement...
-                </>
-              ) : (
-                "✅ Enregistrer"
-              )}
+
+            <Button variant="success" type="submit" disabled={submitting}>
+              {submitting ? "Traitement..." : eleveToEdit ? "Mettre à jour" : "Enregistrer"}
             </Button>
           </div>
         </div>

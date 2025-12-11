@@ -11,7 +11,11 @@ import {
   Alert,
   ButtonGroup,
 } from "react-bootstrap";
-import { fetchClasseById, deleteClass } from "../../../api/classes";
+import {
+  fetchClasseById,
+  deleteClass,
+  updateClass,
+} from "../../../api/classes";
 import {
   FaEdit,
   FaTrash,
@@ -27,6 +31,7 @@ import ClassCodeSection from "../../../components/classes/ClassCodeSection";
 import ClassInfoSidebar from "../../../components/classes/ClassInfoSidebar";
 import DeleteClassModal from "../../../components/classes/DeleteClassModal";
 import { useNavigate } from "react-router-dom";
+import ClasseModal from "./ClasseModal";
 
 const ClasseDetails = () => {
   const { id } = useParams();
@@ -35,6 +40,8 @@ const ClasseDetails = () => {
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState("eleves");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
   const navigate = useNavigate();
 
   const loadClassData = async () => {
@@ -51,24 +58,39 @@ const ClasseDetails = () => {
 
   useEffect(() => {
     loadClassData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
- const handleDeleteClass = async () => {
-  try {
-    await deleteClass(classe.classe?._id);
-    toast.success("Classe supprimée avec succès !");
-    setShowDeleteModal(false);
+  const handleDeleteClass = async () => {
+    try {
+      await deleteClass(classe.classe?._id);
+      toast.success("Classe supprimée avec succès !");
+      setShowDeleteModal(false);
 
-    // attendre un peu avant de rediriger (1.5s)
-    setTimeout(() => {
-      navigate("/classe/folder");
-    }, 2000);
-  } catch (err) {
-    toast.error(err.response?.data?.message || "Erreur lors de la suppression");
-  }
-};
+      // attendre un peu avant de rediriger (1.5s)
+      setTimeout(() => {
+        navigate("/classe/folder");
+      }, 2000);
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Erreur lors de la suppression"
+      );
+    }
+  };
+  const handleEditClick = () => {
+    setShowEditModal(true);
+  };
 
+  const handleSaveEdit = async (updatedData) => {
+    try {
+      await updateClass(classe.classe._id, updatedData);
+      toast.success("Classe mise à jour avec succès !");
+      setShowEditModal(false);
+      loadClassData(); // pour recharger les données mises à jour
+    } catch (err) {
+      toast.error("Erreur lors de la mise à jour");
+    }
+  };
 
   if (loading) {
     return (
@@ -128,9 +150,10 @@ const ClasseDetails = () => {
                   </Button>
                 </ButtonGroup>
 
-                <Button variant="outline-warning">
+                <Button variant="outline-warning" onClick={handleEditClick}>
                   <FaEdit /> Modifier
                 </Button>
+
                 <Button
                   variant="outline-danger"
                   onClick={() => setShowDeleteModal(true)}
@@ -164,6 +187,13 @@ const ClasseDetails = () => {
         onHide={() => setShowDeleteModal(false)}
         className={classe.classe?.nom_classe}
         onDelete={handleDeleteClass}
+      />
+      <ClasseModal
+        show={showEditModal}
+        handleClose={() => setShowEditModal(false)}
+        handleSave={handleSaveEdit}
+        initialData={classe.classe}
+        isEditing={true}
       />
     </Container>
   );

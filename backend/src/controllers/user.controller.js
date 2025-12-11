@@ -5,7 +5,9 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User.model");
 
-// ✅ Ajouter un utilisateur
+//  Ajouter un utilisateur
+const transporter = require("../config/mailer");
+
 exports.addUser = async (req, res) => {
   try {
     const { prenom, nom, email, password, telephone, role, status } = req.body;
@@ -17,11 +19,12 @@ exports.addUser = async (req, res) => {
       });
     }
 
+    // Création utilisateur
     const user = new User({
       prenom,
       nom,
       email,
-      password,
+      password, // déjà hashé par le middleware User
       telephone,
       role,
       status,
@@ -29,11 +32,31 @@ exports.addUser = async (req, res) => {
 
     await user.save();
 
+    //  ---- ENVOI DE L'EMAIL ----
+    try {
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: user.email,
+        subject: "Vos accès SenLab - IMPORTANT",
+        template: "credentials", // Nom du template handlebars (credentials.hbs)
+        context: {
+          prenom: user.prenom,
+          nom: user.nom,
+          email: user.email,
+          password: password,
+        },
+      });
+    } catch (emailError) {
+      console.error("Erreur lors de l'envoi du mail:", emailError);
+    }
+
+    // Réponse sans mot de passe
     const userWithoutPassword = user.toObject();
     delete userWithoutPassword.password;
 
     res.status(201).json({
       success: true,
+      message: "Utilisateur créé et email envoyé avec succès.",
       user: userWithoutPassword,
     });
   } catch (error) {
@@ -48,7 +71,8 @@ exports.addUser = async (req, res) => {
   }
 };
 
-// ✅ Lister tous les utilisateurs
+
+//  Lister tous les utilisateurs
 exports.listerUsers = async (req, res) => {
   try {
     // Trier par ordre croissant sur le champ "nom"
@@ -63,7 +87,7 @@ exports.listerUsers = async (req, res) => {
   }
 };
 
-// ✅ Obtenir un utilisateur par ID
+//  Obtenir un utilisateur par ID
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -75,7 +99,7 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-// ✅ Mettre à jour un utilisateur
+//  Mettre à jour un utilisateur
 exports.updateUser = async (req, res) => {
   try {
     const { prenom, nom, email, password, telephone, role } = req.body;
@@ -107,7 +131,51 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// ✅ Supprimer un utilisateur
+exports.updatePassword = async (req, res) => {
+  try {
+    const { ancienPassword, nouveauPassword, confirmPassword } = req.body;
+
+    // Vérifier si tous les champs sont présents
+    if (!ancienPassword || !nouveauPassword || !confirmPassword) {
+      return res.status(400).json({ message: "Veuillez remplir tous les champs." });
+    }
+
+    // Vérifier si les deux nouveaux mots de passe correspondent
+    if (nouveauPassword !== confirmPassword) {
+      return res.status(400).json({ message: "Les mots de passe ne correspondent pas." });
+    }
+
+    // Trouver l'utilisateur + récupérer le champ password caché
+    const user = await User.findById(req.params.id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    // Vérifier l'ancien mot de passe
+    const match = await bcrypt.compare(ancienPassword, user.password);
+
+    if (!match) {
+      return res.status(401).json({ message: "Ancien mot de passe incorrect." });
+    }
+
+    // Appliquer le nouveau mot de passe
+    user.password = nouveauPassword; // sera hashé automatiquement via pre('save')
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Mot de passe modifié avec succès.",
+    });
+
+  } catch (error) {
+    console.error("Erreur updatePassword :", error);
+    res.status(500).json({ message: "Erreur serveur." });
+  }
+};
+
+//  Supprimer un utilisateur
 exports.deleteUser = async (req, res) => {
   try {
     const deleted = await User.findByIdAndDelete(req.params.id);
@@ -145,6 +213,32 @@ exports.toggleUserStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur lors de la mise à jour du statut :", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+// GET /api/stats/users-evolution
+exports.getUsersEvolution = async (req, res) => {
+  try {
+    const stats = await User.aggregate([
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id": 1 }
+      }
+    ]);
+
+    const formatted = stats.map((s) => ({
+      mois: s._id,
+      users: s.count
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
